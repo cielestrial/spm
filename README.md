@@ -1,1 +1,1 @@
-Spotify Playlist Manager
+Your Spotify Playlist Manager

@@ -1,0 +1,36 @@
+{
+  "items": [
+    {
+      "is_local": false,
+      "track": {
+        "album": {
+          "artists": [
+            {
+              "external_urls": {
+                "spotify": "https://open.spotify.com/artist/7vlM4bn4gPubcmntK8UBp0"
+              },
+              "href": "https://api.spotify.com/v1/artists/7vlM4bn4gPubcmntK8UBp0",
+              "id": "7vlM4bn4gPubcmntK8UBp0",
+              "name": "Arc System Works",
+              "type": "artist",
+              "uri": "spotify:artist:7vlM4bn4gPubcmntK8UBp0"
+            }
+          ],
+          "name": "BLAZBLUE SOUND COMPLETE BOX CENTRALFICTION (1)"
+        },
+        "artists": [
+          {
+            "name": "Arc System Works"
+          }
+        ],
+        "duration_ms": 105253,
+        "id": "00rbmCpvZfEX2kFSIz5k2q",
+        "name": "CENTRALFICTION",
+        "uri": "spotify:track:00rbmCpvZfEX2kFSIz5k2q"
+      }
+    }
+  ],
+  "limit": 1,
+  "offset": 0,
+  "total": 61
+}

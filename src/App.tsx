@@ -1,10 +1,17 @@
-import "./css/App.css";
+import "./css/main.scss";
+import Dashboard from "./Dashboard";
+import { Routes, Route } from "react-router-dom";
+import LandingPage from "./LandingPage";
+
+export const getCode = () =>
+  new URLSearchParams(window.location.search).get("code");
 
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">Hello Spotify World</header>
-    </div>
+    <Routes>
+      <Route path="/" element={<LandingPage />} />
+      <Route path="dashboard" element={<Dashboard />} />
+    </Routes>
   );
 }
 

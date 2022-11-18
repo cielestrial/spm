@@ -1,0 +1,7 @@
+@import "./resets";
+@import "./variables";
+
+body {
+  background-color: $background;
+  color: $primary-color;
+}

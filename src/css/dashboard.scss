@@ -1,0 +1,47 @@
+@import "./variables";
+
+.column-element {
+  place-self: center;
+  width: $column-width;
+  min-width: $min-column-width;
+}
+
+.listDisplayArea {
+  display: grid;
+  grid-template-columns: fit-content($column-width) fit-content($column-width);
+  place-content: center;
+  column-gap: 5vw;
+  max-height: $max-list-height;
+  margin-bottom: calc(1.5 * $margin-bottom);
+}
+
+.list {
+  overflow: auto;
+  align-content: start;
+  // min-width: min-content;
+  width: 30vw;
+  height: $max-list-height;
+  border-style: $border-style;
+  border-color: rgba(255, 255, 255, 0.66);
+}
+
+.button {
+  max-width: $max-column-width * 1.5;
+  margin: 0 $margin-bottom/4 $margin-bottom;
+  place-self: center;
+}
+
+.not-button {
+  width: 100%;
+  font-weight: bold;
+  text-align: left;
+  margin-bottom: 0.05rem;
+  padding: 0.75em 1.33em;
+  border-radius: $border-radius 0 0 $border-radius;
+  border-style: $border-style;
+  border-color: rgba(255, 255, 255, 0.66);
+  cursor: pointer;
+  &:hover {
+    background-color: rgba(255, 255, 255, 0.125);
+  }
+}
