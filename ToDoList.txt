@@ -1,20 +1,14 @@
 To Do:
-  1) 
-    Generalize section
-  2)
+  1)
     Find duplicates of a songs across multiple playlists
-  3)
+  2)
     Deleting duplicate songs within same playlist
   
   
 Features:
-    Library-Wide Duplicate Manager
-    Genre-Based Playlists 
-
-Generalize:
-    Search with option to Follow any of the results
-    create playlists
-    Select playlist then select other playlists to add to it
+    
+    Genre-Based Playlists (album genre, artist genre, 3rd party database)
+    
 
 
 Bugs: 

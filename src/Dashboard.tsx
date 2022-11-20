@@ -180,7 +180,7 @@ const Dashboard = () => {
     const label = playlists?.total === 1 ? "Playlist" : "Playlists";
     return (
       <label className="text">
-        {number} {label}
+        {"Your"} {number} {label}
       </label>
     );
   }
