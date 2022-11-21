@@ -7,7 +7,6 @@ const Logout = () => {
   const navigate = useRef(useNavigate());
   return (
     <Button
-      fullWidth
       variant="outline"
       color="green"
       radius="xl"

@@ -9,29 +9,37 @@ import {
   addPlaylistToPlaylist
 } from "./SpotifyApiClientSide";
 import { useQuery } from "react-query";
-import { Box } from "@mantine/core";
+import { Box, Center, Loader } from "@mantine/core";
 import { useRef } from "react";
-import TimelessTester from "./TimelessTester";
+import UnfollowButton from "./UnfollowButton";
+import { playlistType } from "./SpotifyApiClientTypes";
+import CreatePlaylistButton, {
+  createdPlaylistName
+} from "./CreatePlaylistButton";
+import { useForceUpdate } from "@mantine/hooks";
 
 const Dashboard = () => {
-  let selectedId: string | undefined;
+  let selectedPlaylist: playlistType | undefined;
+  const selectedPlaylistState = useRef<playlistType | undefined>(undefined);
   const scrollReset = useRef({} as HTMLDivElement);
   const mutationObserver = new MutationObserver(() => {
     scrollReset.current.scrollTop = 0;
     mutationObserver.disconnect();
   });
+  const forceUpdate = useForceUpdate();
 
   // Gets access token
   const { data: token, isFetching: tokenStatus } = useQuery("token", getToken);
 
   // Gets playlist
-  const { data: playlists, isFetching: playlistStatus } = useQuery(
-    ["playlists", token],
-    () => getPlaylists(),
-    {
-      enabled: token !== undefined
-    }
-  );
+  const {
+    data: playlists,
+    isFetching: playlistStatus,
+    refetch: refetchPlaylists,
+    isRefetching: refetchPlaylistStatus
+  } = useQuery(["playlists", token], () => getPlaylists(), {
+    enabled: token !== undefined
+  });
 
   // Gets tracks
   const {
@@ -39,49 +47,39 @@ const Dashboard = () => {
     isFetching: trackStatus,
     refetch: refetchTracks,
     isRefetching: refetchTrackStatus
-  } = useQuery(["tracks"], () => getTracks(selectedId), {
-    enabled: false
-  });
+  } = useQuery(
+    ["tracks", selectedPlaylist],
+    async () => {
+      const res = getTracks(selectedPlaylist?.id);
+      forceUpdate();
+      return res;
+    },
+    { enabled: false }
+  );
 
-  const {
-    data: timelessRadar,
-    isFetching: creatingTimelessRadar,
-    refetch: createTimelessRadar
-  } = useQuery(["timelessRadar"], () => createPlaylist("Timeless Radar"), {
-    enabled: false
-  });
-  const {
-    data: timelessDiscovery,
-    isFetching: creatingTimelessDiscovery,
-    refetch: createTimelessDiscovery
-  } = useQuery(
-    ["timelessDiscovery"],
-    () => createPlaylist("Timeless Discovery"),
+  // Creates playlist with name
+  const { isFetching: creating, refetch: refetchCreate } = useQuery(
+    ["create", createdPlaylistName],
+    async () => {
+      const res = await createPlaylist(createdPlaylistName);
+      forceUpdate();
+      return res;
+    },
     { enabled: false }
   );
-  const {
-    isFetching: unfollowingTimelessRadar,
-    refetch: unfollowTimelessRadar
-  } = useQuery(
-    ["unfollowTimelessRadar"],
-    () =>
-      unfollowPlaylist(
-        playlists?.list.find(playlist => playlist.name === "Timeless Radar")?.id
-      ),
+
+  // Unfollows currently selected playlist
+  let { isFetching: unfollowing, refetch: refetchUnfollow } = useQuery(
+    ["unfollow", selectedPlaylistState],
+    async () => {
+      const res = await unfollowPlaylist(selectedPlaylistState.current?.id);
+      selectedPlaylist = undefined;
+      selectedPlaylistState.current = selectedPlaylist;
+      return res;
+    },
     { enabled: false }
   );
-  const {
-    isFetching: unfollowingTimelessDiscovery,
-    refetch: unfollowTimelessDiscovery
-  } = useQuery(
-    ["unfollowTimelessDiscovery"],
-    () =>
-      unfollowPlaylist(
-        playlists?.list.find(playlist => playlist.name === "Timeless Discovery")
-          ?.id
-      ),
-    { enabled: false }
-  );
+
   const { isFetching: addingToTimelessRadar, refetch: addToTimelessRadar } =
     useQuery(
       ["addToTimelessRadar"],
@@ -110,14 +108,13 @@ const Dashboard = () => {
   );
 
   const timelessCheck =
-    creatingTimelessDiscovery ||
-    creatingTimelessRadar ||
-    unfollowingTimelessDiscovery ||
-    unfollowingTimelessRadar ||
+    creating ||
+    unfollowing ||
     addingToTimelessRadar ||
     addingToTimelessDiscovery;
 
-  const displayPlaylistsCheck = playlistStatus || timelessCheck;
+  const displayPlaylistsCheck =
+    playlistStatus || refetchPlaylistStatus || timelessCheck;
 
   const displayTracksCheck = trackStatus || refetchTrackStatus;
 
@@ -127,7 +124,11 @@ const Dashboard = () => {
    */
   function displayPlaylists() {
     if (displayPlaylistsCheck)
-      return <div className="loading text">Loading...</div>;
+      return (
+        <div className="loading container-center">
+          <Loader color="green" size="sm" variant="bars" />
+        </div>
+      );
     if (playlists !== undefined) {
       const dynamicList: JSX.Element[] = [];
       playlists.list.forEach((playlist, index) => {
@@ -137,7 +138,10 @@ const Dashboard = () => {
             id={playlist.id}
             key={index}
             onClick={(event: React.MouseEvent) => {
-              selectedId = event.currentTarget.id;
+              selectedPlaylist = playlists?.list.find(
+                playlist => playlist.id === event.currentTarget.id
+              );
+              selectedPlaylistState.current = selectedPlaylist;
               mutationObserver.observe(scrollReset.current, {
                 childList: true
               });
@@ -159,7 +163,11 @@ const Dashboard = () => {
    */
   function displayTracks() {
     if (displayTracksCheck)
-      return <div className="loading text">Loading...</div>;
+      return (
+        <div className="loading container-center">
+          <Loader color="green" size="sm" variant="bars" />
+        </div>
+      );
     if (tracks?.tracks !== undefined) {
       const dynamicList: JSX.Element[] = [];
       tracks.tracks.forEach((track, index) => {
@@ -201,8 +209,8 @@ const Dashboard = () => {
 
   if (tokenStatus)
     return (
-      <div className="background center">
-        <p className="loading title">Loading...</p>
+      <div className="background center loading">
+        <Loader color="green" size="lg" variant="bars" />
       </div>
     );
   else
@@ -210,6 +218,7 @@ const Dashboard = () => {
       <div className="background start">
         <p className="title start column-element">
           Your Spotify Playlist Manager
+          <Logout />
         </p>
         <div className="listDisplayArea">
           {displayPlaylistsLabel()}
@@ -218,19 +227,20 @@ const Dashboard = () => {
           <div className="list" ref={scrollReset}>
             {displayTracks()}
           </div>
-        </div>
-        <div className="button column-element">
-          <TimelessTester
-            playlists={playlists}
-            createR={createTimelessRadar}
-            createD={createTimelessDiscovery}
-            addToR={addToTimelessRadar}
-            addToD={addToTimelessDiscovery}
-            unfollowR={unfollowTimelessRadar}
-            unfollowD={unfollowTimelessDiscovery}
-            refetchTracks={refetchTracks}
-          />
-          <Logout />
+          <Center h="100%" mt="lg">
+            <CreatePlaylistButton
+              create={refetchCreate}
+              refetchPlaylists={refetchPlaylists}
+              refetchTracks={refetchTracks}
+            />
+          </Center>
+          <Center h="100%" mt="lg">
+            <UnfollowButton
+              playlist={selectedPlaylistState}
+              unfollow={refetchUnfollow}
+              refetchTracks={refetchTracks}
+            />
+          </Center>
         </div>
       </div>
     );

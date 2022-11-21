@@ -9,17 +9,17 @@
 .listDisplayArea {
   display: grid;
   grid-template-columns: fit-content($column-width) fit-content($column-width);
-  place-content: center;
+  place-content: end center;
+  // background-color: aliceblue;
   column-gap: 5vw;
-  max-height: $max-list-height;
   margin-bottom: calc(1.5 * $margin-bottom);
 }
 
 .list {
   overflow: auto;
   align-content: start;
-  // min-width: min-content;
-  width: 30vw;
+  min-width: min-content;
+  width: 35vw;
   height: $max-list-height;
   border-style: $border-style;
   border-color: rgba(255, 255, 255, 0.66);

@@ -1,10 +1,11 @@
 {
   "name": "yspm",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "private": true,
   "dependencies": {
     "@emotion/react": "^11.10.5",
     "@mantine/core": "^5.7.2",
+    "@mantine/form": "^5.8.2",
     "@mantine/hooks": "^5.7.2",
     "@types/node": "^16.7.13",
     "@types/react": "^18.0.0",

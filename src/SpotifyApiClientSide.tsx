@@ -40,6 +40,7 @@ const postLimit = 15;
  */
 export const getToken = async () => {
   if (code === null) return undefined;
+  if (accessToken !== undefined) return accessToken;
   try {
     const res = await axios.post("http://localhost:8080/login", { code });
     accessToken = res.data.accessToken;
@@ -177,7 +178,7 @@ const appendTracks = async (
  */
 export const checkIfPlaylistExists = (name: string) => {
   if (playlists === undefined) return undefined;
-  let playlist: playlistType | undefined = {} as playlistType;
+  let playlist: playlistType | undefined;
   if (
     !playlists.list.some(pl => {
       playlist = pl;
@@ -198,7 +199,11 @@ export const checkIfPlaylistExists = (name: string) => {
  * @param name
  * @returns
  */
-export const createPlaylist = async (name: string) => {
+export const createPlaylist = async (name: string | undefined) => {
+  if (name === "" || name === undefined) {
+    console.log("Invalid playlist name");
+    return undefined;
+  }
   let playlist = checkIfPlaylistExists(name);
   if (playlist !== undefined) {
     console.log("Playlist", name, "already exists");
@@ -223,7 +228,7 @@ export const createPlaylist = async (name: string) => {
         ]
       };
     else {
-      playlists.list.push({
+      playlists.list.unshift({
         id: res.data.id,
         name: res.data.name,
         uri: res.data.uri,
@@ -231,8 +236,8 @@ export const createPlaylist = async (name: string) => {
         tracks: undefined
       });
     }
-    playlists.total++;
-    playlist = res.data.id;
+    playlists.total = playlists.list.length;
+    playlist = playlists.list.find(pl => pl.name === name);
   } catch (err) {
     console.log("Something went wrong with createPlaylist()", err);
   }
@@ -306,13 +311,18 @@ export const addTracksToPlaylist = async (
  * @returns
  */
 export const unfollowPlaylist = async (playlistId: string | undefined) => {
-  if (playlistId === undefined) return false;
+  if (playlistId === undefined) {
+    console.log("Playlist id undefined");
+    return false;
+  }
   try {
     await axios.post("http://localhost:8080/unfollow", { playlistId });
     if (playlists !== undefined) {
       const index = playlists.list.findIndex(pl => pl.id === playlistId);
-      if (index > -1) playlists.list.splice(index, 1);
-      playlists.total--;
+      if (index > -1) {
+        playlists.list.splice(index, 1);
+        playlists.total = playlists.list.length;
+      }
     }
   } catch (err) {
     console.log("Something went wrong with unfollowPlaylist()", err);

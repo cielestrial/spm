@@ -35,7 +35,7 @@
     margin: 0 0 $margin-bottom;
   }
   &.start {
-    margin: $margin-bottom 0 $margin-bottom;
+    margin: $margin-bottom 0 0;
   }
 }
 
@@ -50,4 +50,11 @@
   &.text {
     margin-top: calc(2.5 * $margin-bottom);
   }
+}
+
+.container-center {
+  height: 100%;
+  width: 100%;
+  display: grid;
+  place-content: center;
 }
