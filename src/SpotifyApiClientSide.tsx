@@ -39,7 +39,7 @@ const postLimit = 15;
  * @returns
  */
 export const getToken = async () => {
-  if (code === null) return undefined;
+  if (code === null) throw new Error();
   if (accessToken !== undefined) return accessToken;
   try {
     const res = await axios.post("http://localhost:8080/login", { code });
@@ -83,8 +83,7 @@ export const getPlaylists = async () => {
     console.log("Playlists retrieved from server");
     return playlists;
   } else {
-    console.log("Failed to retrieve playlists");
-    return undefined;
+    throw new Error("Failed to retrieve playlists");
   }
 };
 /**
@@ -114,8 +113,7 @@ const appendPlaylists = async (newOffset: Promise<number> | number) => {
 export const getTracks = async (playlistId: string | undefined) => {
   const playlist = playlists?.list.find(playlist => playlist.id === playlistId);
   if (playlist === undefined) {
-    console.log("Couldn't find playlist with id:", playlistId);
-    return undefined;
+    throw new Error("Couldn't find playlist with id: " + playlistId);
   }
   if (
     playlist.tracks !== undefined &&
@@ -143,8 +141,7 @@ export const getTracks = async (playlistId: string | undefined) => {
     console.log("Tracks retrieved from server");
     return playlist;
   } else {
-    console.log("Failed to retrieve tracks");
-    return undefined;
+    throw new Error("Failed to retrieve tracks");
   }
 };
 
@@ -201,8 +198,7 @@ export const checkIfPlaylistExists = (name: string) => {
  */
 export const createPlaylist = async (name: string | undefined) => {
   if (name === "" || name === undefined) {
-    console.log("Invalid playlist name");
-    return undefined;
+    throw new Error("Invalid playlist name");
   }
   let playlist = checkIfPlaylistExists(name);
   if (playlist !== undefined) {
@@ -312,8 +308,7 @@ export const addTracksToPlaylist = async (
  */
 export const unfollowPlaylist = async (playlistId: string | undefined) => {
   if (playlistId === undefined) {
-    console.log("Playlist id undefined");
-    return false;
+    throw new Error("Playlist id undefined");
   }
   try {
     await axios.post("http://localhost:8080/unfollow", { playlistId });
@@ -329,7 +324,7 @@ export const unfollowPlaylist = async (playlistId: string | undefined) => {
   }
   if (playlists !== undefined) {
     return true;
-  } else return false;
+  } else throw new Error();
 };
 
 /**

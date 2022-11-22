@@ -9,14 +9,15 @@ import {
   addPlaylistToPlaylist
 } from "./SpotifyApiClientSide";
 import { useQuery } from "react-query";
-import { Box, Center, Loader } from "@mantine/core";
-import { useRef } from "react";
+import { Box, Center, Group, Loader, Text } from "@mantine/core";
+import { useCallback, useRef } from "react";
 import UnfollowButton from "./UnfollowButton";
 import { playlistType } from "./SpotifyApiClientTypes";
 import CreatePlaylistButton, {
   createdPlaylistName
 } from "./CreatePlaylistButton";
 import { useForceUpdate } from "@mantine/hooks";
+import SearchBar from "./SearchBar";
 
 const Dashboard = () => {
   let selectedPlaylist: playlistType | undefined;
@@ -107,6 +108,18 @@ const Dashboard = () => {
     { enabled: false }
   );
 
+  const setSelected = useCallback(
+    (selected: playlistType | undefined) => {
+      selectedPlaylist = selected;
+      selectedPlaylistState.current = selectedPlaylist;
+      mutationObserver.observe(scrollReset.current, {
+        childList: true
+      });
+      refetchTracks();
+    },
+    [selectedPlaylist]
+  );
+
   const timelessCheck =
     creating ||
     unfollowing ||
@@ -153,7 +166,12 @@ const Dashboard = () => {
         );
       });
       if (dynamicList.length > 0) return dynamicList;
-      else return <p className="error text">No playlists</p>;
+      else
+        return (
+          <Center h="100%">
+            <Text className="text">No Playlists</Text>
+          </Center>
+        );
     }
   }
 
@@ -178,7 +196,12 @@ const Dashboard = () => {
         );
       });
       if (dynamicList.length > 0) return dynamicList;
-      else return <p className="error text">No tracks</p>;
+      else
+        return (
+          <Center h="100%">
+            <Text className="text">No Tracks</Text>
+          </Center>
+        );
     }
   }
 
@@ -216,10 +239,12 @@ const Dashboard = () => {
   else
     return (
       <div className="background start">
-        <p className="title start column-element">
-          Your Spotify Playlist Manager
+        <Group position="center" spacing="xs">
+          <p className="title column-element">YSPM</p>
+          <SearchBar playlists={playlists} />
           <Logout />
-        </p>
+        </Group>
+
         <div className="listDisplayArea">
           {displayPlaylistsLabel()}
           {displayTracksLabel()}
@@ -231,7 +256,6 @@ const Dashboard = () => {
             <CreatePlaylistButton
               create={refetchCreate}
               refetchPlaylists={refetchPlaylists}
-              refetchTracks={refetchTracks}
             />
           </Center>
           <Center h="100%" mt="lg">

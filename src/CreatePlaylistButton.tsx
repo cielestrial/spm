@@ -17,9 +17,6 @@ type propsType = {
       unknown
     >
   >;
-  refetchTracks: () => Promise<
-    QueryObserverResult<playlistType | undefined, unknown>
-  >;
 };
 const CreatePlaylistButton = (props: propsType) => {
   const [opened, { close, open }] = useDisclosure(false);
@@ -62,6 +59,7 @@ const CreatePlaylistButton = (props: propsType) => {
               size="md"
               w="60%"
               autoComplete="off"
+              autoCorrect="false"
               miw="min-content"
               radius="0.33rem 0 0 0.33rem"
               placeholder="Enter Playlist Name"
