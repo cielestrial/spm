@@ -1,9 +1,11 @@
 import axios from "axios";
+import { token } from "./Dashboard";
 import { code } from "./LandingPage";
 import {
   optionsType,
   playlistsType,
   playlistType,
+  tokenType,
   tracksType
 } from "./SpotifyApiClientTypes";
 
@@ -27,9 +29,6 @@ export const AUTH_URL =
   "&state=" +
   crypto.randomUUID() +
   "&show_dialog=true";
-export let accessToken: string | undefined;
-export let refreshToken: string | undefined;
-export let expiresIn: string | undefined;
 let playlists: playlistsType;
 const options: optionsType = { offset: 0 };
 const getLimit = 50;
@@ -40,16 +39,17 @@ const postLimit = 15;
  */
 export const getToken = async () => {
   if (code === null) throw new Error();
-  if (accessToken !== undefined) return accessToken;
+  if (token?.accessToken !== undefined) return token;
+  let tokenTemp = {} as tokenType;
   try {
     const res = await axios.post("http://localhost:8080/login", { code });
-    accessToken = res.data.accessToken;
-    refreshToken = res.data.refreshToken;
-    expiresIn = res.data.expriresIn;
+    tokenTemp.accessToken = res.data.accessToken;
+    tokenTemp.refreshToken = res.data.refreshToken;
+    tokenTemp.expiresIn = res.data.expriresIn;
   } catch (err) {
     console.log("Something went wrong with getToken()", err);
   }
-  return accessToken;
+  return tokenTemp;
 };
 
 /**
@@ -173,21 +173,21 @@ const appendTracks = async (
  * @param name
  * @returns
  */
-export const checkIfPlaylistExists = (name: string) => {
+export const checkIfPlaylistExists = (name: string | undefined) => {
   if (playlists === undefined) return undefined;
-  let playlist: playlistType | undefined;
+  let playlist: playlistType | undefined = undefined;
   if (
     !playlists.list.some(pl => {
       playlist = pl;
       return (
-        name.localeCompare(pl.name, undefined, {
+        name?.localeCompare(pl.name, undefined, {
           sensitivity: "accent",
           ignorePunctuation: true
         }) === 0
       );
     })
   )
-    playlist = undefined;
+    return undefined;
   return playlist;
 };
 
@@ -200,7 +200,7 @@ export const createPlaylist = async (name: string | undefined) => {
   if (name === "" || name === undefined) {
     throw new Error("Invalid playlist name");
   }
-  let playlist = checkIfPlaylistExists(name);
+  let playlist: playlistType | undefined = checkIfPlaylistExists(name);
   if (playlist !== undefined) {
     console.log("Playlist", name, "already exists");
     return playlist;
@@ -249,8 +249,7 @@ export const addPlaylistToPlaylist = async (
   targetId: string | undefined
 ) => {
   if (sourceId === undefined) {
-    console.log("Couldn't find playlist with id:", sourceId);
-    return false;
+    throw new Error("Couldn't find playlist with id");
   }
   const tracks = await getTracks(sourceId);
   const uris = tracks?.tracks?.map(track => track.uri);
@@ -268,12 +267,10 @@ export const addTracksToPlaylist = async (
   let status = false;
   const playlist = playlists?.list.find(playlist => playlist.id === playlistId);
   if (playlist === undefined) {
-    console.log("Couldn't find playlist with id:", playlistId);
-    return status;
+    throw new Error("Couldn't find playlist with id:" + playlistId);
   }
   if (allUris === undefined) {
-    console.log("Couldn't retrieve track uris");
-    return status;
+    throw new Error("Couldn't retrieve track uris");
   }
   const total = allUris.length;
   console.log("total", total);

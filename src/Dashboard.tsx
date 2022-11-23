@@ -1,135 +1,48 @@
 import "./css/dashboard.scss";
 import Logout from "./Logout";
-import {
-  getToken,
-  getTracks,
-  getPlaylists,
-  createPlaylist,
-  unfollowPlaylist,
-  addPlaylistToPlaylist
-} from "./SpotifyApiClientSide";
-import { useQuery } from "react-query";
 import { Box, Center, Group, Loader, Text } from "@mantine/core";
-import { useCallback, useRef } from "react";
+import { useCallback, useRef, useState } from "react";
 import UnfollowButton from "./UnfollowButton";
-import { playlistType } from "./SpotifyApiClientTypes";
-import CreatePlaylistButton, {
-  createdPlaylistName
-} from "./CreatePlaylistButton";
-import { useForceUpdate } from "@mantine/hooks";
+import { playlistType, tokenType } from "./SpotifyApiClientTypes";
+import CreatePlaylistButton from "./CreatePlaylistButton";
 import SearchBar from "./SearchBar";
+import {
+  createQuery,
+  playlistsQuery,
+  refetchTracks,
+  tokenQuery,
+  tracksQuery,
+  unfollowQuery
+} from "./QueryApi";
+
+export let token: tokenType | undefined;
 
 const Dashboard = () => {
-  let selectedPlaylist: playlistType | undefined;
-  const selectedPlaylistState = useRef<playlistType | undefined>(undefined);
+  //const [playlists, setPlaylists] = useState<playlistsType>();
+  const [getSelectedPlaylist, setSelectedPlaylist] = useState<playlistType>();
+  const [getCreatedPlaylistName, setCreatedPlaylistName] = useState("");
   const scrollReset = useRef({} as HTMLDivElement);
   const mutationObserver = new MutationObserver(() => {
     scrollReset.current.scrollTop = 0;
     mutationObserver.disconnect();
   });
-  const forceUpdate = useForceUpdate();
+  const setSelected = useCallback((selected: playlistType | undefined) => {
+    setSelectedPlaylist(selected);
+    mutationObserver.observe(scrollReset.current, {
+      childList: true
+    });
+    refetchTracks();
+  }, []);
 
-  // Gets access token
-  const { data: token, isFetching: tokenStatus } = useQuery("token", getToken);
-
-  // Gets playlist
-  const {
-    data: playlists,
-    isFetching: playlistStatus,
-    refetch: refetchPlaylists,
-    isRefetching: refetchPlaylistStatus
-  } = useQuery(["playlists", token], () => getPlaylists(), {
-    enabled: token !== undefined
-  });
-
-  // Gets tracks
-  const {
-    data: tracks,
-    isFetching: trackStatus,
-    refetch: refetchTracks,
-    isRefetching: refetchTrackStatus
-  } = useQuery(
-    ["tracks", selectedPlaylist],
-    async () => {
-      const res = getTracks(selectedPlaylist?.id);
-      forceUpdate();
-      return res;
-    },
-    { enabled: false }
-  );
-
-  // Creates playlist with name
-  const { isFetching: creating, refetch: refetchCreate } = useQuery(
-    ["create", createdPlaylistName],
-    async () => {
-      const res = await createPlaylist(createdPlaylistName);
-      forceUpdate();
-      return res;
-    },
-    { enabled: false }
-  );
-
-  // Unfollows currently selected playlist
-  let { isFetching: unfollowing, refetch: refetchUnfollow } = useQuery(
-    ["unfollow", selectedPlaylistState],
-    async () => {
-      const res = await unfollowPlaylist(selectedPlaylistState.current?.id);
-      selectedPlaylist = undefined;
-      selectedPlaylistState.current = selectedPlaylist;
-      return res;
-    },
-    { enabled: false }
-  );
-
-  const { isFetching: addingToTimelessRadar, refetch: addToTimelessRadar } =
-    useQuery(
-      ["addToTimelessRadar"],
-      () =>
-        addPlaylistToPlaylist(
-          playlists?.list.find(playlist => playlist.name === "Release Radar")
-            ?.id,
-          playlists?.list.find(playlist => playlist.name === "Timeless Radar")
-            ?.id
-        ),
-      { enabled: false }
-    );
-  const {
-    isFetching: addingToTimelessDiscovery,
-    refetch: addToTimelessDiscovery
-  } = useQuery(
-    ["addToTimelessDiscovery"],
-    () =>
-      addPlaylistToPlaylist(
-        playlists?.list.find(playlist => playlist.name === "Discover Weekly")
-          ?.id,
-        playlists?.list.find(playlist => playlist.name === "Timeless Discovery")
-          ?.id
-      ),
-    { enabled: false }
-  );
-
-  const setSelected = useCallback(
-    (selected: playlistType | undefined) => {
-      selectedPlaylist = selected;
-      selectedPlaylistState.current = selectedPlaylist;
-      mutationObserver.observe(scrollReset.current, {
-        childList: true
-      });
-      refetchTracks();
-    },
-    [selectedPlaylist]
-  );
-
-  const timelessCheck =
-    creating ||
-    unfollowing ||
-    addingToTimelessRadar ||
-    addingToTimelessDiscovery;
-
+  const { data, isFetching: tokenStatus } = tokenQuery();
+  token = data;
+  const playlistsQ = playlistsQuery();
+  const tracksQ = tracksQuery(getSelectedPlaylist);
+  const createQ = createQuery(getCreatedPlaylistName, setSelected);
+  const unfollowQ = unfollowQuery(getSelectedPlaylist, setSelected);
   const displayPlaylistsCheck =
-    playlistStatus || refetchPlaylistStatus || timelessCheck;
-
-  const displayTracksCheck = trackStatus || refetchTrackStatus;
+    playlistsQ.isFetching || createQ.isFetching || unfollowQ.isFetching;
+  const displayTracksCheck = tracksQ.isFetching;
 
   /**
    * Display list of playlists
@@ -142,23 +55,24 @@ const Dashboard = () => {
           <Loader color="green" size="sm" variant="bars" />
         </div>
       );
-    if (playlists !== undefined) {
+    if (playlistsQ.data !== undefined) {
       const dynamicList: JSX.Element[] = [];
-      playlists.list.forEach((playlist, index) => {
+      playlistsQ.data.list.forEach((playlist, index) => {
         dynamicList.push(
           <Box
             className="not-button"
             id={playlist.id}
             key={index}
             onClick={(event: React.MouseEvent) => {
-              selectedPlaylist = playlists?.list.find(
-                playlist => playlist.id === event.currentTarget.id
+              refetchTracks();
+              setSelectedPlaylist(
+                playlistsQ.data?.list.find(
+                  playlist => playlist.id === event.currentTarget.id
+                )
               );
-              selectedPlaylistState.current = selectedPlaylist;
               mutationObserver.observe(scrollReset.current, {
                 childList: true
               });
-              refetchTracks();
             }}
           >
             {index + 1 + ". " + playlist.name}
@@ -186,9 +100,9 @@ const Dashboard = () => {
           <Loader color="green" size="sm" variant="bars" />
         </div>
       );
-    if (tracks?.tracks !== undefined) {
+    if (getSelectedPlaylist?.tracks !== undefined) {
       const dynamicList: JSX.Element[] = [];
-      tracks.tracks.forEach((track, index) => {
+      getSelectedPlaylist.tracks.forEach((track, index) => {
         dynamicList.push(
           <Box className="not-button" id={track.id} key={index}>
             {index + 1 + ". " + track.name}
@@ -206,9 +120,9 @@ const Dashboard = () => {
   }
 
   function displayPlaylistsLabel() {
-    const loading = playlists === undefined || displayPlaylistsCheck;
-    const number = loading ? "" : playlists?.total;
-    const label = playlists?.total === 1 ? "Playlist" : "Playlists";
+    const loading = playlistsQ.data === undefined || displayPlaylistsCheck;
+    const number = loading ? "" : playlistsQ.data?.total;
+    const label = playlistsQ.data?.total === 1 ? "Playlist" : "Playlists";
     return (
       <label className="text">
         {"Your"} {number} {label}
@@ -217,10 +131,10 @@ const Dashboard = () => {
   }
 
   function displayTracksLabel() {
-    const loading = tracks === undefined || displayTracksCheck;
-    const title = loading ? "" : tracks?.name;
-    const number = loading ? "" : tracks?.total;
-    const label = tracks?.total === 1 ? "Track" : "Tracks";
+    const loading = getSelectedPlaylist === undefined || displayTracksCheck;
+    const title = loading ? "" : getSelectedPlaylist?.name;
+    const number = loading ? "" : getSelectedPlaylist?.total;
+    const label = getSelectedPlaylist?.total === 1 ? "Track" : "Tracks";
     return (
       <label className="text">
         {title}
@@ -241,7 +155,7 @@ const Dashboard = () => {
       <div className="background start">
         <Group position="center" spacing="xs">
           <p className="title column-element">YSPM</p>
-          <SearchBar playlists={playlists} />
+          <SearchBar playlists={playlistsQ} setSelected={setSelected} />
           <Logout />
         </Group>
 
@@ -254,15 +168,15 @@ const Dashboard = () => {
           </div>
           <Center h="100%" mt="lg">
             <CreatePlaylistButton
-              create={refetchCreate}
-              refetchPlaylists={refetchPlaylists}
+              playlists={playlistsQ}
+              setName={setCreatedPlaylistName}
             />
           </Center>
           <Center h="100%" mt="lg">
             <UnfollowButton
-              playlist={selectedPlaylistState}
-              unfollow={refetchUnfollow}
-              refetchTracks={refetchTracks}
+              playlists={playlistsQ}
+              playlist={getSelectedPlaylist}
+              unfollow={unfollowQ}
             />
           </Center>
         </div>

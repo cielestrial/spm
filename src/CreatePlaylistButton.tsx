@@ -1,23 +1,21 @@
 import { Button, Group, Modal, TextInput } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { useDisclosure } from "@mantine/hooks";
-import { QueryObserverResult } from "react-query";
+import { UseQueryResult } from "react-query";
+import { refetchCreate } from "./QueryApi";
 import { playlistType } from "./SpotifyApiClientTypes";
 
-export let createdPlaylistName: string | undefined;
 type propsType = {
-  create: () => Promise<QueryObserverResult<playlistType | undefined, unknown>>;
-  refetchPlaylists: () => Promise<
-    QueryObserverResult<
-      | {
-          total: number;
-          list: playlistType[];
-        }
-      | undefined,
-      unknown
-    >
+  playlists: UseQueryResult<
+    {
+      total: number;
+      list: playlistType[];
+    },
+    unknown
   >;
+  setName: React.Dispatch<React.SetStateAction<string>>;
 };
+
 const CreatePlaylistButton = (props: propsType) => {
   const [opened, { close, open }] = useDisclosure(false);
   const form = useForm({
@@ -47,9 +45,9 @@ const CreatePlaylistButton = (props: propsType) => {
       >
         <form
           onSubmit={form.onSubmit(values => {
-            createdPlaylistName = values.name;
-            props.create();
-            props.refetchPlaylists();
+            props.setName(values.name);
+            refetchCreate();
+            props.playlists.refetch();
             form.reset();
             close();
           })}

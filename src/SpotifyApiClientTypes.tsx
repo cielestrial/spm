@@ -1,3 +1,8 @@
+export type tokenType = {
+  accessToken: string | undefined;
+  refreshToken: string | undefined;
+  expiresIn: string | undefined;
+};
 export type optionsType = {
   offset: Promise<number> | number;
 };

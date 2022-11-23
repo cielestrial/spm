@@ -1,14 +1,18 @@
 import { Button, Group, Modal, Text } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
-import { QueryObserverResult } from "react-query";
+import { UseQueryResult } from "react-query";
 import { playlistType } from "./SpotifyApiClientTypes";
 
 type propsType = {
-  playlist: React.MutableRefObject<playlistType | undefined>;
-  unfollow: () => Promise<QueryObserverResult<boolean, unknown>>;
-  refetchTracks: () => Promise<
-    QueryObserverResult<playlistType | undefined, unknown>
+  playlists: UseQueryResult<
+    {
+      total: number;
+      list: playlistType[];
+    },
+    unknown
   >;
+  playlist: playlistType | undefined;
+  unfollow: UseQueryResult<boolean, unknown>;
 };
 const UnfollowButton = (props: propsType) => {
   const [opened, { close, open }] = useDisclosure(false);
@@ -26,7 +30,7 @@ const UnfollowButton = (props: propsType) => {
           Are you sure you want to unfollow
         </Text>
         <Text fs="italic" fw="bold" ta="center">
-          {props.playlist.current?.name}&#63;
+          {props.playlist?.name}&#63;
         </Text>
         <Group grow spacing="md" mt="md">
           <Button
@@ -36,8 +40,8 @@ const UnfollowButton = (props: propsType) => {
             radius="xl"
             size="sm"
             onClick={() => {
-              props.unfollow();
-              props.refetchTracks();
+              props.unfollow.refetch();
+              props.playlists.refetch();
               close();
             }}
           >
@@ -63,7 +67,7 @@ const UnfollowButton = (props: propsType) => {
         miw="min-content"
         compact
         variant="outline"
-        disabled={props.playlist.current === undefined}
+        disabled={props.playlist === undefined}
         color="green"
         radius="xl"
         size="md"

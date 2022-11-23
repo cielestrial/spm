@@ -1,15 +1,18 @@
 import { Box, Modal, Text, TextInput } from "@mantine/core";
 import { useDebouncedValue, useDisclosure } from "@mantine/hooks";
 import { useState } from "react";
+import { UseQueryResult } from "react-query";
 import { playlistType } from "./SpotifyApiClientTypes";
 
 type propsType = {
-  playlists:
-    | {
-        total: number;
-        list: playlistType[];
-      }
-    | undefined;
+  playlists: UseQueryResult<
+    {
+      total: number;
+      list: playlistType[];
+    },
+    unknown
+  >;
+  setSelected: (selected: playlistType | undefined) => void;
 };
 const SearchBar = (props: propsType) => {
   const [opened, { close, open }] = useDisclosure(false);
@@ -19,7 +22,7 @@ const SearchBar = (props: propsType) => {
   function localSearch() {
     const dynamicList: JSX.Element[] = [];
     if (debounced !== "") {
-      const results = props.playlists?.list.filter(playlist =>
+      const results = props.playlists.data?.list.filter(playlist =>
         playlist.name.toLowerCase().includes(debounced.toLowerCase())
       );
       results?.forEach((playlist, index) => {
@@ -29,6 +32,7 @@ const SearchBar = (props: propsType) => {
             id={playlist.id}
             key={index}
             onClick={() => {
+              props.setSelected(playlist);
               setValue("");
               close();
             }}
