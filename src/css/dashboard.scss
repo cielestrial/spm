@@ -45,3 +45,15 @@
     background-color: rgba(255, 255, 255, 0.125);
   }
 }
+
+.searchlist {
+  overflow: auto;
+  min-width: fit-content;
+  width: 72.5vw;
+  min-height: fit-content;
+  height: 66vh;
+  margin: 1rem;
+  border-radius: $border-radius 0 0 $border-radius;
+  border-style: $border-style;
+  border-color: rgba(255, 255, 255, 0.66);
+}

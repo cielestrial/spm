@@ -3,7 +3,7 @@ import Logout from "./Logout";
 import { Box, Center, Group, Loader, Text } from "@mantine/core";
 import { useCallback, useRef, useState } from "react";
 import UnfollowButton from "./UnfollowButton";
-import { playlistType, tokenType } from "./SpotifyApiClientTypes";
+import { playlistType, tokenType, userInfoType } from "./SpotifyApiClientTypes";
 import CreatePlaylistButton from "./CreatePlaylistButton";
 import SearchBar from "./SearchBar";
 import {
@@ -12,10 +12,12 @@ import {
   refetchTracks,
   tokenQuery,
   tracksQuery,
-  unfollowQuery
+  unfollowQuery,
+  userQuery
 } from "./QueryApi";
 
 export let token: tokenType | undefined;
+export let userInfo: userInfoType | undefined;
 
 const Dashboard = () => {
   //const [playlists, setPlaylists] = useState<playlistsType>();
@@ -34,21 +36,23 @@ const Dashboard = () => {
     refetchTracks();
   }, []);
 
-  const { data, isFetching: tokenStatus } = tokenQuery();
-  token = data;
+  const { data: tokenData, isFetching: tokenStatus } = tokenQuery();
+  token = tokenData;
+  const { data: userData, isFetching: userStatus } = userQuery();
+  userInfo = userData;
   const playlistsQ = playlistsQuery();
   const tracksQ = tracksQuery(getSelectedPlaylist);
   const createQ = createQuery(getCreatedPlaylistName, setSelected);
   const unfollowQ = unfollowQuery(getSelectedPlaylist, setSelected);
   const displayPlaylistsCheck =
     playlistsQ.isFetching || createQ.isFetching || unfollowQ.isFetching;
-  const displayTracksCheck = tracksQ.isFetching;
+  const displayTracksCheck = tracksQ.isLoading;
 
   /**
    * Display list of playlists
    * @returns
    */
-  function displayPlaylists() {
+  const displayPlaylists = () => {
     if (displayPlaylistsCheck)
       return (
         <div className="loading container-center">
@@ -63,16 +67,10 @@ const Dashboard = () => {
             className="not-button"
             id={playlist.id}
             key={index}
-            onClick={(event: React.MouseEvent) => {
-              refetchTracks();
-              setSelectedPlaylist(
-                playlistsQ.data?.list.find(
-                  playlist => playlist.id === event.currentTarget.id
-                )
+            onClick={(e: React.MouseEvent) => {
+              setSelected(
+                playlistsQ.data?.list.find(pl => pl.id === e.currentTarget.id)
               );
-              mutationObserver.observe(scrollReset.current, {
-                childList: true
-              });
             }}
           >
             {index + 1 + ". " + playlist.name}
@@ -87,13 +85,13 @@ const Dashboard = () => {
           </Center>
         );
     }
-  }
+  };
 
   /**
    * Display list of tracks
    * @returns
    */
-  function displayTracks() {
+  const displayTracks = () => {
     if (displayTracksCheck)
       return (
         <div className="loading container-center">
@@ -117,9 +115,9 @@ const Dashboard = () => {
           </Center>
         );
     }
-  }
+  };
 
-  function displayPlaylistsLabel() {
+  const displayPlaylistsLabel = () => {
     const loading = playlistsQ.data === undefined || displayPlaylistsCheck;
     const number = loading ? "" : playlistsQ.data?.total;
     const label = playlistsQ.data?.total === 1 ? "Playlist" : "Playlists";
@@ -128,9 +126,9 @@ const Dashboard = () => {
         {"Your"} {number} {label}
       </label>
     );
-  }
+  };
 
-  function displayTracksLabel() {
+  const displayTracksLabel = () => {
     const loading = getSelectedPlaylist === undefined || displayTracksCheck;
     const title = loading ? "" : getSelectedPlaylist?.name;
     const number = loading ? "" : getSelectedPlaylist?.total;
@@ -142,20 +140,27 @@ const Dashboard = () => {
         {number} {label}
       </label>
     );
-  }
+  };
 
-  if (tokenStatus)
+  const displayUserName = () => {
+    if (userInfo !== undefined) {
+      if (userInfo.display_name !== null) return ": " + userInfo.display_name;
+      else return "";
+    } else return "";
+  };
+
+  if (tokenStatus || userStatus) {
     return (
       <div className="background center loading">
         <Loader color="green" size="lg" variant="bars" />
       </div>
     );
-  else
+  } else {
     return (
       <div className="background start">
         <Group position="center" spacing="xs">
-          <p className="title column-element">YSPM</p>
-          <SearchBar playlists={playlistsQ} setSelected={setSelected} />
+          <p className="title column-element">YSPM{displayUserName()}</p>
+          <SearchBar setSelected={setSelected} />
           <Logout />
         </Group>
 
@@ -182,6 +187,7 @@ const Dashboard = () => {
         </div>
       </div>
     );
+  }
 };
 
 export default Dashboard;

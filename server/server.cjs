@@ -5,6 +5,8 @@ const bodyParser = require("body-parser");
 const SpotifyWebApi = require("spotify-web-api-node");
 const maxGetLimit = 50;
 const maxPostLimit = 100;
+let userId;
+let country;
 
 const app = express();
 app.use(cors());
@@ -20,7 +22,7 @@ const server = app.listen(app.get("port"), function () {
 /**
  * /
  * /login
- * /user?
+ * /user
  * /playlists
  * /create
  * /add
@@ -73,25 +75,32 @@ app.post("/login", (req, res) => {
 });
 
 /**
- * Get UserId and display name?
- 
+ * Get UserId, display name, and country
+ */
 app.post("/user", (req, res) => {
   spotifyApi
     .getMe()
     .then(data => {
+      userId = data.body.id;
+      country = data.body.country;
       console.log(
         "Some information about the authenticated user:",
-        data.body.id
+        "userId:",
+        userId,
+        "display_name:",
+        data.body.display_name,
+        "country:",
+        country
       );
       res.json({
-        userId: data.body.id
+        display_name: data.body.display_name
       });
     })
     .catch(err => {
-      console.log("Something went wrong with userId", err);
+      console.log("Something went wrong with user", err);
     });
 });
-*/
+
 /**
  * Get user's playlists
  */
@@ -202,6 +211,7 @@ app.post("/tracks", (req, res) => {
     .getPlaylistTracks(playlistId, {
       offset: offset,
       limit: maxGetLimit,
+      market: country,
       fields:
         "items(is_local, " +
         "track(album.name, album.artists, artists.name, duration_ms, " +

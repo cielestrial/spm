@@ -1,13 +1,15 @@
 import { useQuery } from "react-query";
-import { token } from "./Dashboard";
+import { token, userInfo } from "./Dashboard";
 import {
   getToken,
   getPlaylists,
   getTracks,
   createPlaylist,
-  unfollowPlaylist
+  unfollowPlaylist,
+  getAllTracks,
+  getAuthenticatedUserInfo
 } from "./SpotifyApiClientSide";
-import { playlistType } from "./SpotifyApiClientTypes";
+import { playlistType, userInfoType } from "./SpotifyApiClientTypes";
 
 let tracksFlag = false;
 export const refetchTracks = () => {
@@ -21,10 +23,16 @@ export const refetchCreate = () => {
 // Gets access token
 export const tokenQuery = () => useQuery("token", getToken);
 
+// Gets authenticated user info
+export const userQuery = () =>
+  useQuery(["user", token?.accessToken], getAuthenticatedUserInfo, {
+    enabled: token?.accessToken !== undefined
+  });
+
 // Gets playlist
 export const playlistsQuery = () =>
-  useQuery(["playlists", token?.accessToken], async () => getPlaylists(), {
-    enabled: token?.accessToken !== undefined
+  useQuery(["playlists", userInfo], getPlaylists, {
+    enabled: userInfo !== undefined
   });
 
 // Gets tracks
@@ -38,6 +46,10 @@ export const tracksQuery = (selectedPlaylist: playlistType | undefined) =>
     },
     { enabled: selectedPlaylist !== undefined && tracksFlag }
   );
+
+// Gets all tracks
+export const allTracksQuery = () =>
+  useQuery("allTracks", getAllTracks, { enabled: false });
 
 // Creates playlist with name
 export const createQuery = (

@@ -6,11 +6,11 @@ Avoid clutter, keep it clean and simple, don't bombard with a lot information or
 Search:
 1 search bar on top.
 Searches all followed playlists
-If playlist is not in followed Search public button or option
+If playlist is not in followed Search General button or option
 Options: Playlists/Tracks
 Playlists: Followed then unfollowed
 Tracks: Library then unFollowed
-Tracks should also show if they are anyplaylists you follow which that track is in.
+When a track is selected show if they are any playlists you follow which that track is in.
 
 Unfollow:
 Unfollow button bottom right

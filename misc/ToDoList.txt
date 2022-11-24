@@ -1,7 +1,14 @@
 To Do:
-  1)
-    Find duplicates of a songs across multiple playlists
   2)
+    Public search
+  1)
+    Find duplicates of a songs across multiple playlists    
+    Duplicates manager
+  3)
+    Additional search criteria: name, artist, album, etc
+
+
+  4)
     Deleting duplicate songs within same playlist
   
   

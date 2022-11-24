@@ -3,6 +3,9 @@ export type tokenType = {
   refreshToken: string | undefined;
   expiresIn: string | undefined;
 };
+export type userInfoType = {
+  display_name: string | null;
+};
 export type optionsType = {
   offset: Promise<number> | number;
 };
@@ -29,4 +32,8 @@ export type tracksType = {
   album: string;
   album_artists: string[];
   artists: string[];
+};
+export type duplicateType = {
+  track: tracksType;
+  in_playlists: playlistType[];
 };
