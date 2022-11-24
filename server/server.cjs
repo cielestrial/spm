@@ -28,6 +28,9 @@ const server = app.listen(app.get("port"), function () {
  * /add
  * /tracks
  * /unfollow
+ * /follow
+ * /search-playlists
+ * /search
  */
 
 app.get("/", function (req, res) {
@@ -126,6 +129,7 @@ app.post("/playlists", (req, res) => {
         list: data.body.items.map(playlist => ({
           id: playlist.id,
           name: playlist.name,
+          owner: playlist.owner.display_name,
           uri: playlist.uri,
           total: playlist.tracks.total
         }))
@@ -149,6 +153,7 @@ app.post("/create", (req, res) => {
       res.json({
         id: data.body.id,
         name: data.body.name,
+        owner: data.body.owner.display_name,
         uri: data.body.uri,
         total: data.body.tracks.total
       });
@@ -202,6 +207,22 @@ app.post("/unfollow", (req, res) => {
 });
 
 /**
+ * Follow a playlist
+ */
+app.post("/follow", (req, res) => {
+  const playlistId = req.body.playlistId;
+  spotifyApi
+    .followPlaylist(playlistId)
+    .then(data => {
+      console.log("Successfully followed playlist");
+      res.json("success");
+    })
+    .catch(err => {
+      console.log("Something went wrong with following the playlist", err);
+    });
+});
+
+/**
  * Get tracks in a playlist
  */
 app.post("/tracks", (req, res) => {
@@ -244,5 +265,37 @@ app.post("/tracks", (req, res) => {
     })
     .catch(err => {
       console.log("Something went wrong with retrieving tracks", err);
+    });
+});
+
+/**
+ * Search general playlists
+ */
+app.post("/search-playlists", (req, res) => {
+  const maxOffset = 1000;
+  const query = req.body.querySearch;
+  const offset = req.body.options.offset;
+  spotifyApi
+    .searchPlaylists(query, {
+      market: country,
+      offset: offset,
+      limit: maxGetLimit,
+      include_external: "audio"
+    })
+    .then(data => {
+      console.log("Found playlists are", data.body.playlists);
+      res.json({
+        total: data.body.playlists.total,
+        list: data.body.playlists.items.map(playlist => ({
+          id: playlist.id,
+          name: playlist.name,
+          owner: playlist.owner.display_name,
+          uri: playlist.uri,
+          total: playlist.tracks.total
+        }))
+      });
+    })
+    .catch(err => {
+      console.log("Something went wrong with searching for playlists", err);
     });
 });

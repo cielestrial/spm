@@ -12,6 +12,7 @@ export type optionsType = {
 export type playlistType = {
   id: string;
   name: string;
+  owner: string | null;
   uri: string;
   total: number;
   tracks: tracksType[] | undefined;

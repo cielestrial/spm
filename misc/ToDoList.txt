@@ -1,15 +1,17 @@
 To Do:
-  2)
-    Public search
+  3)
+    Public track search
+    
   1)
     Find duplicates of a songs across multiple playlists    
     Duplicates manager
-  3)
-    Additional search criteria: name, artist, album, etc
-
+  2)
+    Additional search criteria: name, artist, album, etc (add additional search bars for tracks)
+    Handle large number of search results (pages or auto load when scrolled to bottom)
 
   4)
     Deleting duplicate songs within same playlist
+    Clicking on tracks 
   
   
 Features:

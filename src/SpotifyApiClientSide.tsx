@@ -79,7 +79,7 @@ export const getAuthenticatedUserInfo = async () => {
  * @returns
  */
 export const getPlaylists = async () => {
-  if (playlists !== undefined) {
+  if (playlists !== undefined && playlists.total === playlists.list.length) {
     console.log("Playlists retrieved from client");
     return playlists;
   }
@@ -130,11 +130,8 @@ const appendPlaylists = async (newOffset: Promise<number> | number) => {
  * Get tracks in a playlist
  * @returns
  */
-export const getTracks = async (playlistId: string | undefined) => {
-  const playlist = playlists?.list.find(playlist => playlist.id === playlistId);
-  if (playlist === undefined)
-    throw new Error("Couldn't find playlist with id: " + playlistId);
-
+export const getTracks = async (playlist: playlistType | undefined) => {
+  if (playlist === undefined) throw new Error("Playlist not defined");
   if (
     playlist.tracks !== undefined &&
     playlist.total === playlist.tracks.length
@@ -142,6 +139,7 @@ export const getTracks = async (playlistId: string | undefined) => {
     console.log("Tracks retrieved from client");
     return playlist;
   }
+  const playlistId = playlist.id;
   let newOffset: Promise<number> | number = 0;
   options.offset = 0;
   try {
@@ -195,7 +193,7 @@ export const getAllTracks = async () => {
   let resStatus = true;
   try {
     playlists.list.forEach(async playlist => {
-      await getTracks(playlist.id);
+      await getTracks(playlist);
     });
   } catch (err) {
     resStatus = false;
@@ -253,6 +251,7 @@ export const createPlaylist = async (name: string | undefined) => {
             id: res.data.id,
             name: res.data.name,
             uri: res.data.uri,
+            owner: res.data.owner,
             total: res.data.total,
             tracks: undefined
           }
@@ -263,11 +262,12 @@ export const createPlaylist = async (name: string | undefined) => {
         id: res.data.id,
         name: res.data.name,
         uri: res.data.uri,
+        owner: res.data.owner,
         total: res.data.total,
         tracks: undefined
       });
     }
-    playlists.total = playlists.list.length;
+    playlists.total++;
     playlist = playlists.list.find(pl => pl.name === name);
   } catch (err) {
     console.log("Something went wrong with createPlaylist()", err);
@@ -280,14 +280,14 @@ export const createPlaylist = async (name: string | undefined) => {
  * @returns
  */
 export const addPlaylistToPlaylist = async (
-  sourceId: string | undefined,
-  targetId: string | undefined
+  source: playlistType,
+  target: playlistType
 ) => {
-  if (sourceId === undefined) throw new Error("Couldn't find playlist with id");
+  if (source === undefined) throw new Error("Couldn't find source playlist");
 
-  const tracks = await getTracks(sourceId);
+  const tracks = await getTracks(source);
   const uris = tracks?.tracks?.map(track => track.uri);
-  return await addTracksToPlaylist(targetId, uris);
+  return await addTracksToPlaylist(target, uris);
 };
 
 /**
@@ -295,16 +295,14 @@ export const addPlaylistToPlaylist = async (
  * @returns
  */
 export const addTracksToPlaylist = async (
-  playlistId: string | undefined,
+  playlist: playlistType,
   allUris: string[] | undefined
 ) => {
   let status = false;
-  const playlist = playlists?.list.find(playlist => playlist.id === playlistId);
-  if (playlist === undefined)
-    throw new Error("Couldn't find playlist with id:" + playlistId);
+  if (playlist === undefined) throw new Error("Couldn't find target playlist");
 
   if (allUris === undefined) throw new Error("Couldn't retrieve track uris");
-
+  const playlistId = playlist.id;
   const total = allUris.length;
   console.log("total", total);
   let uris,
@@ -338,37 +336,103 @@ export const addTracksToPlaylist = async (
  */
 export const unfollowPlaylist = async (playlistId: string | undefined) => {
   if (playlistId === undefined) throw new Error("Playlist id undefined");
-
+  let status = false;
   try {
     await axios.post("http://localhost:8080/unfollow", { playlistId });
     if (playlists !== undefined) {
       const index = playlists.list.findIndex(pl => pl.id === playlistId);
       if (index > -1) {
         playlists.list.splice(index, 1);
-        playlists.total = playlists.list.length;
+        playlists.total--;
+        status = true;
       }
     }
   } catch (err) {
     console.log("Something went wrong with unfollowPlaylist()", err);
   }
-  if (playlists !== undefined) return true;
-  else throw new Error();
+  return status;
 };
 
 /**
- * Search for item
- * @param name
+ * Follow a playlist
  * @returns
  */
-export const generalSearch = async (name: string | undefined) => {
-  if (name === "" || name === undefined)
-    throw new Error("Invalid playlist name");
+export const followPlaylist = async (playlistId: string | undefined) => {
+  if (playlistId === undefined) throw new Error("Playlist id undefined");
+  let status = false;
   try {
-    const res = await axios.post("http://localhost:8080/search", {
-      name,
-      description: "Generated by YSPM."
-    });
+    await axios.post("http://localhost:8080/follow", { playlistId });
+    if (playlists !== undefined) {
+      playlists.total++;
+      status = true;
+    }
   } catch (err) {
-    console.log("Something went wrong with generalSearch()", err);
+    console.log("Something went wrong with followPlaylist()", err);
   }
+  return status;
+};
+
+/**
+ * General search for playlists
+ * @param querySearch
+ * @returns
+ */
+export const generalPlaylistsSearch = async (querySearch: string) => {
+  if (querySearch === "") throw new Error("Invalid query search");
+  const maxOffset = 50; // 1000
+  let queriedPlaylists: playlistsType = undefined;
+  let newOffset: Promise<number> | number = 0;
+  options.offset = 0;
+  try {
+    const res = await axios.post("http://localhost:8080/search-playlists", {
+      querySearch,
+      options
+    });
+    queriedPlaylists = {
+      total: res.data.total,
+      list: res.data.list
+    };
+    newOffset = (newOffset as number) + getLimit;
+  } catch (err) {
+    console.log("Something went wrong with generalPlaylistsSearch()", err);
+  }
+  if (queriedPlaylists !== undefined) {
+    while (0 < newOffset && newOffset < maxOffset) {
+      console.log("happening");
+      newOffset = await appendGeneralPlaylistsSearch(
+        querySearch,
+        queriedPlaylists,
+        newOffset
+      );
+    }
+    return queriedPlaylists;
+  } else throw new Error("Failed general playlists search");
+};
+
+/**
+ * Append remaining general searched playlists
+ * @returns
+ */
+const appendGeneralPlaylistsSearch = async (
+  querySearch: string,
+  queriedPlaylists: playlistsType,
+  newOffset: Promise<number> | number
+) => {
+  options.offset = newOffset;
+  try {
+    const res = await axios.post("http://localhost:8080/search-playlists", {
+      querySearch,
+      options
+    });
+    res.data.list.forEach((playlist: playlistType) =>
+      queriedPlaylists?.list.push(playlist)
+    );
+    newOffset = (newOffset as number) + getLimit;
+  } catch (err) {
+    console.log(
+      "Something went wrong with appendGeneralPlaylistsSearch()",
+      err
+    );
+  }
+  return newOffset;
 };

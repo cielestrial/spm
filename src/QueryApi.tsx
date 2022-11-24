@@ -1,5 +1,6 @@
 import { useQuery } from "react-query";
 import { token, userInfo } from "./Dashboard";
+import { searchAreaType } from "./SearchBar";
 import {
   getToken,
   getPlaylists,
@@ -7,7 +8,9 @@ import {
   createPlaylist,
   unfollowPlaylist,
   getAllTracks,
-  getAuthenticatedUserInfo
+  getAuthenticatedUserInfo,
+  generalPlaylistsSearch,
+  followPlaylist
 } from "./SpotifyApiClientSide";
 import { playlistType, userInfoType } from "./SpotifyApiClientTypes";
 
@@ -40,7 +43,7 @@ export const tracksQuery = (selectedPlaylist: playlistType | undefined) =>
   useQuery(
     ["tracks", selectedPlaylist, tracksFlag],
     async () => {
-      const res = await getTracks(selectedPlaylist?.id);
+      const res = await getTracks(selectedPlaylist);
       tracksFlag = false;
       return res;
     },
@@ -79,6 +82,29 @@ export const unfollowQuery = (
       setSelected(undefined);
       return res;
     },
+    { enabled: false }
+  );
+
+// Follows currently selected playlist
+export const followQuery = (
+  selectedPlaylist: playlistType | undefined,
+  setSelected: (selected: playlistType | undefined) => void
+) =>
+  useQuery(
+    ["follow", selectedPlaylist],
+    async () => {
+      const res = await followPlaylist(selectedPlaylist?.id);
+      setSelected(undefined);
+      setSelected(selectedPlaylist);
+      return res;
+    },
+    { enabled: false }
+  );
+
+export const generalPlaylistsQuery = (querySearch: string) =>
+  useQuery(
+    ["generalPlaylists", querySearch],
+    () => generalPlaylistsSearch(querySearch),
     { enabled: false }
   );
 

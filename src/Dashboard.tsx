@@ -8,6 +8,7 @@ import CreatePlaylistButton from "./CreatePlaylistButton";
 import SearchBar from "./SearchBar";
 import {
   createQuery,
+  followQuery,
   playlistsQuery,
   refetchTracks,
   tokenQuery,
@@ -15,6 +16,8 @@ import {
   unfollowQuery,
   userQuery
 } from "./QueryApi";
+import FollowButton from "./FollowButton";
+import { useForceUpdate } from "@mantine/hooks";
 
 export let token: tokenType | undefined;
 export let userInfo: userInfoType | undefined;
@@ -28,12 +31,14 @@ const Dashboard = () => {
     scrollReset.current.scrollTop = 0;
     mutationObserver.disconnect();
   });
+  const forceUpdate = useForceUpdate();
   const setSelected = useCallback((selected: playlistType | undefined) => {
     setSelectedPlaylist(selected);
     mutationObserver.observe(scrollReset.current, {
       childList: true
     });
     refetchTracks();
+    playlistsQ.refetch();
   }, []);
 
   const { data: tokenData, isFetching: tokenStatus } = tokenQuery();
@@ -44,6 +49,7 @@ const Dashboard = () => {
   const tracksQ = tracksQuery(getSelectedPlaylist);
   const createQ = createQuery(getCreatedPlaylistName, setSelected);
   const unfollowQ = unfollowQuery(getSelectedPlaylist, setSelected);
+  const followQ = followQuery(getSelectedPlaylist, setSelected);
   const displayPlaylistsCheck =
     playlistsQ.isFetching || createQ.isFetching || unfollowQ.isFetching;
   const displayTracksCheck = tracksQ.isLoading;
@@ -73,7 +79,7 @@ const Dashboard = () => {
               );
             }}
           >
-            {index + 1 + ". " + playlist.name}
+            {playlist.name}
           </Box>
         );
       });
@@ -103,7 +109,7 @@ const Dashboard = () => {
       getSelectedPlaylist.tracks.forEach((track, index) => {
         dynamicList.push(
           <Box className="not-button" id={track.id} key={index}>
-            {index + 1 + ". " + track.name}
+            {track.name}
           </Box>
         );
       });
@@ -145,8 +151,33 @@ const Dashboard = () => {
   const displayUserName = () => {
     if (userInfo !== undefined) {
       if (userInfo.display_name !== null) return ": " + userInfo.display_name;
-      else return "";
-    } else return "";
+    }
+    return "";
+  };
+
+  /**
+   * Decides whether to display the follow or unfollow button
+   */
+  const displayFollowOrUnfollow = () => {
+    const decider = playlistsQ.data?.list.some(
+      pl => pl.id === getSelectedPlaylist?.id
+    );
+    if (decider)
+      return (
+        <UnfollowButton
+          playlists={playlistsQ}
+          playlist={getSelectedPlaylist}
+          unfollow={unfollowQ}
+        />
+      );
+    else
+      return (
+        <FollowButton
+          playlists={playlistsQ}
+          playlist={getSelectedPlaylist}
+          follow={followQ}
+        />
+      );
   };
 
   if (tokenStatus || userStatus) {
@@ -178,11 +209,7 @@ const Dashboard = () => {
             />
           </Center>
           <Center h="100%" mt="lg">
-            <UnfollowButton
-              playlists={playlistsQ}
-              playlist={getSelectedPlaylist}
-              unfollow={unfollowQ}
-            />
+            {displayFollowOrUnfollow()}
           </Center>
         </div>
       </div>

@@ -11,15 +11,21 @@ import {
 import { useDisclosure } from "@mantine/hooks";
 import { useRef, useState } from "react";
 import { arrayToString } from "./HelperFunctions";
-import { allTracksQuery, playlistsQuery } from "./QueryApi";
+import {
+  allTracksQuery,
+  generalPlaylistsQuery,
+  playlistsQuery
+} from "./QueryApi";
 import { playlistType, tracksType } from "./SpotifyApiClientTypes";
 
 type propsType = {
   setSelected: (selected: playlistType | undefined) => void;
 };
-type searchCategoryType = "Playlists" | "Tracks";
-type searchAreaType = "Library" | "General";
+export type searchCategoryType = "Playlists" | "Tracks";
+export type searchAreaType = "Library" | "General";
+
 const SearchBar = (props: propsType) => {
+  // UI stuff
   const [opened, { close, open }] = useDisclosure(false);
   const [value, setValue] = useState("");
   const selectedCategory = useRef<searchCategoryType>("Playlists");
@@ -36,15 +42,20 @@ const SearchBar = (props: propsType) => {
     scrollReset.current.scrollTop = 0;
     mutationObserver.disconnect();
   });
-  const allPlaylistsFlag = useRef(true);
-  const allTracksFlag = useRef(true);
-  const allTracksQ = allTracksQuery();
-  const allPlaylistsQ = playlistsQuery();
+  // Query stuff
+  const libraryPlaylistsFlag = useRef(true);
+  const libraryTracksFlag = useRef(true);
+  const generalPlaylistsFlag = useRef(true);
+  const generalTracksFlag = useRef(true);
+  const libraryTracksQ = allTracksQuery();
+  const libraryPlaylistsQ = playlistsQuery();
+  const generalPlaylistsQ = generalPlaylistsQuery(value);
   const [searchResults, setSearchResults] = useState<JSX.Element[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const dynamicList = useRef<JSX.Element[]>([]);
   const playlistResults = useRef<playlistType[] | undefined>();
   const trackResults = useRef<tracksType[] | undefined>();
+  const indexRef = useRef(0);
   const timeout = useRef<NodeJS.Timeout>();
   const waitTime = 666;
 
@@ -52,16 +63,16 @@ const SearchBar = (props: propsType) => {
     if (selectedArea.current === "Library") {
       if (
         selectedCategory.current === "Playlists" &&
-        allPlaylistsFlag.current
+        libraryPlaylistsFlag.current
       ) {
-        allPlaylistsQ.refetch();
-        allPlaylistsFlag.current = false;
+        libraryPlaylistsQ.refetch();
+        libraryPlaylistsFlag.current = false;
       } else if (
         selectedCategory.current === "Tracks" &&
-        allTracksFlag.current
+        libraryTracksFlag.current
       ) {
-        allTracksQ.refetch();
-        allTracksFlag.current = false;
+        libraryTracksQ.refetch();
+        libraryTracksFlag.current = false;
       }
     }
   };
@@ -80,18 +91,22 @@ const SearchBar = (props: propsType) => {
         childList: true
       });
       if (selectedSearchCategory === "Playlists") {
-        return await searchLocalPlaylists();
-      } else if (selectedSearchCategory === "Tracks") {
-        return await searchLocalTracks();
+        if (selectedSearchArea === "Library")
+          return await searchLibraryPlaylists();
+        else return await searchGeneralPlaylists();
+      } else {
+        if (selectedSearchArea === "Library")
+          return await searchLibraryTracks();
+        else return [];
       }
     }
     return [];
   };
 
-  const searchLocalPlaylists = async () => {
+  const searchLibraryPlaylists = async () => {
     dynamicList.current = [];
     playlistResults.current = [];
-    playlistResults.current = allPlaylistsQ.data?.list.filter(pl =>
+    playlistResults.current = libraryPlaylistsQ.data?.list.filter(pl =>
       pl.name.toLocaleLowerCase().includes(value.toLocaleLowerCase())
     );
     playlistResults.current?.forEach((playlist, index) => {
@@ -106,10 +121,11 @@ const SearchBar = (props: propsType) => {
           }}
         >
           {playlist.name}
+          <br />
+          {"By"} {playlist.owner}
         </Box>
       );
     });
-    // Search public?
     if (dynamicList.current.length === 0) {
       return [
         <Center key={"No Playlists"} h="calc(66vh - 2rem)">
@@ -121,11 +137,11 @@ const SearchBar = (props: propsType) => {
     } else return dynamicList.current;
   };
 
-  const searchLocalTracks = async () => {
+  const searchLibraryTracks = async () => {
     dynamicList.current = [];
     trackResults.current = [];
-    let index = 0;
-    allPlaylistsQ.data?.list.forEach(pl => {
+    indexRef.current = 0;
+    libraryPlaylistsQ.data?.list.forEach(pl => {
       trackResults.current = pl.tracks?.filter(tr => {
         return (
           !tr.is_local &&
@@ -142,7 +158,7 @@ const SearchBar = (props: propsType) => {
           <Box
             className="not-button"
             id={track.id}
-            key={index++}
+            key={indexRef.current++}
             onClick={() => {
               //closeHandler();
             }}
@@ -152,7 +168,6 @@ const SearchBar = (props: propsType) => {
             {arrayToString(track.artists)}
             <br />
             {pl.name}
-            <br />
           </Box>
         );
       });
@@ -163,6 +178,39 @@ const SearchBar = (props: propsType) => {
         <Center key={"No Tracks"} h="calc(66vh - 2rem)">
           <Text fw="bold" color="crimson">
             No Tracks Found
+          </Text>
+        </Center>
+      ];
+    } else return dynamicList.current;
+  };
+
+  const searchGeneralPlaylists = async () => {
+    dynamicList.current = [];
+    playlistResults.current = [];
+    const res = await generalPlaylistsQ.refetch();
+    playlistResults.current = res.data?.list;
+    playlistResults.current?.forEach((playlist, index) => {
+      dynamicList.current.push(
+        <Box
+          className="not-button"
+          id={playlist.id}
+          key={index}
+          onClick={() => {
+            props.setSelected(playlist);
+            closeHandler();
+          }}
+        >
+          {playlist.name}
+          <br />
+          {"By"} {playlist.owner}
+        </Box>
+      );
+    });
+    if (res.data?.list.length === 0) {
+      return [
+        <Center key={"No Playlists"} h="calc(66vh - 2rem)">
+          <Text fw="bold" color="crimson">
+            No Playlists Found
           </Text>
         </Center>
       ];
@@ -190,8 +238,8 @@ const SearchBar = (props: propsType) => {
 
   const closeHandler = () => {
     resetHandler();
-    allPlaylistsFlag.current = true;
-    allTracksFlag.current = true;
+    libraryPlaylistsFlag.current = true;
+    libraryTracksFlag.current = true;
     close();
   };
 
@@ -326,7 +374,12 @@ const SearchBar = (props: propsType) => {
         radius="xl"
         placeholder="Search"
         variant="filled"
-        onClick={open}
+        onClick={() => {
+          open();
+          libraryPlaylistsFlag.current = true;
+          libraryTracksFlag.current = true;
+          getLibrary();
+        }}
         readOnly
         value={value}
       />
