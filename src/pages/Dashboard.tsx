@@ -1,42 +1,50 @@
-import "./css/dashboard.scss";
-import Logout from "./Logout";
-import { Box, Center, Group, Loader, Text } from "@mantine/core";
+import "../css/dashboard.scss";
+import Logout from "../components/Logout";
+import { Box, Center, Flex, Loader, SimpleGrid, Text } from "@mantine/core";
 import { useCallback, useRef, useState } from "react";
-import UnfollowButton from "./UnfollowButton";
-import { playlistType, tokenType, userInfoType } from "./SpotifyApiClientTypes";
-import CreatePlaylistButton from "./CreatePlaylistButton";
-import SearchBar from "./SearchBar";
+import UnfollowButton from "../components/UnfollowButton";
 import {
+  playlistType,
+  tokenType,
+  userInfoType
+} from "../SpotifyApiClientTypes";
+import CreatePlaylistButton from "../components/CreatePlaylistButton";
+import SearchBar from "../components/SearchBar";
+import {
+  allTracksQuery,
   createQuery,
   followQuery,
   playlistsQuery,
+  refetchAllTracks,
   refetchTracks,
   tokenQuery,
   tracksQuery,
   unfollowQuery,
   userQuery
-} from "./QueryApi";
-import FollowButton from "./FollowButton";
-import { useForceUpdate } from "@mantine/hooks";
+} from "../QueryApi";
+import FollowButton from "../components/FollowButton";
+import TrackDialog, { TrackDialogType } from "../components/TrackDialog";
 
 export let token: tokenType | undefined;
 export let userInfo: userInfoType | undefined;
 
 const Dashboard = () => {
-  //const [playlists, setPlaylists] = useState<playlistsType>();
   const [getSelectedPlaylist, setSelectedPlaylist] = useState<playlistType>();
   const [getCreatedPlaylistName, setCreatedPlaylistName] = useState("");
-  const scrollReset = useRef({} as HTMLDivElement);
+  const trackDialog = useRef<TrackDialogType>(null);
+
+  const scrollReset = useRef<HTMLDivElement>(null);
   const mutationObserver = new MutationObserver(() => {
-    scrollReset.current.scrollTop = 0;
+    if (scrollReset.current !== null) scrollReset.current.scrollTop = 0;
     mutationObserver.disconnect();
   });
-  const forceUpdate = useForceUpdate();
   const setSelected = useCallback((selected: playlistType | undefined) => {
+    if (selected === undefined) return;
     setSelectedPlaylist(selected);
-    mutationObserver.observe(scrollReset.current, {
-      childList: true
-    });
+    if (scrollReset.current !== null)
+      mutationObserver.observe(scrollReset.current, {
+        childList: true
+      });
     refetchTracks();
     playlistsQ.refetch();
   }, []);
@@ -46,13 +54,14 @@ const Dashboard = () => {
   const { data: userData, isFetching: userStatus } = userQuery();
   userInfo = userData;
   const playlistsQ = playlistsQuery();
+  const libraryTracksQ = allTracksQuery(playlistsQ.data);
   const tracksQ = tracksQuery(getSelectedPlaylist);
   const createQ = createQuery(getCreatedPlaylistName, setSelected);
   const unfollowQ = unfollowQuery(getSelectedPlaylist, setSelected);
   const followQ = followQuery(getSelectedPlaylist, setSelected);
   const displayPlaylistsCheck =
     playlistsQ.isFetching || createQ.isFetching || unfollowQ.isFetching;
-  const displayTracksCheck = tracksQ.isLoading;
+  const displayTracksCheck = tracksQ.isLoading || libraryTracksQ.isLoading;
 
   /**
    * Display list of playlists
@@ -73,17 +82,20 @@ const Dashboard = () => {
             className="not-button"
             id={playlist.id}
             key={index}
-            onClick={(e: React.MouseEvent) => {
-              setSelected(
-                playlistsQ.data?.list.find(pl => pl.id === e.currentTarget.id)
-              );
-            }}
+            onClick={() => setSelected(playlist)}
           >
+            {index + 1}
+            {". "}
             {playlist.name}
           </Box>
         );
       });
-      if (dynamicList.length > 0) return dynamicList;
+      if (dynamicList.length > 0)
+        return (
+          <SimpleGrid miw={"max-content"} cols={1} verticalSpacing={0}>
+            {dynamicList}
+          </SimpleGrid>
+        );
       else
         return (
           <Center h="100%">
@@ -108,12 +120,24 @@ const Dashboard = () => {
       const dynamicList: JSX.Element[] = [];
       getSelectedPlaylist.tracks.forEach((track, index) => {
         dynamicList.push(
-          <Box className="not-button" id={track.id} key={index}>
+          <Box
+            className="not-button"
+            id={track.id}
+            key={index}
+            onClick={() => trackDialog.current?.openTrackDialog(track)}
+          >
+            {index + 1}
+            {". "}
             {track.name}
           </Box>
         );
       });
-      if (dynamicList.length > 0) return dynamicList;
+      if (dynamicList.length > 0)
+        return (
+          <SimpleGrid miw={"max-content"} cols={1} verticalSpacing={0}>
+            {dynamicList}
+          </SimpleGrid>
+        );
       else
         return (
           <Center h="100%">
@@ -128,9 +152,10 @@ const Dashboard = () => {
     const number = loading ? "" : playlistsQ.data?.total;
     const label = playlistsQ.data?.total === 1 ? "Playlist" : "Playlists";
     return (
-      <label className="text">
+      <Text className="text">
+        <br />
         {"Your"} {number} {label}
-      </label>
+      </Text>
     );
   };
 
@@ -140,11 +165,11 @@ const Dashboard = () => {
     const number = loading ? "" : getSelectedPlaylist?.total;
     const label = getSelectedPlaylist?.total === 1 ? "Track" : "Tracks";
     return (
-      <label className="text">
+      <Text className="text">
         {title}
         <br />
         {number} {label}
-      </label>
+      </Text>
     );
   };
 
@@ -189,11 +214,21 @@ const Dashboard = () => {
   } else {
     return (
       <div className="background start">
-        <Group position="center" spacing="xs">
-          <p className="title column-element">YSPM{displayUserName()}</p>
-          <SearchBar setSelected={setSelected} />
+        <Flex
+          mt="sm"
+          justify="center"
+          align="center"
+          direction="row"
+          wrap="nowrap"
+        >
+          <Center>
+            <p className="title column-element">YSPM{displayUserName()}</p>
+          </Center>
           <Logout />
-        </Group>
+        </Flex>
+        <Center my="md">
+          <SearchBar setSelected={setSelected} trackDialog={trackDialog} />
+        </Center>
 
         <div className="listDisplayArea">
           {displayPlaylistsLabel()}
@@ -212,6 +247,7 @@ const Dashboard = () => {
             {displayFollowOrUnfollow()}
           </Center>
         </div>
+        <TrackDialog ref={trackDialog} />
       </div>
     );
   }

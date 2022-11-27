@@ -1,31 +1,20 @@
-To Do:
-  3)
-    Public track search
-    
+To Do:    
   1)
-    Find duplicates of a songs across multiple playlists    
-    Duplicates manager
-  2)
-    Additional search criteria: name, artist, album, etc (add additional search bars for tracks)
-    Handle large number of search results (pages or auto load when scrolled to bottom)
-
+    Fully implement map.
+    Theme
+  2) 
+    Genre-Based Playlists (album genre, artist genre, search genre?, category?)
+    Unplayables genre playlist
   4)
-    Deleting duplicate songs within same playlist
-    Clicking on tracks 
-  
-  
-Features:
-    
-    Genre-Based Playlists (album genre, artist genre, 3rd party database)
-    
-
+    Track player capabilities.
+  5)
+    Token renewal
+    Rate limit
+    Handle large number of search results (pages or auto load when scrolled to bottom)   
 
 Bugs: 
   None
 
 Extras:
-  Filter out local files
-  Token renewal
-  Rate limit
   Fonts
   Comment

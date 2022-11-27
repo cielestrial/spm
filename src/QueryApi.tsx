@@ -1,6 +1,5 @@
 import { useQuery } from "react-query";
-import { token, userInfo } from "./Dashboard";
-import { searchAreaType } from "./SearchBar";
+import { token, userInfo } from "./pages/Dashboard";
 import {
   getToken,
   getPlaylists,
@@ -10,13 +9,18 @@ import {
   getAllTracks,
   getAuthenticatedUserInfo,
   generalPlaylistsSearch,
-  followPlaylist
+  followPlaylist,
+  generalTracksSearch
 } from "./SpotifyApiClientSide";
-import { playlistType, userInfoType } from "./SpotifyApiClientTypes";
+import { playlistsType, playlistType } from "./SpotifyApiClientTypes";
 
 let tracksFlag = false;
 export const refetchTracks = () => {
   tracksFlag = true;
+};
+let allTracksFlag = true;
+export const refetchAllTracks = () => {
+  allTracksFlag = true;
 };
 let createFlag = false;
 export const refetchCreate = () => {
@@ -51,8 +55,16 @@ export const tracksQuery = (selectedPlaylist: playlistType | undefined) =>
   );
 
 // Gets all tracks
-export const allTracksQuery = () =>
-  useQuery("allTracks", getAllTracks, { enabled: false });
+export const allTracksQuery = (playlists: playlistsType) =>
+  useQuery(
+    ["allTracks", playlists, allTracksFlag],
+    async () => {
+      const res = getAllTracks();
+      allTracksFlag = false;
+      return res;
+    },
+    { enabled: playlists !== undefined && allTracksFlag }
+  );
 
 // Creates playlist with name
 export const createQuery = (
@@ -105,6 +117,23 @@ export const generalPlaylistsQuery = (querySearch: string) =>
   useQuery(
     ["generalPlaylists", querySearch],
     () => generalPlaylistsSearch(querySearch),
+    { enabled: false }
+  );
+
+export const generalTracksQuery = (
+  songQuery: string,
+  artistQuery: string,
+  albumQuery: string
+) =>
+  useQuery(
+    ["generalTracks", songQuery, artistQuery, albumQuery],
+    () => {
+      let querySearch = "";
+      if (songQuery !== "") querySearch += "track:" + songQuery;
+      if (artistQuery !== "") querySearch += "artist:" + artistQuery;
+      if (albumQuery !== "") querySearch += "album:" + albumQuery;
+      return generalTracksSearch(querySearch);
+    },
     { enabled: false }
   );
 

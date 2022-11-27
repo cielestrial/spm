@@ -2,8 +2,8 @@ import { Button, Group, Modal, TextInput } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { useDisclosure } from "@mantine/hooks";
 import { UseQueryResult } from "react-query";
-import { refetchCreate } from "./QueryApi";
-import { playlistType } from "./SpotifyApiClientTypes";
+import { refetchCreate } from "../QueryApi";
+import { playlistType } from "../SpotifyApiClientTypes";
 
 type propsType = {
   playlists: UseQueryResult<

@@ -1,16 +1,17 @@
 import axios from "axios";
-import { token } from "./Dashboard";
-import { code } from "./LandingPage";
+import { token, userInfo } from "./pages/Dashboard";
+import { generatePlaylistKey, generateTrackKey } from "./HelperFunctions";
+import { code } from "./pages/LandingPage";
 import {
-  duplicateType,
+  uniqueType,
   optionsType,
   playlistsType,
   playlistType,
   tokenType,
   tracksType,
-  userInfoType
+  userInfoType,
+  duplicateType
 } from "./SpotifyApiClientTypes";
-
 const scope =
   "&scope=" +
   "playlist-read-private" +
@@ -33,11 +34,13 @@ export const AUTH_URL =
   "&state=" +
   crypto.randomUUID() +
   "&show_dialog=true";
+
+const server = "http://localhost:8080";
+export const duplicateManager = new Map<string, uniqueType>();
 let playlists: playlistsType;
-let duplicateManager: duplicateType[];
-const options: optionsType = { offset: 0 };
+const options: optionsType = { offset: 0, limit: 0 };
 const getLimit = 50;
-const postLimit = 15;
+const postLimit = 50;
 /**
  * Get access token
  * @returns
@@ -47,7 +50,7 @@ export const getToken = async () => {
   if (token?.accessToken !== undefined) return token;
   let tokenTemp = {} as tokenType;
   try {
-    const res = await axios.post("http://localhost:8080/login", { code });
+    const res = await axios.post(server + "/login", { code });
     tokenTemp.accessToken = res.data.accessToken;
     tokenTemp.refreshToken = res.data.refreshToken;
     tokenTemp.expiresIn = res.data.expriresIn;
@@ -64,7 +67,7 @@ export const getToken = async () => {
 export const getAuthenticatedUserInfo = async () => {
   let userInfo: userInfoType | undefined = undefined;
   try {
-    const res = await axios.post("http://localhost:8080/user");
+    const res = await axios.post(server + "/user");
     userInfo = {
       display_name: res.data.display_name
     };
@@ -85,8 +88,9 @@ export const getPlaylists = async () => {
   }
   let newOffset: Promise<number> | number = 0;
   options.offset = 0;
+  options.limit = getLimit;
   try {
-    const res = await axios.post("http://localhost:8080/playlists", {
+    const res = await axios.post(server + "/playlists", {
       options
     });
     playlists = {
@@ -106,6 +110,7 @@ export const getPlaylists = async () => {
     return playlists;
   } else throw new Error("Failed to retrieve playlists");
 };
+
 /**
  * Append remaining playlists
  * @returns
@@ -113,7 +118,7 @@ export const getPlaylists = async () => {
 const appendPlaylists = async (newOffset: Promise<number> | number) => {
   options.offset = newOffset;
   try {
-    const res = await axios.post("http://localhost:8080/playlists", {
+    const res = await axios.post(server + "/playlists", {
       options
     });
     res.data.list.forEach((playlist: playlistType) =>
@@ -128,7 +133,7 @@ const appendPlaylists = async (newOffset: Promise<number> | number) => {
 
 /**
  * Get tracks in a playlist
- * @returns
+ * @returns playlistType
  */
 export const getTracks = async (playlist: playlistType | undefined) => {
   if (playlist === undefined) throw new Error("Playlist not defined");
@@ -142,20 +147,35 @@ export const getTracks = async (playlist: playlistType | undefined) => {
   const playlistId = playlist.id;
   let newOffset: Promise<number> | number = 0;
   options.offset = 0;
-  try {
-    const res = await axios.post("http://localhost:8080/tracks", {
-      playlistId,
-      options
-    });
-    playlist.tracks = res.data.list;
-    newOffset = (newOffset as number) + getLimit;
-  } catch (err) {
-    console.log("Something went wrong with getTracks()", err);
+  options.limit = getLimit;
+  for (let i = 0; i < 2; i++) {
+    try {
+      const res = await axios.post(server + "/tracks", {
+        playlistId,
+        options
+      });
+      playlist.tracks = res.data.list;
+      newOffset = (newOffset as number) + getLimit;
+    } catch (err) {
+      console.log("Something went wrong with getTracks()", err);
+    }
+    if (playlist.tracks !== undefined) {
+      while (0 < newOffset && newOffset < playlist.total) {
+        newOffset = await appendTracks(playlistId, playlist, newOffset);
+      }
+      // Duplicate manager
+      if (playlists?.list.some(pl => pl.id === playlist?.id && i === 0)) {
+        getOccurances(playlist);
+        if (playlist.owner === userInfo?.display_name) {
+          const originals: string[] = await removeDuplicates(playlist);
+          if (originals.length > 0) {
+            await addTracksToPlaylist(playlist, originals);
+          } else break;
+        } else break;
+      } else break;
+    }
   }
   if (playlist.tracks !== undefined) {
-    while (0 < newOffset && newOffset < playlist.total) {
-      newOffset = await appendTracks(playlistId, playlist, newOffset);
-    }
     console.log("Tracks retrieved from server");
     return playlist;
   } else throw new Error("Failed to retrieve tracks");
@@ -172,7 +192,7 @@ const appendTracks = async (
 ) => {
   options.offset = newOffset;
   try {
-    const res = await axios.post("http://localhost:8080/tracks", {
+    const res = await axios.post(server + "/tracks", {
       playlistId,
       options
     });
@@ -199,6 +219,99 @@ export const getAllTracks = async () => {
     resStatus = false;
   }
   return resStatus;
+};
+
+/**
+ * Records all occurances of a track
+ */
+const getOccurances = (playlist: playlistType) => {
+  let uniqueTrack: uniqueType;
+  let trackKey: string;
+  let playlistKey = generatePlaylistKey(playlist);
+
+  playlist.tracks?.forEach(track => {
+    trackKey = generateTrackKey(track);
+    if (!duplicateManager.has(trackKey)) {
+      uniqueTrack = {} as uniqueType;
+      uniqueTrack.track = track;
+      uniqueTrack.occurances = 1;
+      uniqueTrack.duplicate_uris = [];
+      uniqueTrack.in_playlists = new Map<string, playlistType>();
+      uniqueTrack.in_playlists.set(playlistKey, playlist);
+      duplicateManager.set(trackKey, uniqueTrack);
+    } else {
+      uniqueTrack = duplicateManager.get(trackKey) as uniqueType;
+      uniqueTrack.occurances++;
+      if (!uniqueTrack.in_playlists.has(playlistKey))
+        uniqueTrack.in_playlists.set(playlistKey, playlist);
+      else uniqueTrack.duplicate_uris.push({ uri: track.uri });
+    }
+  });
+};
+
+/**
+ * Check if duplicate or unique
+ * @param track The track being tested.
+ * @param playlist The playlist the track will belong to.
+ * @returns true, if track will be unique in provided playlist. Otherwise, returns false.
+ */
+const isUnique = (track: tracksType, playlist: playlistType) => {
+  return !duplicateManager.has(generateTrackKey(track))
+    ? true
+    : !(
+        duplicateManager.get(generateTrackKey(track)) as uniqueType
+      ).in_playlists.has(generatePlaylistKey(playlist));
+};
+
+/**
+ * Removes duplicates from a playlist.
+ * @param playlist The playlist the track belongs to.
+ * @returns string[] of unique occurances
+ */
+export const removeDuplicates = async (playlist: playlistType) => {
+  if (playlist === undefined) throw new Error("Playlist not defined");
+
+  //max 100 in one request
+  const playlistId = playlist.id;
+  const snapshot = playlist.snapshot;
+  let allOriginals: string[] = [];
+  let allUris: duplicateType[] = [];
+  duplicateManager.forEach(uniqueTrack => {
+    if (uniqueTrack.duplicate_uris.length > 0) {
+      allUris = allUris.concat(uniqueTrack.duplicate_uris);
+      uniqueTrack.occurances -= uniqueTrack.duplicate_uris.length;
+      uniqueTrack.duplicate_uris = [];
+      allOriginals.push(uniqueTrack.track.uri);
+    }
+  });
+  const total = allUris.length;
+  if (total === 0) return [];
+  let newOffset: Promise<number> | number = 0;
+  let uris, res;
+  options.limit = postLimit;
+  try {
+    do {
+      options.offset = newOffset;
+      uris = allUris.slice(
+        newOffset as number,
+        (newOffset as number) + postLimit
+      );
+      res = await axios.post(server + "/remove", {
+        playlistId,
+        uris,
+        total,
+        options,
+        snapshot
+      });
+      playlist.snapshot = res.data.snapshot;
+      playlist.total -= uris.length;
+      newOffset = (newOffset as number) + postLimit;
+    } while (0 < newOffset && newOffset < total);
+    playlist.total -= allOriginals.length;
+  } catch (err) {
+    console.log("Something went wrong with removeDuplicates()", err);
+  }
+  return allOriginals;
 };
 
 /**
@@ -239,7 +352,7 @@ export const createPlaylist = async (name: string | undefined) => {
     return playlist;
   }
   try {
-    const res = await axios.post("http://localhost:8080/create", {
+    const res = await axios.post(server + "/create", {
       name,
       description: "Generated by YSPM."
     });
@@ -252,6 +365,7 @@ export const createPlaylist = async (name: string | undefined) => {
             name: res.data.name,
             uri: res.data.uri,
             owner: res.data.owner,
+            snapshot: res.data.snapshot,
             total: res.data.total,
             tracks: undefined
           }
@@ -263,6 +377,7 @@ export const createPlaylist = async (name: string | undefined) => {
         name: res.data.name,
         uri: res.data.uri,
         owner: res.data.owner,
+        snapshot: res.data.snapshot,
         total: res.data.total,
         tracks: undefined
       });
@@ -284,9 +399,12 @@ export const addPlaylistToPlaylist = async (
   target: playlistType
 ) => {
   if (source === undefined) throw new Error("Couldn't find source playlist");
+  if (target === undefined) throw new Error("Couldn't find target playlist");
 
   const tracks = await getTracks(source);
-  const uris = tracks?.tracks?.map(track => track.uri);
+  const uris = tracks?.tracks
+    ?.filter(track => isUnique(track, target))
+    .map(track => track.uri);
   return await addTracksToPlaylist(target, uris);
 };
 
@@ -296,17 +414,16 @@ export const addPlaylistToPlaylist = async (
  */
 export const addTracksToPlaylist = async (
   playlist: playlistType,
-  allUris: string[] | undefined
+  allUris: string[] | undefined // Make sure the uris go through duplicate manager filtering
 ) => {
   let status = false;
-  if (playlist === undefined) throw new Error("Couldn't find target playlist");
-
   if (allUris === undefined) throw new Error("Couldn't retrieve track uris");
   const playlistId = playlist.id;
   const total = allUris.length;
-  console.log("total", total);
-  let uris,
-    newOffset: Promise<number> | number = 0;
+  if (total === 0) return status;
+  let uris, res;
+  let newOffset: Promise<number> | number = 0;
+  options.limit = postLimit;
   try {
     do {
       options.offset = newOffset;
@@ -314,13 +431,14 @@ export const addTracksToPlaylist = async (
         newOffset as number,
         (newOffset as number) + postLimit
       );
-      await axios.post("http://localhost:8080/add", {
+      res = await axios.post(server + "/add", {
         playlistId,
         uris,
         total,
         options
       });
-      playlist.total = playlist.total + uris.length;
+      playlist.snapshot = res.data.snapshot;
+      playlist.total += uris.length;
       newOffset = (newOffset as number) + postLimit;
     } while (0 < newOffset && newOffset < total);
     status = true;
@@ -338,7 +456,7 @@ export const unfollowPlaylist = async (playlistId: string | undefined) => {
   if (playlistId === undefined) throw new Error("Playlist id undefined");
   let status = false;
   try {
-    await axios.post("http://localhost:8080/unfollow", { playlistId });
+    await axios.post(server + "/unfollow", { playlistId });
     if (playlists !== undefined) {
       const index = playlists.list.findIndex(pl => pl.id === playlistId);
       if (index > -1) {
@@ -361,7 +479,7 @@ export const followPlaylist = async (playlistId: string | undefined) => {
   if (playlistId === undefined) throw new Error("Playlist id undefined");
   let status = false;
   try {
-    await axios.post("http://localhost:8080/follow", { playlistId });
+    await axios.post(server + "/follow", { playlistId });
     if (playlists !== undefined) {
       playlists.total++;
       status = true;
@@ -383,8 +501,9 @@ export const generalPlaylistsSearch = async (querySearch: string) => {
   let queriedPlaylists: playlistsType = undefined;
   let newOffset: Promise<number> | number = 0;
   options.offset = 0;
+  options.limit = getLimit;
   try {
-    const res = await axios.post("http://localhost:8080/search-playlists", {
+    const res = await axios.post(server + "/search-playlists", {
       querySearch,
       options
     });
@@ -420,7 +539,7 @@ const appendGeneralPlaylistsSearch = async (
 ) => {
   options.offset = newOffset;
   try {
-    const res = await axios.post("http://localhost:8080/search-playlists", {
+    const res = await axios.post(server + "/search-playlists", {
       querySearch,
       options
     });
@@ -433,6 +552,69 @@ const appendGeneralPlaylistsSearch = async (
       "Something went wrong with appendGeneralPlaylistsSearch()",
       err
     );
+  }
+  return newOffset;
+};
+
+/**
+ * General search for tracks
+ * @param querySearch
+ * @returns
+ */
+export const generalTracksSearch = async (querySearch: string) => {
+  if (querySearch === "") throw new Error("Invalid query search");
+  const maxOffset = 50; // 1000
+  let queriedTracks = {} as playlistType;
+  let newOffset: Promise<number> | number = 0;
+  options.offset = 0;
+  options.limit = getLimit;
+  try {
+    const res = await axios.post(server + "/search-tracks", {
+      querySearch,
+      options
+    });
+    queriedTracks.name = "search results";
+    queriedTracks.total = res.data.total;
+    queriedTracks.tracks = res.data.list;
+
+    newOffset = (newOffset as number) + getLimit;
+  } catch (err) {
+    console.log("Something went wrong with generalTracksSearch()", err);
+  }
+  if (queriedTracks !== undefined) {
+    while (0 < newOffset && newOffset < maxOffset) {
+      console.log("happening");
+      newOffset = await appendGeneralTracksSearch(
+        querySearch,
+        queriedTracks,
+        newOffset
+      );
+    }
+    return queriedTracks;
+  } else throw new Error("Failed general tracks search");
+};
+
+/**
+ * Append remaining general searched tracks
+ * @returns
+ */
+const appendGeneralTracksSearch = async (
+  querySearch: string,
+  queriedTracks: playlistType,
+  newOffset: Promise<number> | number
+) => {
+  options.offset = newOffset;
+  try {
+    const res = await axios.post(server + "/search-tracks", {
+      querySearch,
+      options
+    });
+    res.data.list.forEach((track: tracksType) =>
+      queriedTracks?.tracks?.push(track)
+    );
+    newOffset = (newOffset as number) + getLimit;
+  } catch (err) {
+    console.log("Something went wrong with appendGeneralTracksSearch()", err);
   }
   return newOffset;
 };

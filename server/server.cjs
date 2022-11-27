@@ -26,11 +26,12 @@ const server = app.listen(app.get("port"), function () {
  * /playlists
  * /create
  * /add
+ * /remove
  * /tracks
  * /unfollow
  * /follow
  * /search-playlists
- * /search
+ * /search-tracks
  */
 
 app.get("/", function (req, res) {
@@ -109,10 +110,13 @@ app.post("/user", (req, res) => {
  */
 app.post("/playlists", (req, res) => {
   const offset = req.body.options.offset;
+  const limit =
+    req.body.options.limit < maxGetLimit ? req.body.options.limit : maxGetLimit;
+
   spotifyApi
     .getUserPlaylists({
       offset: offset,
-      limit: maxGetLimit
+      limit: limit
     })
     .then(data => {
       console.log(
@@ -122,7 +126,7 @@ app.post("/playlists", (req, res) => {
         "Total:",
         data.body.total,
         "Limit:",
-        maxGetLimit
+        limit
       );
       res.json({
         total: data.body.total,
@@ -131,6 +135,7 @@ app.post("/playlists", (req, res) => {
           name: playlist.name,
           owner: playlist.owner.display_name,
           uri: playlist.uri,
+          snapshot: playlist.snapshot_id,
           total: playlist.tracks.total
         }))
       });
@@ -155,6 +160,7 @@ app.post("/create", (req, res) => {
         name: data.body.name,
         owner: data.body.owner.display_name,
         uri: data.body.uri,
+        snapshot: data.body.snapshot_id,
         total: data.body.tracks.total
       });
     })
@@ -171,6 +177,10 @@ app.post("/add", (req, res) => {
   const uris = req.body.uris;
   const total = req.body.total;
   const offset = req.body.options.offset;
+  const limit =
+    req.body.options.limit < maxPostLimit
+      ? req.body.options.limit
+      : maxPostLimit;
   spotifyApi
     .addTracksToPlaylist(playlistId, uris, { position: 0 })
     .then(data => {
@@ -181,12 +191,47 @@ app.post("/add", (req, res) => {
         "Total:",
         total,
         "Limit:",
-        maxPostLimit
+        limit
       );
-      res.json("success");
+      res.json({ snapshot: data.body.snapshot_id });
     })
     .catch(err => {
       console.log("Something went wrong with adding songs to playlist", err);
+    });
+});
+
+/**
+ * Remove all occurances of a track from a playlist
+ */
+app.post("/remove", (req, res) => {
+  const playlistId = req.body.playlistId;
+  const uris = req.body.uris;
+  const snapshot = req.body.snapshot;
+  const total = req.body.total;
+  const offset = req.body.options.offset;
+  const limit =
+    req.body.options.limit < maxPostLimit
+      ? req.body.options.limit
+      : maxPostLimit;
+  spotifyApi
+    .removeTracksFromPlaylist(playlistId, uris, { snapshot_id: snapshot })
+    .then(data => {
+      console.log(
+        "Successfully removed tracks from playlist",
+        "Offset:",
+        offset,
+        "Total:",
+        total,
+        "Limit:",
+        limit
+      );
+      res.json({ snapshot: data.body.snapshot_id });
+    })
+    .catch(err => {
+      console.log(
+        "Something went wrong with removing songs from playlist",
+        err
+      );
     });
 });
 
@@ -228,10 +273,12 @@ app.post("/follow", (req, res) => {
 app.post("/tracks", (req, res) => {
   const playlistId = req.body.playlistId;
   const offset = req.body.options.offset;
+  const limit =
+    req.body.options.limit < maxGetLimit ? req.body.options.limit : maxGetLimit;
   spotifyApi
     .getPlaylistTracks(playlistId, {
       offset: offset,
-      limit: maxGetLimit,
+      limit: limit,
       market: country,
       fields:
         "items(is_local, " +
@@ -247,15 +294,15 @@ app.post("/tracks", (req, res) => {
         "Total:",
         data.body.total,
         "Limit:",
-        maxGetLimit
+        limit
       );
       res.json({
         list: data.body.items.map(track => ({
           is_local: track.is_local,
+          is_playable: track.track.is_playable,
           id: track.track.id,
           name: track.track.name,
           uri: track.track.uri,
-          is_playable: track.track.is_playable,
           duration: track.track.duration_ms,
           album: track.track.album.name,
           album_artists: track.track.album.artists.map(artist => artist.name),
@@ -275,11 +322,13 @@ app.post("/search-playlists", (req, res) => {
   const maxOffset = 1000;
   const query = req.body.querySearch;
   const offset = req.body.options.offset;
+  const limit =
+    req.body.options.limit < maxGetLimit ? req.body.options.limit : maxGetLimit;
   spotifyApi
     .searchPlaylists(query, {
       market: country,
       offset: offset,
-      limit: maxGetLimit,
+      limit: limit,
       include_external: "audio"
     })
     .then(data => {
@@ -297,5 +346,45 @@ app.post("/search-playlists", (req, res) => {
     })
     .catch(err => {
       console.log("Something went wrong with searching for playlists", err);
+    });
+});
+
+/**
+ * Search general tracks
+ */
+app.post("/search-tracks", (req, res) => {
+  const maxOffset = 1000;
+  const query = req.body.querySearch;
+  const offset = req.body.options.offset;
+  const limit =
+    req.body.options.limit < maxGetLimit ? req.body.options.limit : maxGetLimit;
+  spotifyApi
+    .searchTracks(query, {
+      market: country,
+      offset: offset,
+      limit: limit,
+      include_external: "audio"
+    })
+    .then(data => {
+      console.log("Found tracks are", data.body.tracks);
+      res.json({
+        total: data.body.tracks.total,
+        list: data.body.tracks.items
+          .filter(tr => !tr.is_local && tr.is_playable)
+          .map(track => ({
+            is_local: track.is_local,
+            is_playable: track.is_playable,
+            id: track.id,
+            name: track.name,
+            uri: track.uri,
+            duration: track.duration_ms,
+            album: track.album.name,
+            album_artists: track.album.artists.map(artist => artist.name),
+            artists: track.artists.map(artist => artist.name)
+          }))
+      });
+    })
+    .catch(err => {
+      console.log("Something went wrong with searching for tracks", err);
     });
 });

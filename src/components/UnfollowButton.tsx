@@ -1,7 +1,7 @@
-import { Modal, Group, Button, Text } from "@mantine/core";
+import { Button, Group, Modal, Text } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import { UseQueryResult } from "react-query";
-import { playlistType } from "./SpotifyApiClientTypes";
+import { playlistType } from "../SpotifyApiClientTypes";
 
 type propsType = {
   playlists: UseQueryResult<
@@ -12,11 +12,11 @@ type propsType = {
     unknown
   >;
   playlist: playlistType | undefined;
-  follow: UseQueryResult<boolean, unknown>;
+  unfollow: UseQueryResult<boolean, unknown>;
 };
-
-const FollowButton = (props: propsType) => {
+const UnfollowButton = (props: propsType) => {
   const [opened, { close, open }] = useDisclosure(false);
+
   return (
     <>
       <Modal
@@ -27,7 +27,7 @@ const FollowButton = (props: propsType) => {
         size="xs"
       >
         <Text fs="italic" ta="center">
-          Would you like to follow
+          Are you sure you want to unfollow
         </Text>
         <Text fs="italic" fw="bold" ta="center">
           {props.playlist?.name}&#63;
@@ -36,11 +36,11 @@ const FollowButton = (props: propsType) => {
           <Button
             compact
             variant="filled"
-            color="green"
+            color="yellow"
             radius="xl"
             size="sm"
             onClick={() => {
-              props.follow.refetch();
+              props.unfollow.refetch();
               close();
             }}
           >
@@ -72,10 +72,10 @@ const FollowButton = (props: propsType) => {
         size="md"
         onClick={open}
       >
-        Follow
+        Unfollow
       </Button>
     </>
   );
 };
 
-export default FollowButton;
+export default UnfollowButton;

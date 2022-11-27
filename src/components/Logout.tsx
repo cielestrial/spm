@@ -1,7 +1,7 @@
 import { Button } from "@mantine/core";
 import { useNavigate } from "react-router-dom";
 import { useRef } from "react";
-import { setCode } from "./LandingPage";
+import { setCode } from "../pages/LandingPage";
 
 const Logout = () => {
   const navigate = useRef(useNavigate());

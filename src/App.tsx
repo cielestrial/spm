@@ -1,7 +1,7 @@
 import "./css/main.scss";
-import Dashboard from "./Dashboard";
+import Dashboard from "./pages/Dashboard";
 import { Routes, Route } from "react-router-dom";
-import LandingPage from "./LandingPage";
+import LandingPage from "./pages/LandingPage";
 
 export const getCode = () =>
   new URLSearchParams(window.location.search).get("code");

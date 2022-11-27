@@ -1,38 +1,164 @@
 {
-  "external_urls": {
-    "spotify": "https://open.spotify.com/artist/0TnOYISbd1XYRBk9myaseg"
-  },
-  "followers": {
-    "href": null,
-    "total": 9675122
-  },
-  "genres": [
-    "dance pop",
-    "miami hip hop",
-    "pop",
-    "pop rap"
-  ],
-  "href": "https://api.spotify.com/v1/artists/0TnOYISbd1XYRBk9myaseg",
-  "id": "0TnOYISbd1XYRBk9myaseg",
-  "images": [
-    {
-      "height": 640,
-      "url": "https://i.scdn.co/image/ab6761610000e5eb2dc40ac263ef07c16a95af4e",
-      "width": 640
-    },
-    {
-      "height": 320,
-      "url": "https://i.scdn.co/image/ab676161000051742dc40ac263ef07c16a95af4e",
-      "width": 320
-    },
-    {
-      "height": 160,
-      "url": "https://i.scdn.co/image/ab6761610000f1782dc40ac263ef07c16a95af4e",
-      "width": 160
-    }
-  ],
-  "name": "Pitbull",
-  "popularity": 81,
-  "type": "artist",
-  "uri": "spotify:artist:0TnOYISbd1XYRBk9myaseg"
+  "tracks": {
+    "href": "https://api.spotify.com/v1/search?query=Like+Toy+Soldiers&type=track&include_external=audio&market=CA&locale=en-US%2Cen%3Bq%3D0.9&offset=0&limit=2",
+    "items": [
+      {
+        "album": {
+          "album_type": "album",
+          "artists": [
+            {
+              "external_urls": {
+                "spotify": "https://open.spotify.com/artist/7dGJo4pcD2V6oG8kP0tJRR"
+              },
+              "href": "https://api.spotify.com/v1/artists/7dGJo4pcD2V6oG8kP0tJRR",
+              "id": "7dGJo4pcD2V6oG8kP0tJRR",
+              "name": "Eminem",
+              "type": "artist",
+              "uri": "spotify:artist:7dGJo4pcD2V6oG8kP0tJRR"
+            }
+          ],
+          "external_urls": {
+            "spotify": "https://open.spotify.com/album/1kTlYbs28MXw7hwO0NLYif"
+          },
+          "href": "https://api.spotify.com/v1/albums/1kTlYbs28MXw7hwO0NLYif",
+          "id": "1kTlYbs28MXw7hwO0NLYif",
+          "images": [
+            {
+              "height": 640,
+              "url": "https://i.scdn.co/image/ab67616d0000b273726d48d93d02e1271774f023",
+              "width": 640
+            },
+            {
+              "height": 300,
+              "url": "https://i.scdn.co/image/ab67616d00001e02726d48d93d02e1271774f023",
+              "width": 300
+            },
+            {
+              "height": 64,
+              "url": "https://i.scdn.co/image/ab67616d00004851726d48d93d02e1271774f023",
+              "width": 64
+            }
+          ],
+          "name": "Encore (Deluxe Version)",
+          "release_date": "2004-11-12",
+          "release_date_precision": "day",
+          "total_tracks": 23,
+          "type": "album",
+          "uri": "spotify:album:1kTlYbs28MXw7hwO0NLYif"
+        },
+        "artists": [
+          {
+            "external_urls": {
+              "spotify": "https://open.spotify.com/artist/7dGJo4pcD2V6oG8kP0tJRR"
+            },
+            "href": "https://api.spotify.com/v1/artists/7dGJo4pcD2V6oG8kP0tJRR",
+            "id": "7dGJo4pcD2V6oG8kP0tJRR",
+            "name": "Eminem",
+            "type": "artist",
+            "uri": "spotify:artist:7dGJo4pcD2V6oG8kP0tJRR"
+          }
+        ],
+        "disc_number": 1,
+        "duration_ms": 296880,
+        "explicit": true,
+        "external_ids": {
+          "isrc": "USIR10400812"
+        },
+        "external_urls": {
+          "spotify": "https://open.spotify.com/track/6CN3e26iQSj1N5lomh0mfO"
+        },
+        "href": "https://api.spotify.com/v1/tracks/6CN3e26iQSj1N5lomh0mfO",
+        "id": "6CN3e26iQSj1N5lomh0mfO",
+        "is_local": false,
+        "is_playable": true,
+        "name": "Like Toy Soldiers",
+        "popularity": 69,
+        "preview_url": "https://p.scdn.co/mp3-preview/9ba3a76fd9cf5abaaeee784c9b2b1ee866ebf363?cid=774b29d4f13844c495f206cafdad9c86",
+        "track_number": 5,
+        "type": "track",
+        "uri": "spotify:track:6CN3e26iQSj1N5lomh0mfO"
+      },
+      {
+        "album": {
+          "album_type": "album",
+          "artists": [
+            {
+              "external_urls": {
+                "spotify": "https://open.spotify.com/artist/68EB3QvNdVLkC7SAgDbHIR"
+              },
+              "href": "https://api.spotify.com/v1/artists/68EB3QvNdVLkC7SAgDbHIR",
+              "id": "68EB3QvNdVLkC7SAgDbHIR",
+              "name": "Marianas Trench",
+              "type": "artist",
+              "uri": "spotify:artist:68EB3QvNdVLkC7SAgDbHIR"
+            }
+          ],
+          "external_urls": {
+            "spotify": "https://open.spotify.com/album/737av5XsHhJigOC64BV6IY"
+          },
+          "href": "https://api.spotify.com/v1/albums/737av5XsHhJigOC64BV6IY",
+          "id": "737av5XsHhJigOC64BV6IY",
+          "images": [
+            {
+              "height": 640,
+              "url": "https://i.scdn.co/image/ab67616d0000b273222615f0da1d91df294824cc",
+              "width": 640
+            },
+            {
+              "height": 300,
+              "url": "https://i.scdn.co/image/ab67616d00001e02222615f0da1d91df294824cc",
+              "width": 300
+            },
+            {
+              "height": 64,
+              "url": "https://i.scdn.co/image/ab67616d00004851222615f0da1d91df294824cc",
+              "width": 64
+            }
+          ],
+          "name": "Ever After",
+          "release_date": "2011-11-21",
+          "release_date_precision": "day",
+          "total_tracks": 12,
+          "type": "album",
+          "uri": "spotify:album:737av5XsHhJigOC64BV6IY"
+        },
+        "artists": [
+          {
+            "external_urls": {
+              "spotify": "https://open.spotify.com/artist/68EB3QvNdVLkC7SAgDbHIR"
+            },
+            "href": "https://api.spotify.com/v1/artists/68EB3QvNdVLkC7SAgDbHIR",
+            "id": "68EB3QvNdVLkC7SAgDbHIR",
+            "name": "Marianas Trench",
+            "type": "artist",
+            "uri": "spotify:artist:68EB3QvNdVLkC7SAgDbHIR"
+          }
+        ],
+        "disc_number": 1,
+        "duration_ms": 394120,
+        "explicit": true,
+        "external_ids": {
+          "isrc": "CAB391100628"
+        },
+        "external_urls": {
+          "spotify": "https://open.spotify.com/track/5GJWdBG4jJmmJzKmDxOwGC"
+        },
+        "href": "https://api.spotify.com/v1/tracks/5GJWdBG4jJmmJzKmDxOwGC",
+        "id": "5GJWdBG4jJmmJzKmDxOwGC",
+        "is_local": false,
+        "is_playable": true,
+        "name": "Ever After",
+        "popularity": 46,
+        "preview_url": "https://p.scdn.co/mp3-preview/9f876aabaefde954af327bbfda26351f94756d17?cid=774b29d4f13844c495f206cafdad9c86",
+        "track_number": 1,
+        "type": "track",
+        "uri": "spotify:track:5GJWdBG4jJmmJzKmDxOwGC"
+      }
+    ],
+    "limit": 2,
+    "next": "https://api.spotify.com/v1/search?query=Like+Toy+Soldiers&type=track&include_external=audio&market=CA&locale=en-US%2Cen%3Bq%3D0.9&offset=2&limit=2",
+    "offset": 0,
+    "previous": null,
+    "total": 543
+  }
 }

@@ -12,11 +12,6 @@ Playlists: Followed then unfollowed
 Tracks: Library then unFollowed
 When a track is selected show if they are any playlists you follow which that track is in.
 
-Missing: 
-track search 
-track interaction
-theme
-
 Unfollow:
 Unfollow button bottom right
 Unfollows current selected playlist if already followed

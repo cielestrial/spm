@@ -1,7 +1,7 @@
-import Login from "./Login";
+import Login from "../components/Login";
 import { useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { getCode } from "./App";
+import { getCode } from "../App";
 
 export let code: string | null;
 export const setCode = (newCode: string | null) => {
