@@ -9,7 +9,7 @@ type propsType = {
   playlists: UseQueryResult<
     {
       total: number;
-      list: playlistType[];
+      list: Map<string, playlistType>;
     },
     unknown
   >;

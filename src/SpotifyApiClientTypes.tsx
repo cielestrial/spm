@@ -17,12 +17,12 @@ export type playlistType = {
   uri: string;
   snapshot: string;
   total: number;
-  tracks: tracksType[] | undefined; // map?
+  tracks: tracksType[] | undefined;
 };
 export type playlistsType =
   | {
       total: number;
-      list: playlistType[]; // map?
+      list: Map<string, playlistType>;
     }
   | undefined;
 export type tracksType = {
@@ -31,6 +31,10 @@ export type tracksType = {
   name: string;
   uri: string;
   is_playable: boolean;
+  linked_from: {
+    id: string;
+    uri: string;
+  };
   duration: number;
   album: string;
   album_artists: string[];
@@ -38,10 +42,15 @@ export type tracksType = {
 };
 export type uniqueType = {
   track: tracksType;
-  occurances: number;
-  duplicate_uris: duplicateType[];
-  in_playlists: Map<string, playlistType>;
+  total_occurances: number;
+  in_playlists: Map<string, occuranceType>;
 };
 export type duplicateType = {
   uri: string;
+};
+
+export type occuranceType = {
+  playlist: playlistType;
+  occurances: number;
+  duplicate_uris: Map<string, duplicateType>;
 };

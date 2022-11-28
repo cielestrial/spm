@@ -29,7 +29,7 @@
   font-weight: bold;
   text-align: center;
   place-self: center;
-  min-width: 1rem;
+  min-width: fit-content;
   cursor: default;
   &.center {
     margin: 0 0 $margin-bottom;

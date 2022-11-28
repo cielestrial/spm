@@ -214,7 +214,7 @@ app.post("/remove", (req, res) => {
       ? req.body.options.limit
       : maxPostLimit;
   spotifyApi
-    .removeTracksFromPlaylist(playlistId, uris, { snapshot_id: snapshot })
+    .removeTracksFromPlaylist(playlistId, uris)
     .then(data => {
       console.log(
         "Successfully removed tracks from playlist",
@@ -280,10 +280,11 @@ app.post("/tracks", (req, res) => {
       offset: offset,
       limit: limit,
       market: country,
+      include_external: "audio",
       fields:
         "items(is_local, " +
         "track(album.name, album.artists, artists.name, duration_ms, " +
-        "id, name, uri, is_playable)), " +
+        "id, name, uri, is_playable, linked_from(id, uri))), " +
         "offset, total"
     })
     .then(data => {
@@ -303,6 +304,13 @@ app.post("/tracks", (req, res) => {
           id: track.track.id,
           name: track.track.name,
           uri: track.track.uri,
+          linked_from:
+            track.track.linked_from !== undefined
+              ? {
+                  id: track.track.linked_from.id,
+                  uri: track.track.linked_from.uri
+                }
+              : undefined,
           duration: track.track.duration_ms,
           album: track.track.album.name,
           album_artists: track.track.album.artists.map(artist => artist.name),

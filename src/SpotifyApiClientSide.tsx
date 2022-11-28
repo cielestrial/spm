@@ -10,7 +10,8 @@ import {
   tokenType,
   tracksType,
   userInfoType,
-  duplicateType
+  duplicateType,
+  occuranceType
 } from "./SpotifyApiClientTypes";
 const scope =
   "&scope=" +
@@ -82,7 +83,7 @@ export const getAuthenticatedUserInfo = async () => {
  * @returns
  */
 export const getPlaylists = async () => {
-  if (playlists !== undefined && playlists.total === playlists.list.length) {
+  if (playlists !== undefined && playlists.total === playlists.list.size) {
     console.log("Playlists retrieved from client");
     return playlists;
   }
@@ -95,7 +96,12 @@ export const getPlaylists = async () => {
     });
     playlists = {
       total: res.data.total,
-      list: res.data.list
+      list: new Map<string, playlistType>(
+        res.data.list.map((playlist: playlistType) => [
+          generatePlaylistKey(playlist),
+          playlist
+        ])
+      )
     };
     newOffset = (newOffset as number) + getLimit;
   } catch (err) {
@@ -121,9 +127,8 @@ const appendPlaylists = async (newOffset: Promise<number> | number) => {
     const res = await axios.post(server + "/playlists", {
       options
     });
-    res.data.list.forEach((playlist: playlistType) =>
-      playlists?.list.push(playlist)
-    );
+    for (const playlist of res.data.list)
+      playlists?.list.set(generatePlaylistKey(playlist), playlist);
     newOffset = (newOffset as number) + getLimit;
   } catch (err) {
     console.log("Something went wrong with appendPlaylists()", err);
@@ -137,6 +142,7 @@ const appendPlaylists = async (newOffset: Promise<number> | number) => {
  */
 export const getTracks = async (playlist: playlistType | undefined) => {
   if (playlist === undefined) throw new Error("Playlist not defined");
+
   if (
     playlist.tracks !== undefined &&
     playlist.total === playlist.tracks.length
@@ -144,11 +150,11 @@ export const getTracks = async (playlist: playlistType | undefined) => {
     console.log("Tracks retrieved from client");
     return playlist;
   }
-  const playlistId = playlist.id;
-  let newOffset: Promise<number> | number = 0;
-  options.offset = 0;
-  options.limit = getLimit;
   for (let i = 0; i < 2; i++) {
+    const playlistId = playlist.id;
+    let newOffset: Promise<number> | number = 0;
+    options.offset = 0;
+    options.limit = getLimit;
     try {
       const res = await axios.post(server + "/tracks", {
         playlistId,
@@ -164,8 +170,8 @@ export const getTracks = async (playlist: playlistType | undefined) => {
         newOffset = await appendTracks(playlistId, playlist, newOffset);
       }
       // Duplicate manager
-      if (playlists?.list.some(pl => pl.id === playlist?.id && i === 0)) {
-        getOccurances(playlist);
+      if (playlists?.list.has(generatePlaylistKey(playlist)) && i === 0) {
+        await getOccurances(playlist);
         if (playlist.owner === userInfo?.display_name) {
           const originals: string[] = await removeDuplicates(playlist);
           if (originals.length > 0) {
@@ -176,6 +182,7 @@ export const getTracks = async (playlist: playlistType | undefined) => {
     }
   }
   if (playlist.tracks !== undefined) {
+    playlist.total = playlist.tracks.length;
     console.log("Tracks retrieved from server");
     return playlist;
   } else throw new Error("Failed to retrieve tracks");
@@ -196,7 +203,7 @@ const appendTracks = async (
       playlistId,
       options
     });
-    res.data.list.forEach((track: tracksType) => playlist.tracks?.push(track));
+    for (const track of res.data.list) playlist.tracks?.push(track);
     newOffset = (newOffset as number) + getLimit;
   } catch (err) {
     console.log("Something went wrong with appendTracks()", err);
@@ -212,9 +219,7 @@ export const getAllTracks = async () => {
     throw new Error("Playlists has not been defined");
   let resStatus = true;
   try {
-    playlists.list.forEach(async playlist => {
-      await getTracks(playlist);
-    });
+    for (const playlist of playlists.list.values()) await getTracks(playlist);
   } catch (err) {
     resStatus = false;
   }
@@ -224,29 +229,64 @@ export const getAllTracks = async () => {
 /**
  * Records all occurances of a track
  */
-const getOccurances = (playlist: playlistType) => {
+const getOccurances = async (playlist: playlistType) => {
   let uniqueTrack: uniqueType;
   let trackKey: string;
+  let duplicate: occuranceType | undefined;
   let playlistKey = generatePlaylistKey(playlist);
-
-  playlist.tracks?.forEach(track => {
-    trackKey = generateTrackKey(track);
-    if (!duplicateManager.has(trackKey)) {
-      uniqueTrack = {} as uniqueType;
-      uniqueTrack.track = track;
-      uniqueTrack.occurances = 1;
-      uniqueTrack.duplicate_uris = [];
-      uniqueTrack.in_playlists = new Map<string, playlistType>();
-      uniqueTrack.in_playlists.set(playlistKey, playlist);
-      duplicateManager.set(trackKey, uniqueTrack);
-    } else {
-      uniqueTrack = duplicateManager.get(trackKey) as uniqueType;
-      uniqueTrack.occurances++;
-      if (!uniqueTrack.in_playlists.has(playlistKey))
-        uniqueTrack.in_playlists.set(playlistKey, playlist);
-      else uniqueTrack.duplicate_uris.push({ uri: track.uri });
+  if (playlist.tracks !== undefined) {
+    for (const track of playlist.tracks) {
+      trackKey = generateTrackKey(track);
+      if (!duplicateManager.has(trackKey)) {
+        uniqueTrack = {} as uniqueType;
+        uniqueTrack.track = track;
+        uniqueTrack.total_occurances = 1;
+        uniqueTrack.in_playlists = new Map<string, occuranceType>().set(
+          playlistKey,
+          {
+            playlist,
+            occurances: 1,
+            duplicate_uris:
+              track.linked_from !== undefined
+                ? new Map<string, duplicateType>()
+                    .set(track.uri, { uri: track.uri })
+                    .set(track.linked_from.uri, { uri: track.linked_from.uri })
+                : new Map<string, duplicateType>()
+          }
+        );
+        duplicateManager.set(trackKey, uniqueTrack);
+      } else {
+        uniqueTrack = duplicateManager.get(trackKey) as uniqueType;
+        uniqueTrack.total_occurances++;
+        if (!uniqueTrack.in_playlists.has(playlistKey)) {
+          uniqueTrack.in_playlists.set(playlistKey, {
+            playlist,
+            occurances: 1,
+            duplicate_uris:
+              track.linked_from !== undefined
+                ? new Map<string, duplicateType>()
+                    .set(track.uri, { uri: track.uri })
+                    .set(track.linked_from.uri, { uri: track.linked_from.uri })
+                : new Map<string, duplicateType>()
+          });
+        } else {
+          duplicate = uniqueTrack.in_playlists.get(
+            playlistKey
+          ) as occuranceType;
+          duplicate.occurances++;
+          if (!duplicate.duplicate_uris.has(track.uri))
+            duplicate.duplicate_uris.set(track.uri, { uri: track.uri });
+          if (
+            track.linked_from !== undefined &&
+            !duplicate.duplicate_uris.has(track.linked_from.uri)
+          )
+            duplicate.duplicate_uris.set(track.linked_from.uri, {
+              uri: track.linked_from.uri
+            });
+        }
+      }
     }
-  });
+  }
 };
 
 /**
@@ -276,14 +316,17 @@ export const removeDuplicates = async (playlist: playlistType) => {
   const snapshot = playlist.snapshot;
   let allOriginals: string[] = [];
   let allUris: duplicateType[] = [];
-  duplicateManager.forEach(uniqueTrack => {
-    if (uniqueTrack.duplicate_uris.length > 0) {
-      allUris = allUris.concat(uniqueTrack.duplicate_uris);
-      uniqueTrack.occurances -= uniqueTrack.duplicate_uris.length;
-      uniqueTrack.duplicate_uris = [];
+  let duplicate: occuranceType | undefined;
+  for (const uniqueTrack of duplicateManager.values()) {
+    duplicate = uniqueTrack.in_playlists.get(generatePlaylistKey(playlist));
+    if (duplicate !== undefined && duplicate.duplicate_uris.size > 0) {
+      for (const uri of duplicate.duplicate_uris.values()) allUris.push(uri);
+      uniqueTrack.total_occurances -= duplicate.occurances - 1;
+      duplicate.occurances = 1;
+      duplicate.duplicate_uris.clear();
       allOriginals.push(uniqueTrack.track.uri);
     }
-  });
+  }
   const total = allUris.length;
   if (total === 0) return [];
   let newOffset: Promise<number> | number = 0;
@@ -304,10 +347,9 @@ export const removeDuplicates = async (playlist: playlistType) => {
         snapshot
       });
       playlist.snapshot = res.data.snapshot;
-      playlist.total -= uris.length;
       newOffset = (newOffset as number) + postLimit;
     } while (0 < newOffset && newOffset < total);
-    playlist.total -= allOriginals.length;
+    playlist.total -= total;
   } catch (err) {
     console.log("Something went wrong with removeDuplicates()", err);
   }
@@ -322,18 +364,17 @@ export const removeDuplicates = async (playlist: playlistType) => {
 export const checkIfPlaylistExists = (name: string | undefined) => {
   if (playlists === undefined) return undefined;
   let playlist: playlistType | undefined = undefined;
-  if (
-    !playlists.list.some(pl => {
+  for (const pl of playlists.list.values()) {
+    if (
+      name?.localeCompare(pl.name, undefined, {
+        sensitivity: "accent",
+        ignorePunctuation: true
+      }) === 0
+    ) {
       playlist = pl;
-      return (
-        name?.localeCompare(pl.name, undefined, {
-          sensitivity: "accent",
-          ignorePunctuation: true
-        }) === 0
-      );
-    })
-  )
-    return undefined;
+      break;
+    }
+  }
   return playlist;
 };
 
@@ -356,34 +397,23 @@ export const createPlaylist = async (name: string | undefined) => {
       name,
       description: "Generated by YSPM."
     });
+    playlist = {
+      id: res.data.id,
+      name: res.data.name,
+      uri: res.data.uri,
+      owner: res.data.owner,
+      snapshot: res.data.snapshot,
+      total: res.data.total,
+      tracks: undefined
+    };
     if (playlists === undefined) {
       playlists = {
         total: 0,
-        list: [
-          {
-            id: res.data.id,
-            name: res.data.name,
-            uri: res.data.uri,
-            owner: res.data.owner,
-            snapshot: res.data.snapshot,
-            total: res.data.total,
-            tracks: undefined
-          }
-        ]
+        list: new Map<string, playlistType>()
       };
-    } else {
-      playlists.list.unshift({
-        id: res.data.id,
-        name: res.data.name,
-        uri: res.data.uri,
-        owner: res.data.owner,
-        snapshot: res.data.snapshot,
-        total: res.data.total,
-        tracks: undefined
-      });
     }
+    playlists.list.set(generatePlaylistKey(playlist), playlist);
     playlists.total++;
-    playlist = playlists.list.find(pl => pl.name === name);
   } catch (err) {
     console.log("Something went wrong with createPlaylist()", err);
   }
@@ -438,10 +468,10 @@ export const addTracksToPlaylist = async (
         options
       });
       playlist.snapshot = res.data.snapshot;
-      playlist.total += uris.length;
       newOffset = (newOffset as number) + postLimit;
     } while (0 < newOffset && newOffset < total);
     status = true;
+    playlist.total += total;
   } catch (err) {
     console.log("Something went wrong with addTracksToPlaylist()", err);
   }
@@ -452,18 +482,15 @@ export const addTracksToPlaylist = async (
  * Unfollow a playlist
  * @returns
  */
-export const unfollowPlaylist = async (playlistId: string | undefined) => {
-  if (playlistId === undefined) throw new Error("Playlist id undefined");
+export const unfollowPlaylist = async (playlist: playlistType | undefined) => {
+  if (playlist === undefined) throw new Error("Playlist undefined");
   let status = false;
+  const playlistId = playlist.id;
   try {
     await axios.post(server + "/unfollow", { playlistId });
     if (playlists !== undefined) {
-      const index = playlists.list.findIndex(pl => pl.id === playlistId);
-      if (index > -1) {
-        playlists.list.splice(index, 1);
-        playlists.total--;
-        status = true;
-      }
+      status = playlists.list.delete(generatePlaylistKey(playlist));
+      if (status) playlists.total--;
     }
   } catch (err) {
     console.log("Something went wrong with unfollowPlaylist()", err);
@@ -475,9 +502,10 @@ export const unfollowPlaylist = async (playlistId: string | undefined) => {
  * Follow a playlist
  * @returns
  */
-export const followPlaylist = async (playlistId: string | undefined) => {
-  if (playlistId === undefined) throw new Error("Playlist id undefined");
+export const followPlaylist = async (playlist: playlistType | undefined) => {
+  if (playlist === undefined) throw new Error("Playlist  undefined");
   let status = false;
+  const playlistId = playlist.id;
   try {
     await axios.post(server + "/follow", { playlistId });
     if (playlists !== undefined) {
@@ -509,7 +537,12 @@ export const generalPlaylistsSearch = async (querySearch: string) => {
     });
     queriedPlaylists = {
       total: res.data.total,
-      list: res.data.list
+      list: new Map<string, playlistType>(
+        res.data.list.map((playlist: playlistType) => [
+          generatePlaylistKey(playlist),
+          playlist
+        ])
+      )
     };
     newOffset = (newOffset as number) + getLimit;
   } catch (err) {
@@ -543,9 +576,8 @@ const appendGeneralPlaylistsSearch = async (
       querySearch,
       options
     });
-    res.data.list.forEach((playlist: playlistType) =>
-      queriedPlaylists?.list.push(playlist)
-    );
+    for (const playlist of res.data.list)
+      queriedPlaylists?.list.set(generatePlaylistKey(playlist), playlist);
     newOffset = (newOffset as number) + getLimit;
   } catch (err) {
     console.log(
@@ -609,9 +641,7 @@ const appendGeneralTracksSearch = async (
       querySearch,
       options
     });
-    res.data.list.forEach((track: tracksType) =>
-      queriedTracks?.tracks?.push(track)
-    );
+    for (const track of res.data.list) queriedTracks?.tracks?.push(track);
     newOffset = (newOffset as number) + getLimit;
   } catch (err) {
     console.log("Something went wrong with appendGeneralTracksSearch()", err);

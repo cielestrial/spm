@@ -1,6 +1,5 @@
 To Do:    
   1)
-    Fully implement map.
     Theme
   2) 
     Genre-Based Playlists (album genre, artist genre, search genre?, category?)
@@ -10,7 +9,8 @@ To Do:
   5)
     Token renewal
     Rate limit
-    Handle large number of search results (pages or auto load when scrolled to bottom)   
+    Handle large number of search results (pages or auto load when scrolled to bottom)  
+    Add progress bar for longer loadin all tracks
 
 Bugs: 
   None

@@ -1,5 +1,5 @@
 import { useQuery } from "react-query";
-import { token, userInfo } from "./pages/Dashboard";
+import { loadingAllTracks, token, userInfo } from "./pages/Dashboard";
 import {
   getToken,
   getPlaylists,
@@ -10,7 +10,9 @@ import {
   getAuthenticatedUserInfo,
   generalPlaylistsSearch,
   followPlaylist,
-  generalTracksSearch
+  generalTracksSearch,
+  addPlaylistToPlaylist,
+  addTracksToPlaylist
 } from "./SpotifyApiClientSide";
 import { playlistsType, playlistType } from "./SpotifyApiClientTypes";
 
@@ -38,7 +40,7 @@ export const userQuery = () =>
 
 // Gets playlist
 export const playlistsQuery = () =>
-  useQuery(["playlists", userInfo], getPlaylists, {
+  useQuery(["playlists", userInfo, loadingAllTracks], getPlaylists, {
     enabled: userInfo !== undefined
   });
 
@@ -59,7 +61,7 @@ export const allTracksQuery = (playlists: playlistsType) =>
   useQuery(
     ["allTracks", playlists, allTracksFlag],
     async () => {
-      const res = getAllTracks();
+      const res = await getAllTracks();
       allTracksFlag = false;
       return res;
     },
@@ -90,7 +92,7 @@ export const unfollowQuery = (
   useQuery(
     ["unfollow", selectedPlaylist],
     async () => {
-      const res = await unfollowPlaylist(selectedPlaylist?.id);
+      const res = await unfollowPlaylist(selectedPlaylist);
       setSelected(undefined);
       return res;
     },
@@ -105,7 +107,7 @@ export const followQuery = (
   useQuery(
     ["follow", selectedPlaylist],
     async () => {
-      const res = await followPlaylist(selectedPlaylist?.id);
+      const res = await followPlaylist(selectedPlaylist);
       setSelected(undefined);
       setSelected(selectedPlaylist);
       return res;
@@ -137,15 +139,28 @@ export const generalTracksQuery = (
     { enabled: false }
   );
 
-/*
-const { isFetching: addingToTimelessRadar, refetch: addToTimelessRadar } =
+const addPlaylistToPlaylistQuery = (
+  source: playlistType,
+  target: playlistType
+) =>
   useQuery(
-    ["addToTimelessRadar"],
-    () =>
-      addPlaylistToPlaylist(
-        playlists?.list.find(playlist => playlist.name === "Release Radar")?.id,
-        playlists?.list.find(playlist => playlist.name === "Timeless Radar")?.id
-      ),
+    ["addPlaylistToPlaylist", source, target],
+    async () => {
+      const res = await addPlaylistToPlaylist(source, target);
+      return res;
+    },
     { enabled: false }
   );
-*/
+
+const addTracksToPlaylistQuery = (
+  playlist: playlistType,
+  allUris: string[] | undefined
+) =>
+  useQuery(
+    ["addTracksToPlaylist", playlist, allUris],
+    async () => {
+      const res = await addTracksToPlaylist(playlist, allUris);
+      return res;
+    },
+    { enabled: false }
+  );

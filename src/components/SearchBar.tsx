@@ -12,7 +12,12 @@ import {
 } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import { useRef, useState } from "react";
-import { displayMap, inPlaylists } from "../HelperFunctions";
+import {
+  displayMap,
+  generatePlaylistKey,
+  inPlaylists
+} from "../HelperFunctions";
+import { loadingAllTracks } from "../pages/Dashboard";
 import {
   generalPlaylistsQuery,
   generalTracksQuery,
@@ -63,7 +68,7 @@ const SearchBar = (props: propsType) => {
   const [searchResults, setSearchResults] = useState<JSX.Element[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const dynamicList = useRef<JSX.Element[]>([]);
-  const playlistResults = useRef<playlistType[] | undefined>();
+  const playlistResults = useRef<Map<string, playlistType> | undefined>();
   const trackResults = useRef<uniqueType[] | undefined>();
 
   // Misc
@@ -74,7 +79,7 @@ const SearchBar = (props: propsType) => {
 
   const displayLoader = () => {
     return [
-      <Center key={"loader"} className="loading" h="calc(66vh - 2rem)">
+      <Center key={"loader"} className="loading" h="100%">
         <Loader color="green" size="md" variant="bars" />
       </Center>
     ];
@@ -114,36 +119,46 @@ const SearchBar = (props: propsType) => {
 
   const searchLibraryPlaylists = async () => {
     dynamicList.current = [];
-    playlistResults.current = [];
-    playlistResults.current = libraryPlaylistsQ.data?.list.filter(pl =>
-      pl.name.toLocaleLowerCase().includes(playlistValue.toLocaleLowerCase())
-    );
-    playlistResults.current?.forEach((playlist, index) => {
-      dynamicList.current.push(
-        <Box
-          className="not-button"
-          id={playlist.id}
-          key={index}
-          onClick={() => {
-            props.setSelected(playlist);
-            closeHandler();
-          }}
-        >
-          <Group spacing={0}>
-            <Text miw={span} color={"green"}>
-              {"Name:"}
-            </Text>
-            <Text>{playlist.name}</Text>
-          </Group>
-          <Group spacing={0}>
-            <Text miw={span} color={"green"}>
-              {"Owner:"}
-            </Text>
-            <Text>{playlist.owner}</Text>
-          </Group>
-        </Box>
-      );
-    });
+    playlistResults.current = new Map<string, playlistType>();
+    if (libraryPlaylistsQ.data !== undefined) {
+      for (const pl of libraryPlaylistsQ.data.list.values()) {
+        if (
+          pl.name
+            .toLocaleLowerCase()
+            .includes(playlistValue.toLocaleLowerCase())
+        )
+          playlistResults.current.set(generatePlaylistKey(pl), pl);
+      }
+    }
+    let index = 0;
+    if (playlistResults.current !== undefined) {
+      for (const playlist of playlistResults.current.values()) {
+        dynamicList.current.push(
+          <Box
+            className="not-button"
+            id={playlist.id}
+            key={index++}
+            onClick={() => {
+              props.setSelected(playlist);
+              closeHandler();
+            }}
+          >
+            <Group spacing={0}>
+              <Text miw={span} color={"green"}>
+                {"Name:"}
+              </Text>
+              <Text>{playlist.name}</Text>
+            </Group>
+            <Group spacing={0}>
+              <Text miw={span} color={"green"}>
+                {"Owner:"}
+              </Text>
+              <Text>{playlist.owner}</Text>
+            </Group>
+          </Box>
+        );
+      }
+    }
     if (dynamicList.current.length === 0) {
       return [
         <Center key={"No Playlists"} h="calc(66vh - 2rem)">
@@ -159,7 +174,7 @@ const SearchBar = (props: propsType) => {
     dynamicList.current = [];
     trackResults.current = [];
     indexRef.current = 0;
-    duplicateManager.forEach(uniqueTrack => {
+    for (const uniqueTrack of duplicateManager.values()) {
       if (
         !uniqueTrack.track.is_local &&
         uniqueTrack.track.is_playable &&
@@ -174,8 +189,8 @@ const SearchBar = (props: propsType) => {
         )
       )
         trackResults.current?.push(uniqueTrack);
-    });
-    trackResults.current?.forEach(uniqueTrack => {
+    }
+    for (const uniqueTrack of trackResults.current) {
       dynamicList.current.push(
         <Box
           className="not-button"
@@ -212,7 +227,7 @@ const SearchBar = (props: propsType) => {
           </Group>
         </Box>
       );
-    });
+    }
     if (dynamicList.current.length === 0) {
       return [
         <Center key={"No Tracks"} h="calc(66vh - 2rem)">
@@ -226,36 +241,39 @@ const SearchBar = (props: propsType) => {
 
   const searchGeneralPlaylists = async () => {
     dynamicList.current = [];
-    playlistResults.current = [];
+    playlistResults.current = new Map<string, playlistType>();
     const res = await generalPlaylistsQ.refetch();
     playlistResults.current = res.data?.list;
-    playlistResults.current?.forEach((playlist, index) => {
-      dynamicList.current.push(
-        <Box
-          className="not-button"
-          id={playlist.id}
-          key={index}
-          onClick={() => {
-            props.setSelected(playlist);
-            closeHandler();
-          }}
-        >
-          <Group spacing={0}>
-            <Text miw={span} color={"green"}>
-              {"Name:"}
-            </Text>
-            <Text>{playlist.name}</Text>
-          </Group>
-          <Group spacing={0}>
-            <Text miw={span} color={"green"}>
-              {"Owner:"}
-            </Text>
-            <Text>{playlist.owner}</Text>
-          </Group>
-        </Box>
-      );
-    });
-    if (res.data?.list.length === 0) {
+    if (playlistResults.current !== undefined) {
+      let index = 0;
+      for (const playlist of playlistResults.current.values()) {
+        dynamicList.current.push(
+          <Box
+            className="not-button"
+            id={playlist.id}
+            key={index++}
+            onClick={() => {
+              props.setSelected(playlist);
+              closeHandler();
+            }}
+          >
+            <Group spacing={0}>
+              <Text miw={span} color={"green"}>
+                {"Name:"}
+              </Text>
+              <Text>{playlist.name}</Text>
+            </Group>
+            <Group spacing={0}>
+              <Text miw={span} color={"green"}>
+                {"Owner:"}
+              </Text>
+              <Text>{playlist.owner}</Text>
+            </Group>
+          </Box>
+        );
+      }
+    }
+    if (res.data?.list.size === 0) {
       return [
         <Center key={"No Playlists"} h="calc(66vh - 2rem)">
           <Text fw="bold" color="crimson">
@@ -271,44 +289,47 @@ const SearchBar = (props: propsType) => {
     dynamicList.current = [];
     trackResults.current = [];
     const res = await generalTracksQ.refetch();
-    res.data?.tracks?.forEach((track, index) => {
-      dynamicList.current.push(
-        <Box
-          className="not-button"
-          id={track.id}
-          key={index}
-          onClick={() => {
-            props.trackDialog.current?.openTrackDialog(track);
-            closeHandler();
-          }}
-        >
-          <Group spacing={0}>
-            <Text miw={span} color={"green"}>
-              {"Name:"}
-            </Text>
-            <Text>{track.name}</Text>
-          </Group>
-          <Group spacing={0}>
-            <Text miw={span} color={"green"}>
-              {"Artists:"}
-            </Text>
-            <Text>{track.artists.join(", ")}</Text>
-          </Group>
-          <Group spacing={0}>
-            <Text miw={span} color={"green"}>
-              {"Album:"}
-            </Text>
-            <Text>{track.album}</Text>
-          </Group>
-          <Group spacing={0}>
-            <Text miw={span} color={"green"}>
-              {"Playlists:"}
-            </Text>
-            <Text>{inPlaylists(track)}</Text>
-          </Group>
-        </Box>
-      );
-    });
+    if (res.data?.tracks !== undefined) {
+      let index = 0;
+      for (const track of res.data.tracks.values()) {
+        dynamicList.current.push(
+          <Box
+            className="not-button"
+            id={track.id}
+            key={index++}
+            onClick={() => {
+              props.trackDialog.current?.openTrackDialog(track);
+              closeHandler();
+            }}
+          >
+            <Group spacing={0}>
+              <Text miw={span} color={"green"}>
+                {"Name:"}
+              </Text>
+              <Text>{track.name}</Text>
+            </Group>
+            <Group spacing={0}>
+              <Text miw={span} color={"green"}>
+                {"Artists:"}
+              </Text>
+              <Text>{track.artists.join(", ")}</Text>
+            </Group>
+            <Group spacing={0}>
+              <Text miw={span} color={"green"}>
+                {"Album:"}
+              </Text>
+              <Text>{track.album}</Text>
+            </Group>
+            <Group spacing={0}>
+              <Text miw={span} color={"green"}>
+                {"Playlists:"}
+              </Text>
+              <Text>{inPlaylists(track)}</Text>
+            </Group>
+          </Box>
+        );
+      }
+    }
     if (res.data?.tracks?.length === 0) {
       return [
         <Center key={"No Tracks"} h="calc(66vh - 2rem)">
@@ -555,7 +576,8 @@ const SearchBar = (props: propsType) => {
           </Flex>
         </Flex>
         <div ref={scrollReset} className="searchlist">
-          {isLoading ? (
+          {isLoading ||
+          (loadingAllTracks && selectedSearchCategory === "Tracks") ? (
             displayLoader()
           ) : (
             <SimpleGrid miw={"max-content"} cols={1} verticalSpacing={0}>
@@ -569,13 +591,13 @@ const SearchBar = (props: propsType) => {
         size="sm"
         w="60%"
         autoComplete="off"
-        miw="min-content"
+        miw="max-content"
         radius="xl"
         placeholder="Search"
         variant="filled"
         onClick={open}
         readOnly
-        defaultValue={""}
+        value={""}
       />
     </>
   );

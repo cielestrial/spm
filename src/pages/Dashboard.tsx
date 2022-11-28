@@ -15,7 +15,6 @@ import {
   createQuery,
   followQuery,
   playlistsQuery,
-  refetchAllTracks,
   refetchTracks,
   tokenQuery,
   tracksQuery,
@@ -24,9 +23,11 @@ import {
 } from "../QueryApi";
 import FollowButton from "../components/FollowButton";
 import TrackDialog, { TrackDialogType } from "../components/TrackDialog";
+import { generatePlaylistKey } from "../HelperFunctions";
 
 export let token: tokenType | undefined;
 export let userInfo: userInfoType | undefined;
+export let loadingAllTracks: boolean = false;
 
 const Dashboard = () => {
   const [getSelectedPlaylist, setSelectedPlaylist] = useState<playlistType>();
@@ -38,16 +39,6 @@ const Dashboard = () => {
     if (scrollReset.current !== null) scrollReset.current.scrollTop = 0;
     mutationObserver.disconnect();
   });
-  const setSelected = useCallback((selected: playlistType | undefined) => {
-    if (selected === undefined) return;
-    setSelectedPlaylist(selected);
-    if (scrollReset.current !== null)
-      mutationObserver.observe(scrollReset.current, {
-        childList: true
-      });
-    refetchTracks();
-    playlistsQ.refetch();
-  }, []);
 
   const { data: tokenData, isFetching: tokenStatus } = tokenQuery();
   token = tokenData;
@@ -55,13 +46,29 @@ const Dashboard = () => {
   userInfo = userData;
   const playlistsQ = playlistsQuery();
   const libraryTracksQ = allTracksQuery(playlistsQ.data);
+  loadingAllTracks = libraryTracksQ.isFetching;
   const tracksQ = tracksQuery(getSelectedPlaylist);
+
+  const displayTracksCheck = tracksQ.isFetching || libraryTracksQ.isFetching;
+
+  const setSelected = useCallback(
+    (selected: playlistType | undefined) => {
+      if (selected === undefined || displayTracksCheck) return;
+      setSelectedPlaylist(selected);
+      if (scrollReset.current !== null)
+        mutationObserver.observe(scrollReset.current, {
+          childList: true
+        });
+      refetchTracks();
+    },
+    [displayTracksCheck]
+  );
+
   const createQ = createQuery(getCreatedPlaylistName, setSelected);
   const unfollowQ = unfollowQuery(getSelectedPlaylist, setSelected);
   const followQ = followQuery(getSelectedPlaylist, setSelected);
   const displayPlaylistsCheck =
     playlistsQ.isFetching || createQ.isFetching || unfollowQ.isFetching;
-  const displayTracksCheck = tracksQ.isLoading || libraryTracksQ.isLoading;
 
   /**
    * Display list of playlists
@@ -76,12 +83,13 @@ const Dashboard = () => {
       );
     if (playlistsQ.data !== undefined) {
       const dynamicList: JSX.Element[] = [];
-      playlistsQ.data.list.forEach((playlist, index) => {
+      let index = 0;
+      for (const playlist of playlistsQ.data.list.values()) {
         dynamicList.push(
           <Box
             className="not-button"
             id={playlist.id}
-            key={index}
+            key={index++}
             onClick={() => setSelected(playlist)}
           >
             {index + 1}
@@ -89,7 +97,7 @@ const Dashboard = () => {
             {playlist.name}
           </Box>
         );
-      });
+      }
       if (dynamicList.length > 0)
         return (
           <SimpleGrid miw={"max-content"} cols={1} verticalSpacing={0}>
@@ -118,12 +126,13 @@ const Dashboard = () => {
       );
     if (getSelectedPlaylist?.tracks !== undefined) {
       const dynamicList: JSX.Element[] = [];
-      getSelectedPlaylist.tracks.forEach((track, index) => {
+      let index = 0;
+      for (const track of getSelectedPlaylist.tracks.values()) {
         dynamicList.push(
           <Box
             className="not-button"
             id={track.id}
-            key={index}
+            key={index++}
             onClick={() => trackDialog.current?.openTrackDialog(track)}
           >
             {index + 1}
@@ -131,10 +140,15 @@ const Dashboard = () => {
             {track.name}
           </Box>
         );
-      });
+      }
       if (dynamicList.length > 0)
         return (
-          <SimpleGrid miw={"max-content"} cols={1} verticalSpacing={0}>
+          <SimpleGrid
+            ref={scrollReset}
+            miw={"max-content"}
+            cols={1}
+            verticalSpacing={0}
+          >
             {dynamicList}
           </SimpleGrid>
         );
@@ -153,7 +167,6 @@ const Dashboard = () => {
     const label = playlistsQ.data?.total === 1 ? "Playlist" : "Playlists";
     return (
       <Text className="text">
-        <br />
         {"Your"} {number} {label}
       </Text>
     );
@@ -167,7 +180,7 @@ const Dashboard = () => {
     return (
       <Text className="text">
         {title}
-        <br />
+        {title !== "" ? <br /> : null}
         {number} {label}
       </Text>
     );
@@ -184,9 +197,12 @@ const Dashboard = () => {
    * Decides whether to display the follow or unfollow button
    */
   const displayFollowOrUnfollow = () => {
-    const decider = playlistsQ.data?.list.some(
-      pl => pl.id === getSelectedPlaylist?.id
-    );
+    let decider = false;
+    if (getSelectedPlaylist !== undefined && playlistsQ.data !== undefined) {
+      decider = playlistsQ.data.list.has(
+        generatePlaylistKey(getSelectedPlaylist)
+      );
+    }
     if (decider)
       return (
         <UnfollowButton
@@ -215,7 +231,8 @@ const Dashboard = () => {
     return (
       <div className="background start">
         <Flex
-          mt="sm"
+          my="xl"
+          gap="xl"
           justify="center"
           align="center"
           direction="row"
@@ -224,17 +241,17 @@ const Dashboard = () => {
           <Center>
             <p className="title column-element">YSPM{displayUserName()}</p>
           </Center>
+          <SearchBar setSelected={setSelected} trackDialog={trackDialog} />
           <Logout />
         </Flex>
-        <Center my="md">
-          <SearchBar setSelected={setSelected} trackDialog={trackDialog} />
-        </Center>
 
         <div className="listDisplayArea">
           {displayPlaylistsLabel()}
           {displayTracksLabel()}
-          <div className="list">{displayPlaylists()}</div>
-          <div className="list" ref={scrollReset}>
+          <div id="playlistsDisplay" className="list">
+            {displayPlaylists()}
+          </div>
+          <div id="tracksDisplay" className="list" ref={scrollReset}>
             {displayTracks()}
           </div>
           <Center h="100%" mt="lg">
