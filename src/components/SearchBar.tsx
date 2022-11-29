@@ -391,11 +391,6 @@ const SearchBar = (props: propsType) => {
             if (event.key === "Enter") search();
           }}
           value={playlistValue}
-          styles={theme => ({
-            label: {
-              marginLeft: "0.33rem" // same as border-radius
-            }
-          })}
         />
       );
     } else {
@@ -428,11 +423,6 @@ const SearchBar = (props: propsType) => {
               if (event.key === "Enter") search();
             }}
             value={songValue}
-            styles={theme => ({
-              label: {
-                marginLeft: "0.33rem" // same as border-radius
-              }
-            })}
           />
 
           <TextInput
@@ -454,11 +444,6 @@ const SearchBar = (props: propsType) => {
               if (event.key === "Enter") search();
             }}
             value={artistValue}
-            styles={theme => ({
-              label: {
-                marginLeft: "0.33rem" // same as border-radius
-              }
-            })}
           />
 
           <TextInput
@@ -480,11 +465,6 @@ const SearchBar = (props: propsType) => {
               if (event.key === "Enter") search();
             }}
             value={albumValue}
-            styles={theme => ({
-              label: {
-                marginLeft: "0.33rem" // same as border-radius
-              }
-            })}
           />
         </Flex>
       );
@@ -545,11 +525,6 @@ const SearchBar = (props: propsType) => {
                   e.currentTarget.value as searchCategoryType
                 );
               }}
-              styles={theme => ({
-                label: {
-                  marginLeft: "0.33rem" // Same as border-radius
-                }
-              })}
             />
             <NativeSelect
               id="area"
@@ -567,11 +542,6 @@ const SearchBar = (props: propsType) => {
                 selectedArea.current = e.currentTarget.value as searchAreaType;
                 setSelectedSearchArea(e.currentTarget.value as searchAreaType);
               }}
-              styles={theme => ({
-                label: {
-                  marginLeft: "0.33rem" // Same as border-radius
-                }
-              })}
             />
           </Flex>
         </Flex>

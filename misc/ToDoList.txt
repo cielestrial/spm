@@ -1,8 +1,6 @@
 To Do:    
-  1)
-    Theme
-  2) 
-    Genre-Based Playlists (album genre, artist genre, search genre?, category?)
+  1) 
+    Genre-Based Playlists (artist genre, search genre?, category?)
     Unplayables genre playlist
   4)
     Track player capabilities.
@@ -10,11 +8,13 @@ To Do:
     Token renewal
     Rate limit
     Handle large number of search results (pages or auto load when scrolled to bottom)  
+     
     Add progress bar for longer loadin all tracks
 
 Bugs: 
   None
 
 Extras:
+  Theme
   Fonts
   Comment

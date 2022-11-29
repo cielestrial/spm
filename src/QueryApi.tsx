@@ -12,9 +12,15 @@ import {
   followPlaylist,
   generalTracksSearch,
   addPlaylistToPlaylist,
-  addTracksToPlaylist
+  addTracksToPlaylist,
+  getTrackGenres,
+  getAllTrackGenres
 } from "./SpotifyApiClientSide";
-import { playlistsType, playlistType } from "./SpotifyApiClientTypes";
+import {
+  playlistsType,
+  playlistType,
+  tracksType
+} from "./SpotifyApiClientTypes";
 
 let tracksFlag = false;
 export const refetchTracks = () => {
@@ -164,3 +170,9 @@ const addTracksToPlaylistQuery = (
     },
     { enabled: false }
   );
+
+// Gets playlist
+export const trackGenresQuery = () =>
+  useQuery(["trackGenres"], getAllTrackGenres, {
+    enabled: false
+  });

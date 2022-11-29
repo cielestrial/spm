@@ -4,6 +4,8 @@ import App from "./App";
 import "./css/prestyling.scss";
 import { BrowserRouter as Router } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "react-query";
+import { MantineProvider } from "@mantine/core";
+import { myTheme } from "./Theme";
 
 const queryClient = new QueryClient({
   defaultOptions: {

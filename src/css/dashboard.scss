@@ -10,7 +10,6 @@
   display: grid;
   grid-template-columns: fit-content($column-width) fit-content($column-width);
   place-content: end center;
-  // background-color: aliceblue;
   column-gap: 5vw;
   margin-bottom: calc(1.5 * $margin-bottom);
 }

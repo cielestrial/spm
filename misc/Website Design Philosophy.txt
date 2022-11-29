@@ -31,3 +31,6 @@ Update:
 Update button
 Updates all playlists by adding the tracks from the playlists or genres they are subscribed too
 Then removes duplicates
+
+Local storage feature: 
+save playlists and duplicate manager and tracks and genre master list to local storage. Compare playlist snapshot id

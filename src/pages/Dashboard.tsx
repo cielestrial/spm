@@ -24,6 +24,7 @@ import {
 import FollowButton from "../components/FollowButton";
 import TrackDialog, { TrackDialogType } from "../components/TrackDialog";
 import { generatePlaylistKey } from "../HelperFunctions";
+import GenreTestButton from "../components/GenreTestButton";
 
 export let token: tokenType | undefined;
 export let userInfo: userInfoType | undefined;
@@ -243,6 +244,7 @@ const Dashboard = () => {
           </Center>
           <SearchBar setSelected={setSelected} trackDialog={trackDialog} />
           <Logout />
+          <GenreTestButton />
         </Flex>
 
         <div className="listDisplayArea">

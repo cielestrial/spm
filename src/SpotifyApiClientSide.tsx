@@ -38,6 +38,7 @@ export const AUTH_URL =
 
 const server = "http://localhost:8080";
 export const duplicateManager = new Map<string, uniqueType>();
+export const artistGenreMasterList = new Map<string, string[]>();
 let playlists: playlistsType;
 const options: optionsType = { offset: 0, limit: 0 };
 const getLimit = 50;
@@ -219,8 +220,9 @@ export const getAllTracks = async () => {
     throw new Error("Playlists has not been defined");
   let resStatus = true;
   try {
-    for (const playlist of playlists.list.values()) await getTracks(playlist);
+    //for (const playlist of playlists.list.values()) await getTracks(playlist);
   } catch (err) {
+    console.log(err);
     resStatus = false;
   }
   return resStatus;
@@ -240,6 +242,7 @@ const getOccurances = async (playlist: playlistType) => {
       if (!duplicateManager.has(trackKey)) {
         uniqueTrack = {} as uniqueType;
         uniqueTrack.track = track;
+        uniqueTrack.track.genres = new Map<string, string>();
         uniqueTrack.total_occurances = 1;
         uniqueTrack.in_playlists = new Map<string, occuranceType>().set(
           playlistKey,
@@ -647,4 +650,57 @@ const appendGeneralTracksSearch = async (
     console.log("Something went wrong with appendGeneralTracksSearch()", err);
   }
   return newOffset;
+};
+
+/**
+ * Get genres for all tracks
+ */
+export const getAllTrackGenres = async () => {
+  if (duplicateManager.size === 0)
+    throw new Error("No tracks in duplicate manager");
+  let resStatus = true;
+  try {
+    for (const uniqueTrack of duplicateManager.values())
+      await getTrackGenres(uniqueTrack);
+    console.log(duplicateManager);
+  } catch (err) {
+    console.log(err);
+    resStatus = false;
+  }
+  return resStatus;
+};
+
+/**
+ * Get genres for a single track
+ * @returns
+ */
+export const getTrackGenres = async (uniqueTrack: uniqueType | undefined) => {
+  let status = false;
+  let artists: string[] = [];
+  let genreList: string[] | undefined;
+  if (uniqueTrack === undefined) uniqueTrack = {} as uniqueType;
+  else artists = uniqueTrack.track.artists;
+
+  for (const artist of artists) {
+    if (artistGenreMasterList.has(artist)) {
+      genreList = artistGenreMasterList.get(artist);
+      if (genreList !== undefined)
+        for (const genre of genreList)
+          if (!uniqueTrack.track.genres.has(genre))
+            uniqueTrack.track.genres.set(genre, genre);
+      continue;
+    }
+    try {
+      const res = await axios.post(server + "/genres", { artist });
+      if (res.data !== undefined) {
+        uniqueTrack.track.genres = res.data;
+        if (!artistGenreMasterList.has(artist))
+          artistGenreMasterList.set(artist, res.data);
+        status = true;
+      }
+    } catch (err) {
+      console.log("Something went wrong with getTrackGenres()", err);
+    }
+  }
+  return status;
 };

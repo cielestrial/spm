@@ -39,6 +39,7 @@ export type tracksType = {
   album: string;
   album_artists: string[];
   artists: string[];
+  genres: Map<string, string>;
 };
 export type uniqueType = {
   track: tracksType;

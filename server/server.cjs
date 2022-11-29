@@ -3,6 +3,8 @@ const express = require("express");
 const cors = require("cors");
 const bodyParser = require("body-parser");
 const SpotifyWebApi = require("spotify-web-api-node");
+const LastFmNode = require("lastfm").LastFmNode;
+
 const maxGetLimit = 50;
 const maxPostLimit = 100;
 let userId;
@@ -32,6 +34,7 @@ const server = app.listen(app.get("port"), function () {
  * /follow
  * /search-playlists
  * /search-tracks
+ * /genres
  */
 
 app.get("/", function (req, res) {
@@ -214,7 +217,7 @@ app.post("/remove", (req, res) => {
       ? req.body.options.limit
       : maxPostLimit;
   spotifyApi
-    .removeTracksFromPlaylist(playlistId, uris)
+    .removeTracksFromPlaylist(playlistId, uris, { snapshot_id: snapshot })
     .then(data => {
       console.log(
         "Successfully removed tracks from playlist",
@@ -395,4 +398,35 @@ app.post("/search-tracks", (req, res) => {
     .catch(err => {
       console.log("Something went wrong with searching for tracks", err);
     });
+});
+
+var lastFm = new LastFmNode({
+  api_key: "8439b97f6094e7c5bc2f90150fa9e090",
+  secret: "2b124e2c7dd8dc3fa7496ef1574d9030",
+  useragent: "YSPM/" + userId
+});
+
+/**
+ * https://yarnpkg.com/package/lastfm
+ */
+app.post("/genres", (req, res) => {
+  const artist = req.body.artist;
+  const confidenceValue = 10;
+  const top_x = 3;
+  lastFm.request("artist.getTopTags", {
+    artist,
+    handlers: {
+      success: data => {
+        confidenceResult = data.toptags.tag
+          .slice(0, top_x)
+          .filter(toptags => toptags.count >= confidenceValue)
+          .map(tag => tag.count + ": " + tag.name);
+        console.log("Genre for", artist, "is ", confidenceResult);
+        res.json(confidenceResult);
+      },
+      error: err => {
+        console.log("Something went wrong with getting genres for track", err);
+      }
+    }
+  });
 });
