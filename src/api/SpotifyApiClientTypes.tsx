@@ -18,6 +18,7 @@ export type playlistType = {
   snapshot: string;
   total: number;
   tracks: tracksType[] | undefined;
+  genres: Set<string> | undefined;
 };
 export type playlistsType =
   | {
@@ -39,7 +40,7 @@ export type tracksType = {
   album: string;
   album_artists: string[];
   artists: string[];
-  genres: Map<string, string>;
+  genres: Set<string>;
 };
 export type uniqueType = {
   track: tracksType;
@@ -49,7 +50,6 @@ export type uniqueType = {
 export type duplicateType = {
   uri: string;
 };
-
 export type occuranceType = {
   playlist: playlistType;
   occurances: number;

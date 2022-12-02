@@ -1,5 +1,5 @@
 import { Button } from "@mantine/core";
-import { AUTH_URL } from "../SpotifyApiClientSide";
+import { AUTH_URL } from "../api/SpotifyApiClientSide";
 
 const Login = () => {
   return (

@@ -2,7 +2,6 @@ import {
   Box,
   Center,
   Flex,
-  Group,
   Loader,
   Modal,
   NativeSelect,
@@ -16,20 +15,24 @@ import {
   displayMap,
   generatePlaylistKey,
   inPlaylists
-} from "../HelperFunctions";
+} from "../api/misc/HelperFunctions";
 import { loadingAllTracks } from "../pages/Dashboard";
 import {
   generalPlaylistsQuery,
   generalTracksQuery,
   playlistsQuery
-} from "../QueryApi";
-import { duplicateManager } from "../SpotifyApiClientSide";
-import { playlistType, uniqueType } from "../SpotifyApiClientTypes";
-import { TrackDialogType } from "./TrackDialog";
+} from "../api/QueryApi";
+import { duplicateManager } from "../api/SpotifyApiClientSide";
+import {
+  playlistType,
+  tracksType,
+  uniqueType
+} from "../api/SpotifyApiClientTypes";
+import Row from "./Row";
 
 type propsType = {
-  setSelected: (selected: playlistType | undefined) => void;
-  trackDialog: React.RefObject<TrackDialogType>;
+  setSelectedP: (selected: playlistType | undefined) => void;
+  setSelectedT: (track: tracksType) => void;
 };
 export type searchCategoryType = "Playlists" | "Tracks";
 export type searchAreaType = "Library" | "General";
@@ -75,7 +78,6 @@ const SearchBar = (props: propsType) => {
   const indexRef = useRef(0);
   const timeout = useRef<NodeJS.Timeout>();
   const waitTime = 666;
-  const span = "5rem";
 
   const displayLoader = () => {
     return [
@@ -139,22 +141,12 @@ const SearchBar = (props: propsType) => {
             id={playlist.id}
             key={index++}
             onClick={() => {
-              props.setSelected(playlist);
+              props.setSelectedP(playlist);
               closeHandler();
             }}
           >
-            <Group spacing={0}>
-              <Text miw={span} color={"green"}>
-                {"Name:"}
-              </Text>
-              <Text>{playlist.name}</Text>
-            </Group>
-            <Group spacing={0}>
-              <Text miw={span} color={"green"}>
-                {"Owner:"}
-              </Text>
-              <Text>{playlist.owner}</Text>
-            </Group>
+            <Row label={"Name:"} value={playlist.name} />
+            <Row label={"Owned By:"} value={playlist.owner} />
           </Box>
         );
       }
@@ -197,34 +189,20 @@ const SearchBar = (props: propsType) => {
           id={uniqueTrack.track.id}
           key={indexRef.current++}
           onClick={() => {
-            props.trackDialog.current?.openTrackDialog(uniqueTrack.track);
+            props.setSelectedT(uniqueTrack.track);
             closeHandler();
           }}
         >
-          <Group spacing={0}>
-            <Text miw={span} color={"green"}>
-              {"Name:"}
-            </Text>
-            <Text>{uniqueTrack.track.name}</Text>
-          </Group>
-          <Group spacing={0}>
-            <Text miw={span} color={"green"}>
-              {"Artists:"}
-            </Text>
-            <Text>{uniqueTrack.track.artists.join(", ")}</Text>
-          </Group>
-          <Group spacing={0}>
-            <Text miw={span} color={"green"}>
-              {"Album:"}
-            </Text>
-            <Text>{uniqueTrack.track.album}</Text>
-          </Group>
-          <Group spacing={0}>
-            <Text miw={span} color={"green"}>
-              {"Playlists:"}
-            </Text>
-            <Text>{displayMap(uniqueTrack.in_playlists)}</Text>
-          </Group>
+          <Row label={"Name:"} value={uniqueTrack.track.name} />
+          <Row
+            label={"Artists:"}
+            value={uniqueTrack.track.artists.join(", ")}
+          />
+          <Row label={"Album:"} value={uniqueTrack.track.album} />
+          <Row
+            label={"Playlists:"}
+            value={displayMap(uniqueTrack.in_playlists)}
+          />
         </Box>
       );
     }
@@ -253,22 +231,12 @@ const SearchBar = (props: propsType) => {
             id={playlist.id}
             key={index++}
             onClick={() => {
-              props.setSelected(playlist);
+              props.setSelectedP(playlist);
               closeHandler();
             }}
           >
-            <Group spacing={0}>
-              <Text miw={span} color={"green"}>
-                {"Name:"}
-              </Text>
-              <Text>{playlist.name}</Text>
-            </Group>
-            <Group spacing={0}>
-              <Text miw={span} color={"green"}>
-                {"Owner:"}
-              </Text>
-              <Text>{playlist.owner}</Text>
-            </Group>
+            <Row label={"Name:"} value={playlist.name} />
+            <Row label={"Owned By:"} value={playlist.owner} />
           </Box>
         );
       }
@@ -298,34 +266,14 @@ const SearchBar = (props: propsType) => {
             id={track.id}
             key={index++}
             onClick={() => {
-              props.trackDialog.current?.openTrackDialog(track);
+              props.setSelectedT(track);
               closeHandler();
             }}
           >
-            <Group spacing={0}>
-              <Text miw={span} color={"green"}>
-                {"Name:"}
-              </Text>
-              <Text>{track.name}</Text>
-            </Group>
-            <Group spacing={0}>
-              <Text miw={span} color={"green"}>
-                {"Artists:"}
-              </Text>
-              <Text>{track.artists.join(", ")}</Text>
-            </Group>
-            <Group spacing={0}>
-              <Text miw={span} color={"green"}>
-                {"Album:"}
-              </Text>
-              <Text>{track.album}</Text>
-            </Group>
-            <Group spacing={0}>
-              <Text miw={span} color={"green"}>
-                {"Playlists:"}
-              </Text>
-              <Text>{inPlaylists(track)}</Text>
-            </Group>
+            <Row label={"Name:"} value={track.name} />
+            <Row label={"Artists:"} value={track.artists.join(", ")} />
+            <Row label={"Album:"} value={track.album} />
+            <Row label={"Playlists:"} value={inPlaylists(track)} />
           </Box>
         );
       }
@@ -484,7 +432,7 @@ const SearchBar = (props: propsType) => {
           modal: {
             width: "80vw",
             minHeight: "min-content",
-            maxHeight: "85vh",
+            height: "85vh",
             overflow: "clip"
           }
         })}
@@ -493,7 +441,7 @@ const SearchBar = (props: propsType) => {
           gap="lg"
           justify="center"
           align="end"
-          direction="row"
+          direction="row-reverse"
           wrap="wrap-reverse"
           mt="lg"
           mb="xl"

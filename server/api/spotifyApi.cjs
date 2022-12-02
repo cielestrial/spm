@@ -1,28 +1,12 @@
-const path = require("path");
-const express = require("express");
-const cors = require("cors");
-const bodyParser = require("body-parser");
 const SpotifyWebApi = require("spotify-web-api-node");
-const LastFmNode = require("lastfm").LastFmNode;
-
-const maxGetLimit = 50;
-const maxPostLimit = 100;
-let userId;
-let country;
-
-const app = express();
-app.use(cors());
-app.use(bodyParser.json());
-
-app.use(express.static(path.join(__dirname, "build")));
-app.set("port", process.env.PORT || 8080);
-
-const server = app.listen(app.get("port"), function () {
-  console.log("listening on port ", server.address().port);
+const spotifyApi = new SpotifyWebApi({
+  redirectUri: "http://localhost:3000",
+  clientId: "d03dd28afb3f40d1aad5e6a45d9bff7f",
+  clientSecret: "e75eb0904b534609ac65376077d10329"
 });
 
 /**
- * /
+ * List of endpoints:
  * /login
  * /user
  * /playlists
@@ -37,32 +21,16 @@ const server = app.listen(app.get("port"), function () {
  * /genres
  */
 
-app.get("/", function (req, res) {
-  res.send(
-    "<body style='background-color:#2b3039; color:#00e344; display:grid; place-content:center;'>" +
-      "<h1 style='text-align: center; margin: 0; padding: 0; margin-bottom: 1rem;'>" +
-      "Your Spotify Playlist Manager" +
-      "</h1>" +
-      "<h3 style='text-align:center; margin:0; padding:0; margin-bottom:1rem;'>" +
-      "Welcome to the YSPM Server" +
-      "</h3>" +
-      "<h5 style='text-align:center; margin:0; padding:0; margin-bottom:1rem;'>" +
-      "By: Cielestrial" +
-      "</h5>" +
-      "</body>"
-  );
-});
-
-const spotifyApi = new SpotifyWebApi({
-  redirectUri: "http://localhost:3000",
-  clientId: "d03dd28afb3f40d1aad5e6a45d9bff7f",
-  clientSecret: "e75eb0904b534609ac65376077d10329"
-});
+const maxGetLimit = 50;
+const maxPostLimit = 100;
+let userId;
+exports.userId = userId;
+let country;
 
 /**
  * Get Access Token
  */
-app.post("/login", (req, res) => {
+const login = (req, res) => {
   const code = req.body.code;
   spotifyApi
     .authorizationCodeGrant(code)
@@ -79,12 +47,12 @@ app.post("/login", (req, res) => {
       console.log("Something went wrong with accessToken", err);
       res.sendStatus(400);
     });
-});
+};
 
 /**
  * Get UserId, display name, and country
  */
-app.post("/user", (req, res) => {
+const getUser = (req, res) => {
   spotifyApi
     .getMe()
     .then(data => {
@@ -106,12 +74,12 @@ app.post("/user", (req, res) => {
     .catch(err => {
       console.log("Something went wrong with user", err);
     });
-});
+};
 
 /**
  * Get user's playlists
  */
-app.post("/playlists", (req, res) => {
+const getPlaylists = (req, res) => {
   const offset = req.body.options.offset;
   const limit =
     req.body.options.limit < maxGetLimit ? req.body.options.limit : maxGetLimit;
@@ -146,12 +114,12 @@ app.post("/playlists", (req, res) => {
     .catch(err => {
       console.log("Something went wrong with retrieving playlists", err);
     });
-});
+};
 
 /**
  * Create new playlist
  */
-app.post("/create", (req, res) => {
+const create = (req, res) => {
   const name = req.body.name;
   const description = req.body.description;
   spotifyApi
@@ -170,12 +138,12 @@ app.post("/create", (req, res) => {
     .catch(err => {
       console.log("Something went wrong with playlist creation", err);
     });
-});
+};
 
 /**
  * Add tracks to a specific position in a playlist
  */
-app.post("/add", (req, res) => {
+const add = (req, res) => {
   const playlistId = req.body.playlistId;
   const uris = req.body.uris;
   const total = req.body.total;
@@ -201,12 +169,12 @@ app.post("/add", (req, res) => {
     .catch(err => {
       console.log("Something went wrong with adding songs to playlist", err);
     });
-});
+};
 
 /**
  * Remove all occurances of a track from a playlist
  */
-app.post("/remove", (req, res) => {
+const remove = (req, res) => {
   const playlistId = req.body.playlistId;
   const uris = req.body.uris;
   const snapshot = req.body.snapshot;
@@ -236,12 +204,12 @@ app.post("/remove", (req, res) => {
         err
       );
     });
-});
+};
 
 /**
  * Unfollow a playlist
  */
-app.post("/unfollow", (req, res) => {
+const unfollow = (req, res) => {
   const playlistId = req.body.playlistId;
   spotifyApi
     .unfollowPlaylist(playlistId)
@@ -252,12 +220,12 @@ app.post("/unfollow", (req, res) => {
     .catch(err => {
       console.log("Something went wrong with unfollowing the playlist", err);
     });
-});
+};
 
 /**
  * Follow a playlist
  */
-app.post("/follow", (req, res) => {
+const follow = (req, res) => {
   const playlistId = req.body.playlistId;
   spotifyApi
     .followPlaylist(playlistId)
@@ -268,12 +236,12 @@ app.post("/follow", (req, res) => {
     .catch(err => {
       console.log("Something went wrong with following the playlist", err);
     });
-});
+};
 
 /**
  * Get tracks in a playlist
  */
-app.post("/tracks", (req, res) => {
+const getTracks = (req, res) => {
   const playlistId = req.body.playlistId;
   const offset = req.body.options.offset;
   const limit =
@@ -324,12 +292,12 @@ app.post("/tracks", (req, res) => {
     .catch(err => {
       console.log("Something went wrong with retrieving tracks", err);
     });
-});
+};
 
 /**
  * Search general playlists
  */
-app.post("/search-playlists", (req, res) => {
+const searchPlaylists = (req, res) => {
   const maxOffset = 1000;
   const query = req.body.querySearch;
   const offset = req.body.options.offset;
@@ -358,12 +326,12 @@ app.post("/search-playlists", (req, res) => {
     .catch(err => {
       console.log("Something went wrong with searching for playlists", err);
     });
-});
+};
 
 /**
  * Search general tracks
  */
-app.post("/search-tracks", (req, res) => {
+const searchTracks = (req, res) => {
   const maxOffset = 1000;
   const query = req.body.querySearch;
   const offset = req.body.options.offset;
@@ -398,35 +366,18 @@ app.post("/search-tracks", (req, res) => {
     .catch(err => {
       console.log("Something went wrong with searching for tracks", err);
     });
-});
+};
 
-var lastFm = new LastFmNode({
-  api_key: "8439b97f6094e7c5bc2f90150fa9e090",
-  secret: "2b124e2c7dd8dc3fa7496ef1574d9030",
-  useragent: "YSPM/" + userId
-});
-
-/**
- * https://yarnpkg.com/package/lastfm
- */
-app.post("/genres", (req, res) => {
-  const artist = req.body.artist;
-  const confidenceValue = 10;
-  const top_x = 3;
-  lastFm.request("artist.getTopTags", {
-    artist,
-    handlers: {
-      success: data => {
-        confidenceResult = data.toptags.tag
-          .slice(0, top_x)
-          .filter(toptags => toptags.count >= confidenceValue)
-          .map(tag => tag.count + ": " + tag.name);
-        console.log("Genre for", artist, "is ", confidenceResult);
-        res.json(confidenceResult);
-      },
-      error: err => {
-        console.log("Something went wrong with getting genres for track", err);
-      }
-    }
-  });
-});
+module.exports = {
+  login,
+  getUser,
+  getPlaylists,
+  getTracks,
+  add,
+  create,
+  remove,
+  follow,
+  unfollow,
+  searchPlaylists,
+  searchTracks
+};

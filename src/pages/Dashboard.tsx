@@ -1,13 +1,22 @@
 import "../css/dashboard.scss";
 import Logout from "../components/Logout";
-import { Box, Center, Flex, Loader, SimpleGrid, Text } from "@mantine/core";
+import {
+  Box,
+  Button,
+  Center,
+  Flex,
+  Loader,
+  SimpleGrid,
+  Text
+} from "@mantine/core";
 import { useCallback, useRef, useState } from "react";
 import UnfollowButton from "../components/UnfollowButton";
 import {
   playlistType,
   tokenType,
+  tracksType,
   userInfoType
-} from "../SpotifyApiClientTypes";
+} from "../api/SpotifyApiClientTypes";
 import CreatePlaylistButton from "../components/CreatePlaylistButton";
 import SearchBar from "../components/SearchBar";
 import {
@@ -20,11 +29,14 @@ import {
   tracksQuery,
   unfollowQuery,
   userQuery
-} from "../QueryApi";
+} from "../api/QueryApi";
 import FollowButton from "../components/FollowButton";
-import TrackDialog, { TrackDialogType } from "../components/TrackDialog";
-import { generatePlaylistKey } from "../HelperFunctions";
+import { generatePlaylistKey, inPlaylists } from "../api/misc/HelperFunctions";
 import GenreTestButton from "../components/GenreTestButton";
+import BackButton from "../components/BackButton";
+import Row from "../components/Row";
+import ShowTracksButton from "../components/ShowTracksButton";
+import GenreSubscriber from "../components/GenreSubscriber";
 
 export let token: tokenType | undefined;
 export let userInfo: userInfoType | undefined;
@@ -32,14 +44,9 @@ export let loadingAllTracks: boolean = false;
 
 const Dashboard = () => {
   const [getSelectedPlaylist, setSelectedPlaylist] = useState<playlistType>();
+  const [getSelectedTrack, setSelectedTrack] = useState<tracksType>();
   const [getCreatedPlaylistName, setCreatedPlaylistName] = useState("");
-  const trackDialog = useRef<TrackDialogType>(null);
-
-  const scrollReset = useRef<HTMLDivElement>(null);
-  const mutationObserver = new MutationObserver(() => {
-    if (scrollReset.current !== null) scrollReset.current.scrollTop = 0;
-    mutationObserver.disconnect();
-  });
+  const [infoIndex, setInfoIndex] = useState(0);
 
   const { data: tokenData, isFetching: tokenStatus } = tokenQuery();
   token = tokenData;
@@ -52,22 +59,24 @@ const Dashboard = () => {
 
   const displayTracksCheck = tracksQ.isFetching || libraryTracksQ.isFetching;
 
-  const setSelected = useCallback(
+  const setSelectedP = useCallback(
     (selected: playlistType | undefined) => {
       if (selected === undefined || displayTracksCheck) return;
+      setInfoIndex(0);
       setSelectedPlaylist(selected);
-      if (scrollReset.current !== null)
-        mutationObserver.observe(scrollReset.current, {
-          childList: true
-        });
       refetchTracks();
     },
     [displayTracksCheck]
   );
 
-  const createQ = createQuery(getCreatedPlaylistName, setSelected);
-  const unfollowQ = unfollowQuery(getSelectedPlaylist, setSelected);
-  const followQ = followQuery(getSelectedPlaylist, setSelected);
+  const setSelectedT = useCallback((track: tracksType) => {
+    setSelectedTrack(track);
+    setInfoIndex(2);
+  }, []);
+
+  const createQ = createQuery(getCreatedPlaylistName, setSelectedP);
+  const unfollowQ = unfollowQuery(getSelectedPlaylist, setSelectedP);
+  const followQ = followQuery(getSelectedPlaylist, setSelectedP);
   const displayPlaylistsCheck =
     playlistsQ.isFetching || createQ.isFetching || unfollowQ.isFetching;
 
@@ -91,7 +100,7 @@ const Dashboard = () => {
             className="not-button"
             id={playlist.id}
             key={index++}
-            onClick={() => setSelected(playlist)}
+            onClick={() => setSelectedP(playlist)}
           >
             {index + 1}
             {". "}
@@ -118,14 +127,29 @@ const Dashboard = () => {
    * Display list of tracks
    * @returns
    */
-  const displayTracks = () => {
+  const displayInfo = () => {
     if (displayTracksCheck)
       return (
         <div className="loading container-center">
           <Loader color="green" size="sm" variant="bars" />
         </div>
       );
-    if (getSelectedPlaylist?.tracks !== undefined) {
+    if (infoIndex === 0 && getSelectedPlaylist !== undefined) {
+      return (
+        <Box className="info-card">
+          <Row label={"Name:"} value={getSelectedPlaylist.name} />
+          <Row label={"Owned By:"} value={getSelectedPlaylist.owner} />
+          <Row label={"Songs:"} value={getSelectedPlaylist.total} />
+          <Center mt="sm">
+            <ShowTracksButton setInfoIndex={setInfoIndex} />
+          </Center>
+          <Row label={"Top Genres:"} value={null} />
+          {"Black Rock Shooter"}
+          <Row label={"Subscriptions:"} value={null} />
+          <GenreSubscriber />
+        </Box>
+      );
+    } else if (infoIndex === 1 && getSelectedPlaylist?.tracks !== undefined) {
       const dynamicList: JSX.Element[] = [];
       let index = 0;
       for (const track of getSelectedPlaylist.tracks.values()) {
@@ -134,7 +158,9 @@ const Dashboard = () => {
             className="not-button"
             id={track.id}
             key={index++}
-            onClick={() => trackDialog.current?.openTrackDialog(track)}
+            onClick={() => {
+              setSelectedT(track);
+            }}
           >
             {index + 1}
             {". "}
@@ -144,12 +170,7 @@ const Dashboard = () => {
       }
       if (dynamicList.length > 0)
         return (
-          <SimpleGrid
-            ref={scrollReset}
-            miw={"max-content"}
-            cols={1}
-            verticalSpacing={0}
-          >
+          <SimpleGrid miw={"max-content"} cols={1} verticalSpacing={0}>
             {dynamicList}
           </SimpleGrid>
         );
@@ -159,6 +180,16 @@ const Dashboard = () => {
             <Text className="text">No Tracks</Text>
           </Center>
         );
+    }
+    if (infoIndex === 2 && getSelectedTrack !== undefined) {
+      return (
+        <Box className="info-card">
+          <Row label={"Name:"} value={getSelectedTrack.name} />
+          <Row label={"Artists:"} value={getSelectedTrack.artists.join(", ")} />
+          <Row label={"Album:"} value={getSelectedTrack.album} />
+          <Row label={"Playlists:"} value={inPlaylists(getSelectedTrack)} />
+        </Box>
+      );
     }
   };
 
@@ -173,18 +204,12 @@ const Dashboard = () => {
     );
   };
 
-  const displayTracksLabel = () => {
+  const displayInfoLabel = () => {
     const loading = getSelectedPlaylist === undefined || displayTracksCheck;
-    const title = loading ? "" : getSelectedPlaylist?.name;
+    const title = loading ? "" : "Playlist Info";
     const number = loading ? "" : getSelectedPlaylist?.total;
     const label = getSelectedPlaylist?.total === 1 ? "Track" : "Tracks";
-    return (
-      <Text className="text">
-        {title}
-        {title !== "" ? <br /> : null}
-        {number} {label}
-      </Text>
-    );
+    return <Text className="text">{title}</Text>;
   };
 
   const displayUserName = () => {
@@ -242,19 +267,19 @@ const Dashboard = () => {
           <Center>
             <p className="title column-element">YSPM{displayUserName()}</p>
           </Center>
-          <SearchBar setSelected={setSelected} trackDialog={trackDialog} />
+          <SearchBar setSelectedP={setSelectedP} setSelectedT={setSelectedT} />
           <Logout />
           <GenreTestButton />
         </Flex>
 
         <div className="listDisplayArea">
           {displayPlaylistsLabel()}
-          {displayTracksLabel()}
+          {displayInfoLabel()}
           <div id="playlistsDisplay" className="list">
             {displayPlaylists()}
           </div>
-          <div id="tracksDisplay" className="list" ref={scrollReset}>
-            {displayTracks()}
+          <div id="infoDisplay" className="list">
+            {displayInfo()}
           </div>
           <Center h="100%" mt="lg">
             <CreatePlaylistButton
@@ -262,11 +287,17 @@ const Dashboard = () => {
               setName={setCreatedPlaylistName}
             />
           </Center>
-          <Center h="100%" mt="lg">
+          <Flex
+            align="center"
+            justify="space-evenly"
+            h="100%"
+            mt="lg"
+            wrap="nowrap"
+          >
+            <BackButton infoIndex={infoIndex} setInfoIndex={setInfoIndex} />
             {displayFollowOrUnfollow()}
-          </Center>
+          </Flex>
         </div>
-        <TrackDialog ref={trackDialog} />
       </div>
     );
   }

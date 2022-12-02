@@ -1,5 +1,5 @@
 import { useQuery } from "react-query";
-import { loadingAllTracks, token, userInfo } from "./pages/Dashboard";
+import { loadingAllTracks, token, userInfo } from "../pages/Dashboard";
 import {
   getToken,
   getPlaylists,

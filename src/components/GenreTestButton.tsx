@@ -1,8 +1,10 @@
 import { Button } from "@mantine/core";
-import { trackGenresQuery } from "../QueryApi";
+import { useRef } from "react";
+import { useNavigate } from "react-router-dom";
 
 const GenreTestButton = () => {
-  const trackGenresQ = trackGenresQuery();
+  const navigate = useRef(useNavigate());
+
   return (
     <Button
       w="40%"
@@ -12,7 +14,10 @@ const GenreTestButton = () => {
       color="green"
       radius="xl"
       size="md"
-      onClick={() => trackGenresQ.refetch()}
+      component="a"
+      onClick={() => {
+        navigate.current("/genres");
+      }}
     >
       Genre
     </Button>

@@ -1,15 +1,18 @@
 To Do:    
-  1) 
-    Genre-Based Playlists (artist genre, search genre?, category?)
-    Unplayables genre playlist
-  4)
+  1)
+    Subscriptions 
+  2)
+     Update
+  4) 
+    Add progress bar for longer loading all tracks
+  3)
     Track player capabilities.
-  5)
+
+
+Performance:
     Token renewal
     Rate limit
-    Handle large number of search results (pages or auto load when scrolled to bottom)  
-     
-    Add progress bar for longer loadin all tracks
+    Handle large number of search results (pages or auto load when scrolled to bottom)       
 
 Bugs: 
   None

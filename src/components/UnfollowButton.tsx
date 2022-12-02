@@ -1,7 +1,7 @@
 import { Button, Group, Modal, Text } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import { UseQueryResult } from "react-query";
-import { playlistType } from "../SpotifyApiClientTypes";
+import { playlistType } from "../api/SpotifyApiClientTypes";
 
 type propsType = {
   playlists: UseQueryResult<
@@ -62,7 +62,7 @@ const UnfollowButton = (props: propsType) => {
       </Modal>
 
       <Button
-        w="40%"
+        w="35%"
         miw="min-content"
         compact
         variant="outline"

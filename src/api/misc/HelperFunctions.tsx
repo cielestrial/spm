@@ -1,9 +1,12 @@
-import { duplicateManager } from "./SpotifyApiClientSide";
+import { TransferListItem } from "@mantine/core";
+import { duplicateManager } from "../SpotifyApiClientSide";
 import {
   occuranceType,
   playlistType,
   tracksType
-} from "./SpotifyApiClientTypes";
+} from "../SpotifyApiClientTypes";
+
+export const span = "7rem";
 
 export const displayMap = (map: Map<string, occuranceType>) => {
   const output: string[] = [];

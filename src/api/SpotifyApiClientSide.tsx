@@ -1,7 +1,7 @@
 import axios from "axios";
-import { token, userInfo } from "./pages/Dashboard";
-import { generatePlaylistKey, generateTrackKey } from "./HelperFunctions";
-import { code } from "./pages/LandingPage";
+import { token, userInfo } from "../pages/Dashboard";
+import { generatePlaylistKey, generateTrackKey } from "./misc/HelperFunctions";
+import { code } from "../pages/LandingPage";
 import {
   uniqueType,
   optionsType,
@@ -13,6 +13,8 @@ import {
   duplicateType,
   occuranceType
 } from "./SpotifyApiClientTypes";
+import { genreBlackList } from "./misc/GenreBlackList";
+import { TransferListItem } from "@mantine/core";
 const scope =
   "&scope=" +
   "playlist-read-private" +
@@ -38,7 +40,25 @@ export const AUTH_URL =
 
 const server = "http://localhost:8080";
 export const duplicateManager = new Map<string, uniqueType>();
-export const artistGenreMasterList = new Map<string, string[]>();
+export const genreMasterList = new Map<string, number>();
+export const updateWhitelist = (genres: TransferListItem[]) => {
+  for (const genre of genres)
+    if (genreMasterList.has(genre.label)) genreMasterList.delete(genre.label);
+};
+export const getWhitelist = () => {
+  return Array.from(genreMasterList.entries())
+    .sort((a, b) =>
+      a[0].localeCompare(b[0], undefined, {
+        sensitivity: "accent",
+        ignorePunctuation: true
+      })
+    )
+    .map(element => ({
+      value: element[0],
+      label: element[0]
+    }));
+};
+
 let playlists: playlistsType;
 const options: optionsType = { offset: 0, limit: 0 };
 const getLimit = 50;
@@ -219,8 +239,13 @@ export const getAllTracks = async () => {
   if (playlists === undefined)
     throw new Error("Playlists has not been defined");
   let resStatus = true;
+  const promises = [];
   try {
-    //for (const playlist of playlists.list.values()) await getTracks(playlist);
+    /*
+    for (const playlist of playlists.list.values())
+      promises.push(getTracks(playlist));
+    await Promise.all(promises);
+    */
   } catch (err) {
     console.log(err);
     resStatus = false;
@@ -242,7 +267,7 @@ const getOccurances = async (playlist: playlistType) => {
       if (!duplicateManager.has(trackKey)) {
         uniqueTrack = {} as uniqueType;
         uniqueTrack.track = track;
-        uniqueTrack.track.genres = new Map<string, string>();
+        uniqueTrack.track.genres = new Set<string>();
         uniqueTrack.total_occurances = 1;
         uniqueTrack.in_playlists = new Map<string, occuranceType>().set(
           playlistKey,
@@ -407,7 +432,8 @@ export const createPlaylist = async (name: string | undefined) => {
       owner: res.data.owner,
       snapshot: res.data.snapshot,
       total: res.data.total,
-      tracks: undefined
+      tracks: undefined,
+      genres: undefined
     };
     if (playlists === undefined) {
       playlists = {
@@ -659,47 +685,63 @@ export const getAllTrackGenres = async () => {
   if (duplicateManager.size === 0)
     throw new Error("No tracks in duplicate manager");
   let resStatus = true;
+  const promises = [];
   try {
     for (const uniqueTrack of duplicateManager.values())
-      await getTrackGenres(uniqueTrack);
+      promises.push(getTrackGenres(uniqueTrack));
+    await Promise.all(promises);
     console.log(duplicateManager);
+    console.log(genreMasterList);
   } catch (err) {
     console.log(err);
     resStatus = false;
   }
-  return resStatus;
+  return genreMasterList;
 };
 
 /**
  * Get genres for a single track
  * @returns
  */
-export const getTrackGenres = async (uniqueTrack: uniqueType | undefined) => {
-  let status = false;
+export const getTrackGenres = async (uniqueTrack: uniqueType) => {
+  let status = true;
   let artists: string[] = [];
-  let genreList: string[] | undefined;
-  if (uniqueTrack === undefined) uniqueTrack = {} as uniqueType;
-  else artists = uniqueTrack.track.artists;
+  let popularity: number;
 
+  if (!uniqueTrack.track.is_playable) {
+    uniqueTrack.track.genres.add("unplayable");
+    return status;
+  }
+  if (uniqueTrack.track.is_local) {
+    uniqueTrack.track.genres.add("local");
+    return status;
+  }
+
+  artists = uniqueTrack.track.artists;
   for (const artist of artists) {
-    if (artistGenreMasterList.has(artist)) {
-      genreList = artistGenreMasterList.get(artist);
-      if (genreList !== undefined)
-        for (const genre of genreList)
-          if (!uniqueTrack.track.genres.has(genre))
-            uniqueTrack.track.genres.set(genre, genre);
-      continue;
-    }
     try {
-      const res = await axios.post(server + "/genres", { artist });
+      const res = await axios.post(server + "/genres", {
+        artist,
+        genreBlackList
+      });
+      // Keep track of genre popularity with count and genreMasterList <genre, popularityCount>
+      // Also look into how count is calculated
       if (res.data !== undefined) {
-        uniqueTrack.track.genres = res.data;
-        if (!artistGenreMasterList.has(artist))
-          artistGenreMasterList.set(artist, res.data);
-        status = true;
+        for (const data of res.data) {
+          const genre = data.name.toLowerCase();
+          if (!uniqueTrack.track.genres.has(genre))
+            uniqueTrack.track.genres.add(genre);
+          if (!genreMasterList.has(genre)) genreMasterList.set(genre, 1);
+          else {
+            popularity = genreMasterList.get(genre) as number;
+            popularity++;
+            genreMasterList.set(genre, popularity);
+          }
+        }
       }
     } catch (err) {
       console.log("Something went wrong with getTrackGenres()", err);
+      status = false;
     }
   }
   return status;

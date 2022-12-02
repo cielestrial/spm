@@ -22,7 +22,7 @@ Create:
 Create button bottom left
 Textbox popup type in name and hit enter
 
-Manage Subscriptions:
+Manage Subscriptions (Contents):
 Replaces add and modify/edit features.
 Select a playlist then select followed(/unfollowed?) playlists to subscribe to
 Genres from library can also be subscribed too
