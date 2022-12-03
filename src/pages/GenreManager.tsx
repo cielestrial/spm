@@ -8,11 +8,7 @@ import {
 import { useEffect, useState } from "react";
 import { getBlacklist, setBlacklist } from "../api/misc/GenreBlackList";
 import { trackGenresQuery } from "../api/QueryApi";
-import {
-  genreMasterList,
-  getWhitelist,
-  updateWhitelist
-} from "../api/SpotifyApiClientSide";
+import { getWhitelist, updateWhitelist } from "../api/SpotifyApiClientSide";
 
 const GenreManager = () => {
   const [data, setData] = useState<TransferListData>([[], []]);

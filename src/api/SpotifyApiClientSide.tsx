@@ -205,6 +205,7 @@ export const getTracks = async (playlist: playlistType | undefined) => {
   if (playlist.tracks !== undefined) {
     playlist.total = playlist.tracks.length;
     console.log("Tracks retrieved from server");
+    await getAllTrackGenres();
     return playlist;
   } else throw new Error("Failed to retrieve tracks");
 };
@@ -432,8 +433,10 @@ export const createPlaylist = async (name: string | undefined) => {
       owner: res.data.owner,
       snapshot: res.data.snapshot,
       total: res.data.total,
-      tracks: undefined,
-      genres: undefined
+      tracks: [],
+      genres: new Map<string, number>(),
+      genreSubscriptions: [],
+      playlistSubscriptions: []
     };
     if (playlists === undefined) {
       playlists = {
@@ -731,6 +734,18 @@ export const getTrackGenres = async (uniqueTrack: uniqueType) => {
           const genre = data.name.toLowerCase();
           if (!uniqueTrack.track.genres.has(genre))
             uniqueTrack.track.genres.add(genre);
+          for (const occurance of uniqueTrack.in_playlists.values()) {
+            if (occurance.playlist.genres === undefined)
+              occurance.playlist.genres = new Map<string, number>();
+            if (!occurance.playlist.genres.has(genre))
+              occurance.playlist.genres.set(genre, 1);
+            else {
+              popularity = occurance.playlist.genres.get(genre) as number;
+              popularity++;
+              occurance.playlist.genres.set(genre, popularity);
+            }
+          }
+          uniqueTrack.track.genres.add(genre);
           if (!genreMasterList.has(genre)) genreMasterList.set(genre, 1);
           else {
             popularity = genreMasterList.get(genre) as number;

@@ -17,8 +17,10 @@ export type playlistType = {
   uri: string;
   snapshot: string;
   total: number;
-  tracks: tracksType[] | undefined;
-  genres: Set<string> | undefined;
+  tracks: tracksType[];
+  genres: Map<string, number>;
+  genreSubscriptions: string[];
+  playlistSubscriptions: string[];
 };
 export type playlistsType =
   | {

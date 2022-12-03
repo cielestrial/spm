@@ -6,6 +6,7 @@ import {
   Modal,
   NativeSelect,
   SimpleGrid,
+  Space,
   Text,
   TextInput
 } from "@mantine/core";
@@ -146,6 +147,7 @@ const SearchBar = (props: propsType) => {
             }}
           >
             <Row label={"Name:"} value={playlist.name} />
+            <Space h={5} />
             <Row label={"Owned By:"} value={playlist.owner} />
           </Box>
         );
@@ -194,11 +196,14 @@ const SearchBar = (props: propsType) => {
           }}
         >
           <Row label={"Name:"} value={uniqueTrack.track.name} />
+          <Space h={5} />
           <Row
             label={"Artists:"}
             value={uniqueTrack.track.artists.join(", ")}
           />
+          <Space h={5} />
           <Row label={"Album:"} value={uniqueTrack.track.album} />
+          <Space h={5} />
           <Row
             label={"Playlists:"}
             value={displayMap(uniqueTrack.in_playlists)}
@@ -236,6 +241,7 @@ const SearchBar = (props: propsType) => {
             }}
           >
             <Row label={"Name:"} value={playlist.name} />
+            <Space h={5} />
             <Row label={"Owned By:"} value={playlist.owner} />
           </Box>
         );
@@ -271,8 +277,11 @@ const SearchBar = (props: propsType) => {
             }}
           >
             <Row label={"Name:"} value={track.name} />
+            <Space h={5} />
             <Row label={"Artists:"} value={track.artists.join(", ")} />
+            <Space h={5} />
             <Row label={"Album:"} value={track.album} />
+            <Space h={5} />
             <Row label={"Playlists:"} value={inPlaylists(track)} />
           </Box>
         );
@@ -329,6 +338,8 @@ const SearchBar = (props: propsType) => {
           radius="xl"
           placeholder="Search Playlists"
           variant="filled"
+          mt="md"
+          mx="xl"
           data-autofocus
           onChange={event => {
             setPlaylistValue(event.currentTarget.value);
@@ -350,6 +361,7 @@ const SearchBar = (props: propsType) => {
           wrap="wrap-reverse"
           miw="fit-content"
           mt="xs"
+          mx="xl"
         >
           <TextInput
             ref={nameSearchBar}
@@ -402,6 +414,7 @@ const SearchBar = (props: propsType) => {
             aria-label="Album Search Bar"
             miw="fit-content"
             radius="xl"
+            mt="xs"
             placeholder="Search Albums"
             variant="filled"
             onChange={event => {
@@ -438,7 +451,7 @@ const SearchBar = (props: propsType) => {
         })}
       >
         <Flex
-          gap="lg"
+          gap={0}
           justify="center"
           align="end"
           direction="row-reverse"
@@ -449,10 +462,11 @@ const SearchBar = (props: propsType) => {
           {displaySearchBars()}
           <Flex
             miw="fit-content"
-            gap="md"
+            gap="xl"
             justify="center"
             direction="row"
             wrap="wrap-reverse"
+            mx="xl"
           >
             <NativeSelect
               id="category"

@@ -9,16 +9,16 @@ const ShowTracksButton = (props: proptype) => {
   };
   return (
     <Button
-      w="35%"
       miw="min-content"
       compact
       variant="outline"
-      color="gray"
+      color="green"
       radius="xl"
-      size="md"
+      size="sm"
+      mt={2}
       onClick={showTracksHandler}
     >
-      Show Songs
+      Expand
     </Button>
   );
 };

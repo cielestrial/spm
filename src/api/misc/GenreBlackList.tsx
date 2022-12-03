@@ -2,7 +2,6 @@ import { TransferListItem } from "@mantine/core";
 
 export let genreBlackList = [
   "seen live",
-  "female vocalist",
   "female vocalists",
   "singer-songwriter",
   "united states"

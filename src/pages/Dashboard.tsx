@@ -4,9 +4,12 @@ import {
   Box,
   Button,
   Center,
+  Chip,
   Flex,
+  Group,
   Loader,
   SimpleGrid,
+  Space,
   Text
 } from "@mantine/core";
 import { useCallback, useRef, useState } from "react";
@@ -37,6 +40,8 @@ import BackButton from "../components/BackButton";
 import Row from "../components/Row";
 import ShowTracksButton from "../components/ShowTracksButton";
 import GenreSubscriber from "../components/GenreSubscriber";
+import PlaylistSubscriber from "../components/PlaylistSubscriber";
+import TopPlaylistGenres from "../components/TopPlaylistGenres";
 
 export let token: tokenType | undefined;
 export let userInfo: userInfoType | undefined;
@@ -73,6 +78,12 @@ const Dashboard = () => {
     setSelectedTrack(track);
     setInfoIndex(2);
   }, []);
+
+  const isFollowed = useCallback(() => {
+    if (getSelectedPlaylist !== undefined && playlistsQ.data !== undefined) {
+      return playlistsQ.data.list.has(generatePlaylistKey(getSelectedPlaylist));
+    } else return false;
+  }, [getSelectedPlaylist, playlistsQ.data]);
 
   const createQ = createQuery(getCreatedPlaylistName, setSelectedP);
   const unfollowQ = unfollowQuery(getSelectedPlaylist, setSelectedP);
@@ -136,18 +147,46 @@ const Dashboard = () => {
       );
     if (infoIndex === 0 && getSelectedPlaylist !== undefined) {
       return (
-        <Box className="info-card">
-          <Row label={"Name:"} value={getSelectedPlaylist.name} />
-          <Row label={"Owned By:"} value={getSelectedPlaylist.owner} />
-          <Row label={"Songs:"} value={getSelectedPlaylist.total} />
-          <Center mt="sm">
-            <ShowTracksButton setInfoIndex={setInfoIndex} />
-          </Center>
-          <Row label={"Top Genres:"} value={null} />
-          {"Black Rock Shooter"}
-          <Row label={"Subscriptions:"} value={null} />
-          <GenreSubscriber />
-        </Box>
+        <SimpleGrid
+          h="100%"
+          mih="max-content"
+          miw="fit-content"
+          cols={1}
+          verticalSpacing={0}
+        >
+          <Box className="info-card">
+            <Row label={"Name:"} value={getSelectedPlaylist.name} />
+            <Space h="md" />
+            <Row label={"Owned By:"} value={getSelectedPlaylist.owner} />
+            <Space h="md" />
+            <Flex wrap="wrap" gap="sm">
+              <Row label={"Songs:"} value={getSelectedPlaylist.total} />
+              <ShowTracksButton setInfoIndex={setInfoIndex} />
+            </Flex>
+            <Space h="xs" />
+            <Row label={"Top Genres:"} value={null} />
+            <TopPlaylistGenres
+              selectedPlaylist={getSelectedPlaylist}
+              isFollowed={isFollowed}
+            />
+            <Space h="xs" />
+            <Group spacing={0}>
+              <Row label={"Subscribed Genres:"} value={null} />
+              <GenreSubscriber
+                selectedPlaylist={getSelectedPlaylist}
+                isFollowed={isFollowed}
+              />
+            </Group>
+            <Space h="md" />
+            <Group spacing={0}>
+              <Row label={"Subscribed Playlists:"} value={null} />
+              <PlaylistSubscriber
+                selectedPlaylist={getSelectedPlaylist}
+                isFollowed={isFollowed}
+              />
+            </Group>
+          </Box>
+        </SimpleGrid>
       );
     } else if (infoIndex === 1 && getSelectedPlaylist?.tracks !== undefined) {
       const dynamicList: JSX.Element[] = [];
@@ -185,8 +224,11 @@ const Dashboard = () => {
       return (
         <Box className="info-card">
           <Row label={"Name:"} value={getSelectedTrack.name} />
+          <Space h="md" />
           <Row label={"Artists:"} value={getSelectedTrack.artists.join(", ")} />
+          <Space h="md" />
           <Row label={"Album:"} value={getSelectedTrack.album} />
+          <Space h="md" />
           <Row label={"Playlists:"} value={inPlaylists(getSelectedTrack)} />
         </Box>
       );
@@ -206,9 +248,21 @@ const Dashboard = () => {
 
   const displayInfoLabel = () => {
     const loading = getSelectedPlaylist === undefined || displayTracksCheck;
-    const title = loading ? "" : "Playlist Info";
-    const number = loading ? "" : getSelectedPlaylist?.total;
-    const label = getSelectedPlaylist?.total === 1 ? "Track" : "Tracks";
+    let label: string;
+    switch (infoIndex) {
+      case 0:
+        label = "Playlist Info";
+        break;
+      case 1:
+        label = "Playlist Songs";
+        break;
+      case 2:
+        label = "Track Info";
+        break;
+      default:
+        label = "";
+    }
+    const title = loading ? "" : label;
     return <Text className="text">{title}</Text>;
   };
 
@@ -223,12 +277,7 @@ const Dashboard = () => {
    * Decides whether to display the follow or unfollow button
    */
   const displayFollowOrUnfollow = () => {
-    let decider = false;
-    if (getSelectedPlaylist !== undefined && playlistsQ.data !== undefined) {
-      decider = playlistsQ.data.list.has(
-        generatePlaylistKey(getSelectedPlaylist)
-      );
-    }
+    let decider = isFollowed();
     if (decider)
       return (
         <UnfollowButton

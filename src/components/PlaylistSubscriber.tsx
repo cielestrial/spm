@@ -1,19 +1,20 @@
-import { MultiSelect, SelectItem } from "@mantine/core";
+import { SelectItem, MultiSelect } from "@mantine/core";
 import { useState } from "react";
-import { getWhitelist } from "../api/SpotifyApiClientSide";
+import { getBlacklist } from "../api/misc/GenreBlackList";
 import { playlistType } from "../api/SpotifyApiClientTypes";
 
 type proptype = {
   selectedPlaylist: playlistType | undefined;
   isFollowed: () => boolean;
 };
-const GenreSubscriber = (props: proptype) => {
+const PlaylistSubscriber = (props: proptype) => {
   const [value, setValue] = useState<string[]>(
     props.selectedPlaylist !== undefined
-      ? props.selectedPlaylist.genreSubscriptions
+      ? props.selectedPlaylist.playlistSubscriptions
       : []
   );
-  const data = getWhitelist();
+  const [searchValue, onSearchChange] = useState("");
+  const data = getBlacklist();
 
   const searchFilter = (value: string, selected: boolean, item: SelectItem) =>
     item.label !== undefined &&
@@ -23,19 +24,21 @@ const GenreSubscriber = (props: proptype) => {
   return (
     <MultiSelect
       variant="filled"
-      aria-label="Genre Selector"
+      aria-label="Playlist Selector"
       data={data}
       value={value}
       onChange={e => {
         setValue(e);
         if (props.selectedPlaylist !== undefined)
-          props.selectedPlaylist.genreSubscriptions = e;
+          props.selectedPlaylist.playlistSubscriptions = e;
       }}
       searchable
+      searchValue={searchValue}
+      onSearchChange={onSearchChange}
       autoComplete="off"
       autoCorrect="false"
-      placeholder={props.isFollowed() ? "Select genres" : ""}
-      nothingFound="Genre not found"
+      placeholder={props.isFollowed() ? "Select playlists" : ""}
+      nothingFound="Playlist not found"
       filter={searchFilter}
       maxDropdownHeight={112}
       dropdownPosition="flip"
@@ -50,5 +53,4 @@ const GenreSubscriber = (props: proptype) => {
     />
   );
 };
-
-export default GenreSubscriber;
+export default PlaylistSubscriber;

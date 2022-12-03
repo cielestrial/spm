@@ -1,12 +1,14 @@
 To Do:    
   1)
-    Subscriptions 
+    Playlist Subscriptions 
   2)
-     Update
-  4) 
-    Add progress bar for longer loading all tracks
+     Update (test with new playlist - tester)
   3)
     Track player capabilities.
+    Save and Load from csv files
+  4) 
+    Add progress bar for longer loading all tracks
+    Bug fixes
 
 
 Performance:
@@ -15,7 +17,8 @@ Performance:
     Handle large number of search results (pages or auto load when scrolled to bottom)       
 
 Bugs: 
-  None
+  In playlists not showing all playlists (ex. blazblue & vgm)
+  "Your playlists" double flash on startup
 
 Extras:
   Theme
