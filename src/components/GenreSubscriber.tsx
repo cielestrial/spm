@@ -37,14 +37,18 @@ const GenreSubscriber = (props: proptype) => {
       placeholder={props.isFollowed() ? "Select genres" : ""}
       nothingFound="Genre not found"
       filter={searchFilter}
-      maxDropdownHeight={112}
-      dropdownPosition="flip"
+      maxDropdownHeight={288}
+      dropdownPosition="top"
       disabled={!props.isFollowed()}
       size="sm"
       w="100%"
       styles={theme => ({
         value: {
           fontWeight: "bold"
+        },
+        item: {
+          borderStyle: "inset outset outset inset",
+          borderColor: "rgba(255, 255, 255, 0.66)"
         }
       })}
     />

@@ -181,6 +181,7 @@ const Dashboard = () => {
             <Group spacing={0}>
               <Row label={"Subscribed Playlists:"} value={null} />
               <PlaylistSubscriber
+                playlists={playlistsQ.data?.list}
                 selectedPlaylist={getSelectedPlaylist}
                 isFollowed={isFollowed}
               />

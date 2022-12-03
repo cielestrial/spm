@@ -62,7 +62,8 @@ export const getWhitelist = () => {
 let playlists: playlistsType;
 const options: optionsType = { offset: 0, limit: 0 };
 const getLimit = 50;
-const postLimit = 50;
+const postLimit = 100;
+
 /**
  * Get access token
  * @returns
@@ -555,13 +556,17 @@ export const followPlaylist = async (playlist: playlistType | undefined) => {
  * @param querySearch
  * @returns
  */
-export const generalPlaylistsSearch = async (querySearch: string) => {
+export const generalPlaylistsSearch = async (
+  querySearch: string,
+  limit: number
+) => {
   if (querySearch === "") throw new Error("Invalid query search");
   const maxOffset = 50; // 1000
   let queriedPlaylists: playlistsType = undefined;
   let newOffset: Promise<number> | number = 0;
   options.offset = 0;
-  options.limit = getLimit;
+  if (limit === 0 || limit > getLimit) limit = getLimit;
+  options.limit = limit;
   try {
     const res = await axios.post(server + "/search-playlists", {
       querySearch,
@@ -576,7 +581,7 @@ export const generalPlaylistsSearch = async (querySearch: string) => {
         ])
       )
     };
-    newOffset = (newOffset as number) + getLimit;
+    newOffset = (newOffset as number) + options.limit;
   } catch (err) {
     console.log("Something went wrong with generalPlaylistsSearch()", err);
   }
@@ -610,7 +615,7 @@ const appendGeneralPlaylistsSearch = async (
     });
     for (const playlist of res.data.list)
       queriedPlaylists?.list.set(generatePlaylistKey(playlist), playlist);
-    newOffset = (newOffset as number) + getLimit;
+    newOffset = (newOffset as number) + options.limit;
   } catch (err) {
     console.log(
       "Something went wrong with appendGeneralPlaylistsSearch()",
@@ -625,13 +630,17 @@ const appendGeneralPlaylistsSearch = async (
  * @param querySearch
  * @returns
  */
-export const generalTracksSearch = async (querySearch: string) => {
+export const generalTracksSearch = async (
+  querySearch: string,
+  limit: number
+) => {
   if (querySearch === "") throw new Error("Invalid query search");
   const maxOffset = 50; // 1000
   let queriedTracks = {} as playlistType;
   let newOffset: Promise<number> | number = 0;
   options.offset = 0;
-  options.limit = getLimit;
+  if (limit === 0 || limit > getLimit) limit = getLimit;
+  options.limit = limit;
   try {
     const res = await axios.post(server + "/search-tracks", {
       querySearch,
@@ -641,7 +650,7 @@ export const generalTracksSearch = async (querySearch: string) => {
     queriedTracks.total = res.data.total;
     queriedTracks.tracks = res.data.list;
 
-    newOffset = (newOffset as number) + getLimit;
+    newOffset = (newOffset as number) + options.limit;
   } catch (err) {
     console.log("Something went wrong with generalTracksSearch()", err);
   }
@@ -674,7 +683,7 @@ const appendGeneralTracksSearch = async (
       options
     });
     for (const track of res.data.list) queriedTracks?.tracks?.push(track);
-    newOffset = (newOffset as number) + getLimit;
+    newOffset = (newOffset as number) + options.limit;
   } catch (err) {
     console.log("Something went wrong with appendGeneralTracksSearch()", err);
   }

@@ -1,12 +1,10 @@
 To Do:    
   1)
-    Playlist Subscriptions 
-  2)
      Update (test with new playlist - tester)
-  3)
+  2)
     Track player capabilities.
     Save and Load from csv files
-  4) 
+  3) 
     Add progress bar for longer loading all tracks
     Bug fixes
 

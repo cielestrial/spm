@@ -121,26 +121,27 @@ export const followQuery = (
     { enabled: false }
   );
 
-export const generalPlaylistsQuery = (querySearch: string) =>
+export const generalPlaylistsQuery = (querySearch: string, limit: number) =>
   useQuery(
-    ["generalPlaylists", querySearch],
-    () => generalPlaylistsSearch(querySearch),
+    ["generalPlaylists", querySearch, limit],
+    () => generalPlaylistsSearch(querySearch, limit),
     { enabled: false }
   );
 
 export const generalTracksQuery = (
   songQuery: string,
   artistQuery: string,
-  albumQuery: string
+  albumQuery: string,
+  limit: number
 ) =>
   useQuery(
-    ["generalTracks", songQuery, artistQuery, albumQuery],
+    ["generalTracks", songQuery, artistQuery, albumQuery, limit],
     () => {
       let querySearch = "";
       if (songQuery !== "") querySearch += "track:" + songQuery;
       if (artistQuery !== "") querySearch += "artist:" + artistQuery;
       if (albumQuery !== "") querySearch += "album:" + albumQuery;
-      return generalTracksSearch(querySearch);
+      return generalTracksSearch(querySearch, limit);
     },
     { enabled: false }
   );

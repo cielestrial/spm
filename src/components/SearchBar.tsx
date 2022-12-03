@@ -65,8 +65,14 @@ const SearchBar = (props: propsType) => {
 
   // Query stuff
   const libraryPlaylistsQ = playlistsQuery();
-  const generalPlaylistsQ = generalPlaylistsQuery(playlistValue);
-  const generalTracksQ = generalTracksQuery(songValue, artistValue, albumValue);
+  const resultLimit = 50;
+  const generalPlaylistsQ = generalPlaylistsQuery(playlistValue, resultLimit);
+  const generalTracksQ = generalTracksQuery(
+    songValue,
+    artistValue,
+    albumValue,
+    resultLimit
+  );
 
   // Display query result stuff
   const [searchResults, setSearchResults] = useState<JSX.Element[]>([]);
