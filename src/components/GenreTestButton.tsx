@@ -7,7 +7,6 @@ const GenreTestButton = () => {
 
   return (
     <Button
-      w="40%"
       miw="min-content"
       compact
       variant="outline"

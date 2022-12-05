@@ -86,7 +86,7 @@ const CreatePlaylistButton = (props: propsType) => {
       </Modal>
 
       <Button
-        w="40%"
+        w="35%"
         miw="min-content"
         compact
         variant="outline"

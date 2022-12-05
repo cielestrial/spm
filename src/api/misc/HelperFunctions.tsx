@@ -38,7 +38,8 @@ export const generateTrackKey = (track: tracksType) => {
   return uniqueId;
 };
 
-export const generatePlaylistKey = (playlist: playlistType) => {
+export const generatePlaylistKey = (playlist: playlistType | undefined) => {
+  if (playlist === undefined) return "";
   let uniqueId = "";
   uniqueId += playlist.name;
   uniqueId += playlist.owner;

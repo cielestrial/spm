@@ -6,6 +6,7 @@ import { playlistType } from "../api/SpotifyApiClientTypes";
 type proptype = {
   selectedPlaylist: playlistType | undefined;
   isFollowed: () => boolean;
+  isOwned: () => boolean;
 };
 const GenreSubscriber = (props: proptype) => {
   const [value, setValue] = useState<string[]>(
@@ -34,12 +35,12 @@ const GenreSubscriber = (props: proptype) => {
       searchable
       autoComplete="off"
       autoCorrect="false"
-      placeholder={props.isFollowed() ? "Select genres" : ""}
+      placeholder={props.isFollowed() && props.isOwned() ? "Select genres" : ""}
       nothingFound="Genre not found"
       filter={searchFilter}
       maxDropdownHeight={288}
       dropdownPosition="top"
-      disabled={!props.isFollowed()}
+      disabled={!props.isFollowed() || !props.isOwned()}
       size="sm"
       w="100%"
       styles={theme => ({

@@ -2,9 +2,7 @@ import "../css/dashboard.scss";
 import Logout from "../components/Logout";
 import {
   Box,
-  Button,
   Center,
-  Chip,
   Flex,
   Group,
   Loader,
@@ -12,7 +10,7 @@ import {
   Space,
   Text
 } from "@mantine/core";
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import UnfollowButton from "../components/UnfollowButton";
 import {
   playlistType,
@@ -23,6 +21,7 @@ import {
 import CreatePlaylistButton from "../components/CreatePlaylistButton";
 import SearchBar from "../components/SearchBar";
 import {
+  addSubscriptionsQuery,
   allTracksQuery,
   createQuery,
   followQuery,
@@ -42,12 +41,15 @@ import ShowTracksButton from "../components/ShowTracksButton";
 import GenreSubscriber from "../components/GenreSubscriber";
 import PlaylistSubscriber from "../components/PlaylistSubscriber";
 import TopPlaylistGenres from "../components/TopPlaylistGenres";
+import UpdateAllButton from "../components/UpdateAllButton";
+import { useNavigate } from "react-router-dom";
 
-export let token: tokenType | undefined;
+export let token: tokenType | undefined | null;
 export let userInfo: userInfoType | undefined;
 export let loadingAllTracks: boolean = false;
 
 const Dashboard = () => {
+  const navigate = useRef(useNavigate());
   const [getSelectedPlaylist, setSelectedPlaylist] = useState<playlistType>();
   const [getSelectedTrack, setSelectedTrack] = useState<tracksType>();
   const [getCreatedPlaylistName, setCreatedPlaylistName] = useState("");
@@ -55,18 +57,23 @@ const Dashboard = () => {
 
   const { data: tokenData, isFetching: tokenStatus } = tokenQuery();
   token = tokenData;
+  useEffect(() => {
+    if (tokenData === null) navigate.current("/");
+  }, [tokenData]);
+
   const { data: userData, isFetching: userStatus } = userQuery();
   userInfo = userData;
   const playlistsQ = playlistsQuery();
   const libraryTracksQ = allTracksQuery(playlistsQ.data);
   loadingAllTracks = libraryTracksQ.isFetching;
   const tracksQ = tracksQuery(getSelectedPlaylist);
-
-  const displayTracksCheck = tracksQ.isFetching || libraryTracksQ.isFetching;
+  let displayTracksCheck = tracksQ.isFetching || libraryTracksQ.isFetching;
+  let displayPlaylistsCheck = playlistsQ.isFetching;
 
   const setSelectedP = useCallback(
     (selected: playlistType | undefined) => {
       if (selected === undefined || displayTracksCheck) return;
+      console.log(selected);
       setInfoIndex(0);
       setSelectedPlaylist(selected);
       refetchTracks();
@@ -85,11 +92,24 @@ const Dashboard = () => {
     } else return false;
   }, [getSelectedPlaylist, playlistsQ.data]);
 
+  const isOwned = useCallback(() => {
+    if (
+      getSelectedPlaylist !== undefined &&
+      userInfo !== undefined &&
+      getSelectedPlaylist.owner === userInfo.display_name
+    )
+      return true;
+    else return false;
+  }, [getSelectedPlaylist, userInfo]);
+
   const createQ = createQuery(getCreatedPlaylistName, setSelectedP);
   const unfollowQ = unfollowQuery(getSelectedPlaylist, setSelectedP);
   const followQ = followQuery(getSelectedPlaylist, setSelectedP);
-  const displayPlaylistsCheck =
-    playlistsQ.isFetching || createQ.isFetching || unfollowQ.isFetching;
+  const addSubscriptionsQ = addSubscriptionsQuery(setSelectedP);
+
+  displayTracksCheck = displayTracksCheck || addSubscriptionsQ.isFetching;
+  displayPlaylistsCheck =
+    displayPlaylistsCheck || createQ.isFetching || unfollowQ.isFetching;
 
   /**
    * Display list of playlists
@@ -175,6 +195,7 @@ const Dashboard = () => {
               <GenreSubscriber
                 selectedPlaylist={getSelectedPlaylist}
                 isFollowed={isFollowed}
+                isOwned={isOwned}
               />
             </Group>
             <Space h="md" />
@@ -184,6 +205,7 @@ const Dashboard = () => {
                 playlists={playlistsQ.data?.list}
                 selectedPlaylist={getSelectedPlaylist}
                 isFollowed={isFollowed}
+                isOwned={isOwned}
               />
             </Group>
           </Box>
@@ -331,12 +353,23 @@ const Dashboard = () => {
           <div id="infoDisplay" className="list">
             {displayInfo()}
           </div>
-          <Center h="100%" mt="lg">
+          <Flex
+            align="center"
+            justify="space-evenly"
+            h="100%"
+            mt="lg"
+            wrap="nowrap"
+          >
             <CreatePlaylistButton
               playlists={playlistsQ}
               setName={setCreatedPlaylistName}
             />
-          </Center>
+            <UpdateAllButton
+              selectedPlaylist={getSelectedPlaylist}
+              playlists={playlistsQ}
+              addSubscriptions={addSubscriptionsQ}
+            />
+          </Flex>
           <Flex
             align="center"
             justify="space-evenly"

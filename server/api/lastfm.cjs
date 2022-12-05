@@ -1,7 +1,7 @@
 const LastFmNode = require("lastfm").LastFmNode;
 const CaN = require("./misc/countriesAndNationalities.cjs");
 const Filter = require("bad-words");
-const { userId } = require("./spotifyApi.cjs");
+const { userId, rateLimit } = require("./spotifyApi.cjs");
 const artistGenreMasterList = new Map();
 
 const lastFm = new LastFmNode({
@@ -46,7 +46,8 @@ const getArtistGenres = (req, res) => {
           res.json(confidenceResult);
         },
         error: err => {
-          res.json(undefined);
+          if (err.statusCode === 429) rateLimit(err, res);
+          else res.json(undefined);
         }
       }
     });

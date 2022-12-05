@@ -1,6 +1,7 @@
 import { SelectItem, MultiSelect } from "@mantine/core";
 import { useForceUpdate } from "@mantine/hooks";
-import { useRef, useState } from "react";
+import { useState } from "react";
+import { generatePlaylistKey } from "../api/misc/HelperFunctions";
 import { generalPlaylistsQuery } from "../api/QueryApi";
 import { playlistType } from "../api/SpotifyApiClientTypes";
 
@@ -8,6 +9,7 @@ type proptype = {
   playlists: Map<string, playlistType> | undefined;
   selectedPlaylist: playlistType | undefined;
   isFollowed: () => boolean;
+  isOwned: () => boolean;
 };
 const PlaylistSubscriber = (props: proptype) => {
   const [selectValue, setSelectValue] = useState<string[]>(
@@ -19,7 +21,7 @@ const PlaylistSubscriber = (props: proptype) => {
   const [searchValue, onSearchChange] = useState("");
   const resultLimit = 30;
   const generalPlaylistsQ = generalPlaylistsQuery(searchValue, resultLimit);
-
+  const key = generatePlaylistKey(props.selectedPlaylist);
   const data1 = props.playlists
     ? Array.from(props.playlists.entries()).map(value => ({
         value: value[0],
@@ -27,11 +29,17 @@ const PlaylistSubscriber = (props: proptype) => {
       }))
     : [];
 
+  data1.splice(
+    data1.findIndex(value => value.label === props.selectedPlaylist?.name),
+    1
+  );
+
   const [data, setData] = useState(data1);
 
   const updateData = async () => {
     if (searchValue !== "") {
       const res = await generalPlaylistsQ.refetch();
+      if (res.data?.list.has(key)) res.data.list.delete(key);
       for (const item of data1) {
         if (res.data?.list.has(item.value)) res.data.list.delete(item.value);
       }
@@ -70,12 +78,14 @@ const PlaylistSubscriber = (props: proptype) => {
       }}
       autoComplete="off"
       autoCorrect="false"
-      placeholder={props.isFollowed() ? "Select playlists" : ""}
+      placeholder={
+        props.isFollowed() && props.isOwned() ? "Select playlists" : ""
+      }
       nothingFound="Playlist not found"
       filter={searchFilter}
       maxDropdownHeight={288}
       dropdownPosition="top"
-      disabled={!props.isFollowed()}
+      disabled={!props.isFollowed() || !props.isOwned()}
       size="sm"
       w="100%"
       styles={theme => ({

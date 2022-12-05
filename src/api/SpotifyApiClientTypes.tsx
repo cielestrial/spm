@@ -5,6 +5,7 @@ export type tokenType = {
 };
 export type userInfoType = {
   display_name: string | null;
+  premium: boolean;
 };
 export type optionsType = {
   offset: Promise<number> | number;

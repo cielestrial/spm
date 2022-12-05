@@ -1,6 +1,5 @@
 import {
   Flex,
-  Loader,
   TransferList,
   TransferListData,
   TransferListItem
@@ -9,6 +8,7 @@ import { useEffect, useState } from "react";
 import { getBlacklist, setBlacklist } from "../api/misc/GenreBlackList";
 import { trackGenresQuery } from "../api/QueryApi";
 import { getWhitelist, updateWhitelist } from "../api/SpotifyApiClientSide";
+import ProgressBar from "../components/ProgressBar";
 
 const GenreManager = () => {
   const [data, setData] = useState<TransferListData>([[], []]);
@@ -26,7 +26,7 @@ const GenreManager = () => {
   if (trackGenresQ.isFetching) {
     return (
       <div className="background center loading">
-        <Loader color="green" size="lg" variant="bars" />
+        <ProgressBar />
       </div>
     );
   } else {

@@ -23,9 +23,40 @@ const spotifyApi = new SpotifyWebApi({
 
 const maxGetLimit = 50;
 const maxPostLimit = 100;
+let accessToken;
+let refreshToken;
+let expriresIn;
 let userId;
-exports.userId = userId;
 let country;
+let premium;
+
+/**
+ * Handle Rate Limit
+ */
+const rateLimit = (err, res) => {
+  if (err.statusCode === 429) {
+    res.json({
+      errorCode: err.statusCode,
+      retryAfter: err.headers["retry-after"]
+    });
+  } else if (err.statusCode === 400) {
+    spotifyApi
+      .refreshAccessToken()
+      .then(data => {
+        accessToken = data.body.access_token;
+        expriresIn = data.body.expires_in;
+        spotifyApi.setAccessToken(accessToken);
+        res.json({
+          accessToken: accessToken,
+          refreshToken: refreshToken,
+          expriresIn: expriresIn
+        });
+      })
+      .catch(err => {
+        console.log("Something went wrong with refreshing accessToken", err);
+      });
+  }
+};
 
 /**
  * Get Access Token
@@ -35,17 +66,20 @@ const login = (req, res) => {
   spotifyApi
     .authorizationCodeGrant(code)
     .then(data => {
-      spotifyApi.setAccessToken(data.body["access_token"]);
-      spotifyApi.setRefreshToken(data.body["refresh_token"]);
+      accessToken = data.body.access_token;
+      refreshToken = data.body.refresh_token;
+      expriresIn = data.body.expires_in;
+      spotifyApi.setAccessToken(accessToken);
+      spotifyApi.setRefreshToken(refreshToken);
       res.json({
-        accessToken: data.body.access_token,
-        refreshToken: data.body.refresh_token,
-        expriresIn: data.body.expires_in
+        accessToken: accessToken,
+        refreshToken: refreshToken,
+        expriresIn: expriresIn
       });
     })
     .catch(err => {
       console.log("Something went wrong with accessToken", err);
-      res.sendStatus(400);
+      rateLimit(err, res);
     });
 };
 
@@ -58,6 +92,7 @@ const getUser = (req, res) => {
     .then(data => {
       userId = data.body.id;
       country = data.body.country;
+      premium = data.body.product === "premium" ? true : false;
       console.log(
         "Some information about the authenticated user:",
         "userId:",
@@ -65,10 +100,13 @@ const getUser = (req, res) => {
         "display_name:",
         data.body.display_name,
         "country:",
-        country
+        country,
+        "premium:",
+        premium
       );
       res.json({
-        display_name: data.body.display_name
+        display_name: data.body.display_name,
+        premium: premium
       });
     })
     .catch(err => {
@@ -113,6 +151,7 @@ const getPlaylists = (req, res) => {
     })
     .catch(err => {
       console.log("Something went wrong with retrieving playlists", err);
+      rateLimit(err, res);
     });
 };
 
@@ -137,6 +176,7 @@ const create = (req, res) => {
     })
     .catch(err => {
       console.log("Something went wrong with playlist creation", err);
+      rateLimit(err, res);
     });
 };
 
@@ -168,6 +208,7 @@ const add = (req, res) => {
     })
     .catch(err => {
       console.log("Something went wrong with adding songs to playlist", err);
+      rateLimit(err, res);
     });
 };
 
@@ -203,6 +244,7 @@ const remove = (req, res) => {
         "Something went wrong with removing songs from playlist",
         err
       );
+      rateLimit(err, res);
     });
 };
 
@@ -219,6 +261,7 @@ const unfollow = (req, res) => {
     })
     .catch(err => {
       console.log("Something went wrong with unfollowing the playlist", err);
+      rateLimit(err, res);
     });
 };
 
@@ -235,6 +278,7 @@ const follow = (req, res) => {
     })
     .catch(err => {
       console.log("Something went wrong with following the playlist", err);
+      rateLimit(err, res);
     });
 };
 
@@ -291,6 +335,7 @@ const getTracks = (req, res) => {
     })
     .catch(err => {
       console.log("Something went wrong with retrieving tracks", err);
+      rateLimit(err, res);
     });
 };
 
@@ -325,6 +370,7 @@ const searchPlaylists = (req, res) => {
     })
     .catch(err => {
       console.log("Something went wrong with searching for playlists", err);
+      rateLimit(err, res);
     });
 };
 
@@ -365,6 +411,7 @@ const searchTracks = (req, res) => {
     })
     .catch(err => {
       console.log("Something went wrong with searching for tracks", err);
+      rateLimit(err, res);
     });
 };
 
@@ -379,5 +426,7 @@ module.exports = {
   follow,
   unfollow,
   searchPlaylists,
-  searchTracks
+  searchTracks,
+  userId,
+  rateLimit
 };

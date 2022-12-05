@@ -1,24 +1,31 @@
 To Do:    
-  1)
-     Update (test with new playlist - tester)
-  2)
-    Track player capabilities.
-    Save and Load from csv files
-  3) 
-    Add progress bar for longer loading all tracks
-    Bug fixes
+  2) Save and Load from csv files
+  1) Add progress bar for longer loading all tracks
+  
+  
+  3) Handle large number of search results (pages or auto load when scrolled to bottom)  
 
 
-Performance:
-    Token renewal
-    Rate limit
-    Handle large number of search results (pages or auto load when scrolled to bottom)       
+
+  5) Visuals
+  6) Hosting
+
+
+Performance:     
+
+Hosting: 
+  Comply with liscening (lastfm and spotify ToS)  
+  Comment Code
+  Host on Netify / AWS
+  Collect User Feedback
 
 Bugs: 
-  In playlists not showing all playlists (ex. blazblue & vgm)
-  "Your playlists" double flash on startup
 
-Extras:
+Visuals: 
+  Navbar
   Theme
   Fonts
-  Comment
+  Visual Overhaul
+
+Extras:
+  Track player capabilities (will only work for premium though....).
