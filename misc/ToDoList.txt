@@ -1,10 +1,7 @@
 To Do:    
-  2) Save and Load from csv files
-  1) Add progress bar for longer loading all tracks
-  
-  
-  3) Handle large number of search results (pages or auto load when scrolled to bottom)  
-
+  1) Handle large number of search results (pages or auto load when scrolled to bottom) 
+  2) Save and Load from csv files 
+  3) Liked Songs
 
 
   5) Visuals
@@ -14,7 +11,7 @@ To Do:
 Performance:     
 
 Hosting: 
-  Comply with liscening (lastfm and spotify ToS)  
+  Comply with licensing (lastfm and spotify ToS)  
   Comment Code
   Host on Netify / AWS
   Collect User Feedback

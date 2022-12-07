@@ -51,10 +51,3 @@
     margin-top: calc(2.5 * $margin-bottom);
   }
 }
-
-.container-center {
-  height: 100%;
-  width: 100%;
-  display: grid;
-  place-content: center;
-}

@@ -118,9 +118,9 @@ const Dashboard = () => {
   const displayPlaylists = () => {
     if (displayPlaylistsCheck)
       return (
-        <div className="loading container-center">
+        <Center h="100%" className="loading">
           <Loader color="green" size="sm" variant="bars" />
-        </div>
+        </Center>
       );
     if (playlistsQ.data !== undefined) {
       const dynamicList: JSX.Element[] = [];
@@ -161,9 +161,9 @@ const Dashboard = () => {
   const displayInfo = () => {
     if (displayTracksCheck)
       return (
-        <div className="loading container-center">
+        <Center h="100%" className="loading">
           <Loader color="green" size="sm" variant="bars" />
-        </div>
+        </Center>
       );
     if (infoIndex === 0 && getSelectedPlaylist !== undefined) {
       return (

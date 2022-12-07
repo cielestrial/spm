@@ -35,11 +35,12 @@ let premium;
  */
 const rateLimit = (err, res) => {
   if (err.statusCode === 429) {
+    console.log(err.headers["retry-after"]);
     res.json({
       errorCode: err.statusCode,
       retryAfter: err.headers["retry-after"]
     });
-  } else if (err.statusCode === 400) {
+  } else if (err.statusCode === 400 || err.statusCode === 401) {
     spotifyApi
       .refreshAccessToken()
       .then(data => {
@@ -54,6 +55,7 @@ const rateLimit = (err, res) => {
       })
       .catch(err => {
         console.log("Something went wrong with refreshing accessToken", err);
+        res.json(undefined);
       });
   }
 };
@@ -78,7 +80,6 @@ const login = (req, res) => {
       });
     })
     .catch(err => {
-      console.log("Something went wrong with accessToken", err);
       rateLimit(err, res);
     });
 };

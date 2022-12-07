@@ -62,19 +62,20 @@ export const getWhitelist = () => {
       label: element[0]
     }));
 };
-
+const artistGenreMasterList = new Map<string, string[]>();
 let playlists: playlistsType;
 const options: optionsType = { offset: 0, limit: 0 };
 const getLimit = 50;
 const postLimit = 100;
-
 /**
  * Handle Rate limit Spotify
  */
 const rateLimitSpotify = (res: AxiosResponse<any, any>) => {
   if (res.data.errorCode === 429) {
     setRetryAfterSpotify(res.data.retryAfter);
-    throw new Error("Rate limit hit. Wait for " + res.data.retryAfter);
+    throw new Error(
+      "Rate limit hit for spotify. Wait for " + res.data.retryAfter
+    );
   }
 };
 
@@ -84,7 +85,9 @@ const rateLimitSpotify = (res: AxiosResponse<any, any>) => {
 const rateLimitLastfm = (res: AxiosResponse<any, any>) => {
   if (res.data.errorCode === 429) {
     setRetryAfterLastfm(res.data.retryAfter);
-    throw new Error("Rate limit hit. Wait for " + res.data.retryAfter);
+    throw new Error(
+      "Rate limit hit for lastfm. Wait for " + res.data.retryAfter
+    );
   }
 };
 
@@ -98,6 +101,7 @@ export const getToken = async () => {
   let tokenTemp = {} as tokenType;
   try {
     const res = await axios.post(server + "/login", { code });
+    if (res.data === undefined) return null;
     tokenTemp.accessToken = res.data.accessToken;
     tokenTemp.refreshToken = res.data.refreshToken;
     tokenTemp.expiresIn = res.data.expriresIn;
@@ -163,7 +167,9 @@ export const getPlaylists = async () => {
     }
     console.log("Playlists retrieved from server");
     return playlists;
-  } else throw new Error("Failed to retrieve playlists");
+  } else {
+    throw new Error("Failed to retrieve playlists");
+  }
 };
 
 /**
@@ -230,9 +236,12 @@ export const getTracks = async (playlist: playlistType | undefined) => {
       if (playlists?.list.has(generatePlaylistKey(playlist)) && i === 0) {
         await getOccurances(playlist);
         if (playlist.owner === userInfo?.display_name) {
-          const originals: string[] = await removeDuplicates(playlist);
+          const originals: tracksType[] = await removeDuplicates(playlist);
           if (originals.length > 0) {
-            await addTracksToPlaylist(playlist, originals);
+            const tempPlaylist = {} as playlistType;
+            tempPlaylist.total = originals.length;
+            tempPlaylist.tracks = originals;
+            await addPlaylistToPlaylist(tempPlaylist, playlist); //source = from, target = to
           } else break;
         } else break;
       } else break;
@@ -273,21 +282,32 @@ const appendTracks = async (
  * Get all tracks
  */
 export const getAllTracks = async () => {
-  if (playlists === undefined)
+  if (playlists === undefined) {
     throw new Error("Playlists has not been defined");
-  let resStatus = true;
-  const promises = [];
+  }
+  let promises = [];
+  let i = 1;
+  const bundle = postLimit;
   try {
-    /*
-    for (const playlist of playlists.list.values())
+    for (const playlist of playlists.list.values()) {
       promises.push(getTracks(playlist));
-    await Promise.all(promises);
-    */
+      if (i % bundle === 0) {
+        await Promise.all(promises);
+        promises = [];
+      }
+      i++;
+    }
+    if (promises.length > 0) {
+      await Promise.all(promises);
+      promises = [];
+      i = 1;
+    }
+    await getAllTrackGenres();
   } catch (err) {
     console.log(err);
-    resStatus = false;
+    return false;
   }
-  return resStatus;
+  return true;
 };
 
 /**
@@ -379,7 +399,7 @@ export const removeDuplicates = async (playlist: playlistType) => {
   //max 100 in one request
   const playlistId = playlist.id;
   const snapshot = playlist.snapshot;
-  let allOriginals: string[] = [];
+  let allOriginals: tracksType[] = [];
   let allUris: duplicateType[] = [];
   let duplicate: occuranceType | undefined;
   for (const uniqueTrack of duplicateManager.values()) {
@@ -389,7 +409,7 @@ export const removeDuplicates = async (playlist: playlistType) => {
       uniqueTrack.total_occurances -= duplicate.occurances - 1;
       duplicate.occurances = 1;
       duplicate.duplicate_uris.clear();
-      allOriginals.push(uniqueTrack.track.uri);
+      allOriginals.push(uniqueTrack.track);
     }
   }
   const total = allUris.length;
@@ -505,48 +525,50 @@ export const addPlaylistToPlaylist = async (
   const uris = tracks?.tracks
     ?.filter(track => isUnique(track, target))
     .map(track => track.uri);
-  return await addTracksToPlaylist(target, uris);
-};
 
-/**
- * Add tracks to playlist
- * @returns
- */
-const addTracksToPlaylist = async (
-  playlist: playlistType,
-  allUris: string[] | undefined // Make sure the uris go through duplicate manager filtering
-) => {
-  let status = false;
-  if (allUris === undefined) throw new Error("Couldn't retrieve track uris");
-  const playlistId = playlist.id;
-  const total = allUris.length;
-  if (total === 0) return status;
-  let uris, res;
-  let newOffset: Promise<number> | number = 0;
-  options.limit = postLimit;
-  try {
-    do {
-      options.offset = newOffset;
-      uris = allUris.slice(
-        newOffset as number,
-        (newOffset as number) + postLimit
-      );
-      res = await axios.post(server + "/add", {
-        playlistId,
-        uris,
-        total,
-        options
-      });
-      rateLimitSpotify(res);
-      playlist.snapshot = res.data.snapshot;
-      newOffset = (newOffset as number) + postLimit;
-    } while (0 < newOffset && newOffset < total);
-    status = true;
-    playlist.total += total;
-  } catch (err) {
-    console.log("Something went wrong with addTracksToPlaylist()", err);
-  }
-  return status;
+  /**
+   * Add tracks to playlist
+   * Does not have duplicate protection. Must call addPlaylistToPlaylist first
+   * @returns
+   */
+  const addTracksToPlaylist = async (
+    playlist: playlistType,
+    allUris: string[] | undefined // Make sure the uris go through duplicate manager filtering
+  ) => {
+    let status = false;
+    if (allUris === undefined) throw new Error("Couldn't retrieve track uris");
+    const playlistId = playlist.id;
+    const total = allUris.length;
+    if (total === 0) return status;
+    let uris, res;
+    let newOffset: Promise<number> | number = 0;
+    options.limit = postLimit;
+    try {
+      do {
+        options.offset = newOffset;
+        uris = allUris.slice(
+          newOffset as number,
+          (newOffset as number) + postLimit
+        );
+        res = await axios.post(server + "/add", {
+          playlistId,
+          uris,
+          total,
+          options
+        });
+        rateLimitSpotify(res);
+        playlist.snapshot = res.data.snapshot;
+        newOffset = (newOffset as number) + postLimit;
+      } while (0 < newOffset && newOffset < total);
+      status = true;
+      playlist.total += total;
+    } catch (err) {
+      console.log("Something went wrong with addTracksToPlaylist()", err);
+    }
+    return status;
+  };
+
+  return await addTracksToPlaylist(target, uris);
 };
 
 /**
@@ -738,17 +760,27 @@ const appendGeneralTracksSearch = async (
  * Get genres for all tracks
  */
 export const getAllTrackGenres = async () => {
-  if (duplicateManager.size === 0)
-    throw new Error("No tracks in duplicate manager");
-  const promises = [];
-  try {
-    for (const uniqueTrack of duplicateManager.values())
-      promises.push(getTrackGenres(uniqueTrack));
-    await Promise.all(promises);
-    console.log(duplicateManager);
-    console.log(genreMasterList);
-  } catch (err) {
-    console.log(err);
+  if (duplicateManager.size > 0) {
+    let promises = [];
+    let i = 1;
+    const bundle = postLimit;
+    try {
+      for (const uniqueTrack of duplicateManager.values()) {
+        promises.push(getTrackGenres(uniqueTrack));
+        if (i % bundle === 0) {
+          await Promise.all(promises);
+          promises = [];
+        }
+        i++;
+      }
+      if (promises.length > 0) {
+        await Promise.all(promises);
+        promises = [];
+        i = 1;
+      }
+    } catch (err) {
+      console.log(err);
+    }
   }
   return genreMasterList;
 };
@@ -773,9 +805,32 @@ export const getTrackGenres = async (uniqueTrack: uniqueType) => {
     if (!genreMasterList.has("local")) genreMasterList.set("local", 1);
     return status;
   }
-
+  let genreList: string[] | undefined = [];
   artists = uniqueTrack.track.artists;
   for (const artist of artists) {
+    if (artistGenreMasterList.has(artist)) {
+      genreList = artistGenreMasterList.get(artist);
+      if (genreList !== undefined) {
+        for (const genre of genreList) {
+          if (!uniqueTrack.track.genres.has(genre))
+            uniqueTrack.track.genres.add(genre);
+          for (const occurance of uniqueTrack.in_playlists.values()) {
+            if (!occurance.playlist.genres.has(genre))
+              occurance.playlist.genres.set(genre, 1);
+            else {
+              popularity = occurance.playlist.genres.get(genre) as number;
+              popularity++;
+              occurance.playlist.genres.set(genre, popularity);
+            }
+          }
+          popularity = genreMasterList.get(genre) as number;
+          popularity++;
+          genreMasterList.set(genre, popularity);
+        }
+      }
+      console.log("Genres retrieved from client");
+      continue;
+    }
     try {
       const res = await axios.post(server + "/genres", {
         artist,
@@ -790,8 +845,6 @@ export const getTrackGenres = async (uniqueTrack: uniqueType) => {
           if (!uniqueTrack.track.genres.has(genre))
             uniqueTrack.track.genres.add(genre);
           for (const occurance of uniqueTrack.in_playlists.values()) {
-            if (occurance.playlist.genres === undefined)
-              occurance.playlist.genres = new Map<string, number>();
             if (!occurance.playlist.genres.has(genre))
               occurance.playlist.genres.set(genre, 1);
             else {
@@ -800,7 +853,6 @@ export const getTrackGenres = async (uniqueTrack: uniqueType) => {
               occurance.playlist.genres.set(genre, popularity);
             }
           }
-          uniqueTrack.track.genres.add(genre);
           if (!genreMasterList.has(genre)) genreMasterList.set(genre, 1);
           else {
             popularity = genreMasterList.get(genre) as number;
@@ -808,6 +860,7 @@ export const getTrackGenres = async (uniqueTrack: uniqueType) => {
             genreMasterList.set(genre, popularity);
           }
         }
+        console.log("Genres retrieved from server");
       }
     } catch (err) {
       console.log("Something went wrong with getTrackGenres()", err);
@@ -822,29 +875,58 @@ export const getTrackGenres = async (uniqueTrack: uniqueType) => {
  */
 export const addSubscriptions = async () => {
   if (playlists === undefined) return;
-  const promises = [];
-  for (const playlist of playlists.list.values()) {
-    const target = playlist;
-    // playlist subscriptions
-    if (target.playlistSubscriptions !== undefined) {
-      for (const playlistSub of target.playlistSubscriptions) {
-        const source = playlists.list.get(playlistSub) as playlistType;
-        promises.push(addPlaylistToPlaylist(source, target));
-      }
-    }
-    // genre subscriptions
-    if (target.genreSubscriptions !== undefined) {
-      for (const genreSub of target.genreSubscriptions) {
-        const allUris: string[] = [];
-        for (const uniqueTrack of duplicateManager.values()) {
-          if (uniqueTrack.track.genres.has(genreSub))
-            allUris.push(uniqueTrack.track.uri);
+  let promises: Promise<boolean>[] = [];
+  let tempPlaylist: playlistType;
+  let i = 1;
+  const bundle = postLimit;
+  try {
+    for (const playlist of playlists.list.values()) {
+      const target = playlist;
+      // playlist subscriptions
+      if (target.playlistSubscriptions !== undefined) {
+        for (const playlistSub of target.playlistSubscriptions) {
+          tempPlaylist = playlists.list.get(playlistSub) as playlistType;
+          promises.push(addPlaylistToPlaylist(tempPlaylist, target));
+          if (i % bundle === 0) {
+            await Promise.all(promises);
+            promises = [];
+          }
+          i++;
         }
-        promises.push(addTracksToPlaylist(target, allUris));
+        if (promises.length > 0) {
+          await Promise.all(promises);
+          promises = [];
+          i = 1;
+        }
+      }
+      // genre subscriptions
+      if (target.genreSubscriptions !== undefined) {
+        for (const genreSub of target.genreSubscriptions) {
+          const allTracks: tracksType[] = [];
+          for (const uniqueTrack of duplicateManager.values()) {
+            if (uniqueTrack.track.genres.has(genreSub))
+              allTracks.push(uniqueTrack.track);
+          }
+          tempPlaylist = {} as playlistType;
+          tempPlaylist.total = allTracks.length;
+          tempPlaylist.tracks = allTracks;
+          promises.push(addPlaylistToPlaylist(tempPlaylist, target));
+          if (i % bundle === 0) {
+            await Promise.all(promises);
+            promises = [];
+          }
+          i++;
+        }
+        if (promises.length > 0) {
+          await Promise.all(promises);
+          promises = [];
+          i = 1;
+        }
       }
     }
+  } catch (err) {
+    console.log("Something went wrong with addSubscriptions()", err);
   }
-  await Promise.all(promises);
 };
 
 //export const playTrack = () => {};

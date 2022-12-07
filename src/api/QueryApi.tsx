@@ -1,4 +1,4 @@
-import { useQuery } from "react-query";
+import { useQuery, UseQueryResult } from "react-query";
 import { token, userInfo } from "../pages/Dashboard";
 import {
   getToken,
@@ -42,6 +42,10 @@ let addFlag = false;
 export const refetchAdd = () => {
   addFlag = true;
 };
+let allGenresFlag = true;
+export const refetchAllGenres = () => {
+  allGenresFlag = true;
+};
 
 // Gets access token
 export const tokenQuery = () => useQuery("token", getToken);
@@ -58,7 +62,6 @@ export const playlistsQuery = () =>
     ["playlists", retryAfterSpotify, userInfo],
     async () => {
       const res = await getPlaylists();
-      res;
       return res;
     },
     {
@@ -245,13 +248,14 @@ export const addSubscriptionsQuery = (
 // Gets tracks from lastfm
 export const trackGenresQuery = () =>
   useQuery(
-    ["trackGenres", retryAfterLastfm],
+    ["trackGenres", retryAfterLastfm, allGenresFlag],
     async () => {
       const res = await getAllTrackGenres();
+      allGenresFlag = false;
       return res;
     },
     {
-      enabled: false,
+      enabled: allGenresFlag,
       retryDelay: retryAfterLastfm,
       onSuccess: () => {
         retryAfterLastfm = 1000;
