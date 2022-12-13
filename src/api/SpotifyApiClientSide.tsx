@@ -16,6 +16,7 @@ import {
 import { genreBlackList } from "./misc/GenreBlackList";
 import { TransferListItem } from "@mantine/core";
 import { setRetryAfterLastfm, setRetryAfterSpotify } from "./QueryApi";
+import { resultLimit } from "../components/SearchBar";
 const scope =
   "&scope=" +
   "playlist-read-private" +
@@ -67,6 +68,7 @@ let playlists: playlistsType;
 const options: optionsType = { offset: 0, limit: 0 };
 const getLimit = 50;
 const postLimit = 100;
+export const maxOffset = 1000;
 /**
  * Handle Rate limit Spotify
  */
@@ -285,6 +287,7 @@ export const getAllTracks = async () => {
   if (playlists === undefined) {
     throw new Error("Playlists has not been defined");
   }
+  /*
   let promises = [];
   let i = 1;
   const bundle = postLimit;
@@ -306,7 +309,7 @@ export const getAllTracks = async () => {
   } catch (err) {
     console.log(err);
     return false;
-  }
+  }*/
   return true;
 };
 
@@ -620,73 +623,39 @@ export const followPlaylist = async (playlist: playlistType | undefined) => {
  */
 export const generalPlaylistsSearch = async (
   querySearch: string,
-  limit: number
+  offset: number
 ) => {
   if (querySearch === "") throw new Error("Invalid query search");
-  const maxOffset = 50; // 1000
   let queriedPlaylists: playlistsType = undefined;
-  let newOffset: Promise<number> | number = 0;
-  options.offset = 0;
+  if (offset > maxOffset) return queriedPlaylists;
+  options.offset = offset;
+  let limit = resultLimit;
   if (limit === 0 || limit > getLimit) limit = getLimit;
   options.limit = limit;
+
   try {
     const res = await axios.post(server + "/search-playlists", {
       querySearch,
       options
     });
     rateLimitSpotify(res);
-    queriedPlaylists = {
-      total: res.data.total,
-      list: new Map<string, playlistType>(
-        res.data.list.map((playlist: playlistType) => [
-          generatePlaylistKey(playlist),
-          playlist
-        ])
-      )
-    };
-    newOffset = (newOffset as number) + options.limit;
+    if (res.data !== undefined) {
+      queriedPlaylists = {
+        total: res.data.total,
+        list: new Map<string, playlistType>(
+          res.data.list.map((playlist: playlistType) => [
+            generatePlaylistKey(playlist),
+            playlist
+          ])
+        )
+      };
+    }
   } catch (err) {
     console.log("Something went wrong with generalPlaylistsSearch()", err);
   }
   if (queriedPlaylists !== undefined) {
-    while (0 < newOffset && newOffset < maxOffset) {
-      console.log("happening");
-      newOffset = await appendGeneralPlaylistsSearch(
-        querySearch,
-        queriedPlaylists,
-        newOffset
-      );
-    }
     return queriedPlaylists;
   } else throw new Error("Failed general playlists search");
-};
-
-/**
- * Append remaining general searched playlists
- * @returns
- */
-const appendGeneralPlaylistsSearch = async (
-  querySearch: string,
-  queriedPlaylists: playlistsType,
-  newOffset: Promise<number> | number
-) => {
-  options.offset = newOffset;
-  try {
-    const res = await axios.post(server + "/search-playlists", {
-      querySearch,
-      options
-    });
-    rateLimitSpotify(res);
-    for (const playlist of res.data.list)
-      queriedPlaylists?.list.set(generatePlaylistKey(playlist), playlist);
-    newOffset = (newOffset as number) + options.limit;
-  } catch (err) {
-    console.log(
-      "Something went wrong with appendGeneralPlaylistsSearch()",
-      err
-    );
-  }
-  return newOffset;
 };
 
 /**
@@ -696,13 +665,13 @@ const appendGeneralPlaylistsSearch = async (
  */
 export const generalTracksSearch = async (
   querySearch: string,
-  limit: number
+  offset: number
 ) => {
   if (querySearch === "") throw new Error("Invalid query search");
-  const maxOffset = 50; // 1000
   let queriedTracks = {} as playlistType;
-  let newOffset: Promise<number> | number = 0;
-  options.offset = 0;
+  if (offset > maxOffset) return queriedTracks;
+  options.offset = offset;
+  let limit = resultLimit;
   if (limit === 0 || limit > getLimit) limit = getLimit;
   options.limit = limit;
   try {
@@ -711,56 +680,24 @@ export const generalTracksSearch = async (
       options
     });
     rateLimitSpotify(res);
-    queriedTracks.name = "search results";
-    queriedTracks.total = res.data.total;
-    queriedTracks.tracks = res.data.list;
-
-    newOffset = (newOffset as number) + options.limit;
+    if (res.data !== undefined) {
+      queriedTracks.name = "search results";
+      queriedTracks.total = res.data.total;
+      queriedTracks.tracks = res.data.list;
+    }
   } catch (err) {
     console.log("Something went wrong with generalTracksSearch()", err);
   }
   if (queriedTracks !== undefined) {
-    while (0 < newOffset && newOffset < maxOffset) {
-      console.log("happening");
-      newOffset = await appendGeneralTracksSearch(
-        querySearch,
-        queriedTracks,
-        newOffset
-      );
-    }
     return queriedTracks;
   } else throw new Error("Failed general tracks search");
-};
-
-/**
- * Append remaining general searched tracks
- * @returns
- */
-const appendGeneralTracksSearch = async (
-  querySearch: string,
-  queriedTracks: playlistType,
-  newOffset: Promise<number> | number
-) => {
-  options.offset = newOffset;
-  try {
-    const res = await axios.post(server + "/search-tracks", {
-      querySearch,
-      options
-    });
-    rateLimitSpotify(res);
-    for (const track of res.data.list) queriedTracks?.tracks?.push(track);
-    newOffset = (newOffset as number) + options.limit;
-  } catch (err) {
-    console.log("Something went wrong with appendGeneralTracksSearch()", err);
-  }
-  return newOffset;
 };
 
 /**
  * Get genres for all tracks
  */
 export const getAllTrackGenres = async () => {
-  if (duplicateManager.size > 0) {
+  if (duplicateManager.size > 0 && false) {
     let promises = [];
     let i = 1;
     const bundle = postLimit;

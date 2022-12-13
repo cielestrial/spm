@@ -1,14 +1,16 @@
 To Do:    
-  1) Handle large number of search results (pages or auto load when scrolled to bottom) 
+  1) Try SWS
   2) Save and Load from csv files 
   3) Liked Songs
+  
 
 
   5) Visuals
   6) Hosting
 
 
-Performance:     
+Performance:    
+  React.Lazy && suspense 
 
 Hosting: 
   Comply with licensing (lastfm and spotify ToS)  

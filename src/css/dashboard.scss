@@ -48,7 +48,7 @@
 .searchlist {
   overflow: auto;
   width: calc(100% - 2rem);
-  min-height: calc(50vh - 3rem);
+  min-height: min-content;
   height: calc(70vmin - 3rem);
   margin: 1rem;
   border-radius: $border-radius 0 0 $border-radius;

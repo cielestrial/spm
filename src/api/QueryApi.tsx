@@ -1,4 +1,4 @@
-import { useQuery, UseQueryResult } from "react-query";
+import { useQuery } from "react-query";
 import { token, userInfo } from "../pages/Dashboard";
 import {
   getToken,
@@ -38,9 +38,9 @@ let createFlag = false;
 export const refetchCreate = () => {
   createFlag = true;
 };
-let addFlag = false;
-export const refetchAdd = () => {
-  addFlag = true;
+let playlistsQFlag = false;
+export const refetchPlaylistsQ = () => {
+  playlistsQFlag = true;
 };
 let allGenresFlag = true;
 export const refetchAllGenres = () => {
@@ -174,19 +174,18 @@ export const followQuery = (
     }
   );
 
-export const generalPlaylistsQuery = (querySearch: string, limit: number) =>
+export const generalPlaylistsQuery = (
+  querySearch: React.MutableRefObject<string>,
+  offset: React.MutableRefObject<number>
+) =>
   useQuery(
-    ["generalPlaylists", retryAfterSpotify, querySearch, limit],
+    ["generalPlaylistsQuery", retryAfterSpotify, querySearch, offset],
     async () => {
-      const res = await generalPlaylistsSearch(querySearch, limit);
-      return res;
+      return await generalPlaylistsSearch(querySearch.current, offset.current);
     },
     {
       enabled: false,
-      retryDelay: retryAfterSpotify,
-      onSuccess: () => {
-        retryAfterSpotify = 1000;
-      }
+      retryDelay: retryAfterSpotify
     }
   );
 
@@ -194,7 +193,7 @@ export const generalTracksQuery = (
   songQuery: string,
   artistQuery: string,
   albumQuery: string,
-  limit: number
+  offset: React.MutableRefObject<number>
 ) =>
   useQuery(
     [
@@ -203,14 +202,14 @@ export const generalTracksQuery = (
       songQuery,
       artistQuery,
       albumQuery,
-      limit
+      offset.current
     ],
     async () => {
       let querySearch = "";
-      if (songQuery !== "") querySearch += "track:" + songQuery;
-      if (artistQuery !== "") querySearch += "artist:" + artistQuery;
+      if (songQuery !== "") querySearch += "track:" + songQuery + " ";
+      if (artistQuery !== "") querySearch += "artist:" + artistQuery + " ";
       if (albumQuery !== "") querySearch += "album:" + albumQuery;
-      const res = await generalTracksSearch(querySearch, limit);
+      const res = await generalTracksSearch(querySearch, offset.current);
       return res;
     },
     {
