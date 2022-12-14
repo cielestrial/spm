@@ -4,7 +4,7 @@ import { useDisclosure } from "@mantine/hooks";
 import { playlistsType, playlistType } from "../api/SpotifyApiClientTypes";
 import { useSpotifyQuery } from "../api/QueryApi";
 import { createPlaylist } from "../api/SpotifyApiClientSide";
-import { useState } from "react";
+import { useRef } from "react";
 
 type propsType = {
   playlists: React.MutableRefObject<playlistsType>;
@@ -14,20 +14,19 @@ type propsType = {
 
 const CreatePlaylistButton = (props: propsType) => {
   const [opened, { close, open }] = useDisclosure(false);
-  const [getName, setName] = useState("");
+  const playlistName = useRef("");
 
   const create = async () => {
     props.setLoading(prev => prev + 1);
-    const createQ = await useSpotifyQuery(
-      async (playlistName, setSelected) => {
-        const res = await createPlaylist(playlistName);
-        setSelected(res);
-        return res;
-      },
+
+    const createQ = (await useSpotifyQuery(
+      createPlaylist,
       0,
-      getName,
+      playlistName.current,
       props.setSelected
-    );
+    )) as playlistType | undefined;
+    props.setSelected(createQ);
+
     props.setLoading(prev => prev - 1);
     return createQ;
   };
@@ -59,7 +58,7 @@ const CreatePlaylistButton = (props: propsType) => {
       >
         <form
           onSubmit={form.onSubmit(values => {
-            setName(values.name);
+            playlistName.current = values.name;
             create();
             form.reset();
             close();

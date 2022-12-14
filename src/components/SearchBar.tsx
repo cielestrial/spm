@@ -47,14 +47,14 @@ type propsType = {
 export type searchCategoryType = "Playlists" | "Tracks";
 export type searchAreaType = "Library" | "General";
 export const resultLimit = 50;
+export const waitTime = 750;
+export const debounceWaitTime = Math.round(0.67 * waitTime);
 
 const SearchBar = (props: propsType) => {
   // UI stuff
   const [opened, { close, open }] = useDisclosure(false);
   const [playlistValue, setPlaylistValue] = useState("");
-  const waitTime = 750;
-  const debounceWaitTime = Math.round(0.67 * waitTime);
-  let [debouncedPlaylistValue] = useDebouncedValue(
+  const [debouncedPlaylistValue] = useDebouncedValue(
     playlistValue,
     debounceWaitTime
   );
@@ -94,41 +94,37 @@ const SearchBar = (props: propsType) => {
   const offsetRef = useRef(0);
   async function generalPlaylistsQ() {
     const results = (await useSpotifyQuery(
-      async function (querySearch, offset) {
-        return await generalPlaylistsSearch(
-          querySearch.current,
-          offset.current
-        );
-      },
+      generalPlaylistsSearch,
       0,
-      playlistValueRef,
-      offsetRef
+      playlistValueRef.current,
+      offsetRef.current
     )) as playlistsType;
     return results;
   }
-
+  const trackValueRef = useRef("");
   const generalTracksQ = async () => {
     const results = (await useSpotifyQuery(
-      async function (songQuery, artistQuery, albumQuery, offset) {
-        let querySearch = "";
-        if (songQuery.current !== "")
-          querySearch += "track:" + songQuery.current + " ";
-        if (artistQuery.current !== "")
-          querySearch += "artist:" + artistQuery.current + " ";
-        if (albumQuery.current !== "")
-          querySearch += "album:" + albumQuery.current;
-        const res = (await generalTracksSearch(querySearch, offset.current)) as
-          | playlistType
-          | undefined;
-        return res;
-      },
+      generalTracksSearch,
       0,
-      songValueRef,
-      artistValueRef,
-      albumValueRef,
-      offsetRef
+      trackValueRef.current,
+      offsetRef.current
     )) as playlistType | undefined;
     return results;
+  };
+
+  const getFullTrackQueryValue = () => {
+    songValueRef.current = debouncedSongValue;
+    artistValueRef.current = debouncedArtistValue;
+    albumValueRef.current = debouncedAlbumValue;
+
+    let querySearch = "";
+    if (songValueRef.current !== "")
+      querySearch += "track:" + songValueRef.current + " ";
+    if (artistValueRef.current !== "")
+      querySearch += "artist:" + artistValueRef.current + " ";
+    if (albumValueRef.current !== "")
+      querySearch += "album:" + albumValueRef.current;
+    return querySearch;
   };
 
   // Display query result stuff
@@ -493,23 +489,21 @@ const SearchBar = (props: propsType) => {
   };
 
   const getGeneralResultsT = useCallback(async () => {
-    if (trackResults.current !== undefined) {
-      const data = await generalTracksQ();
-      if (data !== undefined) {
-        trackResults.current[pageRef.current] = new Set<uniqueType>(
-          data.tracks.map(track => ({
-            track: track,
-            total_occurances: 1,
-            in_playlists: new Map<string, occuranceType>()
-          }))
-        );
-        totalPageRef.current = data.total;
-        counterRef.current = totalPageRef.current;
-        addToResultListT();
-      }
+    const data = await generalTracksQ();
+    if (data !== undefined && trackResults.current !== undefined) {
+      trackResults.current[pageRef.current] = new Set<uniqueType>(
+        data.tracks.map(track => ({
+          track: track,
+          total_occurances: 1,
+          in_playlists: new Map<string, occuranceType>()
+        }))
+      );
+      totalPageRef.current = data.total;
+      counterRef.current = totalPageRef.current;
+      addToResultListT();
     }
   }, [
-    generalTracksQ,
+    trackValueRef.current,
     trackResults.current,
     pageRef.current,
     offsetRef.current
@@ -524,9 +518,7 @@ const SearchBar = (props: propsType) => {
     totalPageRef.current = 0;
     counterRef.current = 0;
 
-    songValueRef.current = debouncedSongValue;
-    artistValueRef.current = debouncedArtistValue;
-    albumValueRef.current = debouncedAlbumValue;
+    trackValueRef.current = getFullTrackQueryValue();
     await getGeneralResultsT();
     if (totalPageRef.current === 0) {
       return [

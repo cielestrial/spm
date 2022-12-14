@@ -1,9 +1,7 @@
-import { Dialog, Group, Text } from "@mantine/core";
+import { Dialog } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
-import { forwardRef, useImperativeHandle, useState } from "react";
-import { inPlaylists } from "../api/misc/HelperFunctions";
-import { tracksType } from "../api/SpotifyApiClientTypes";
-import Row from "./Row";
+import { forwardRef, useImperativeHandle } from "react";
+import { tracksType } from "../src/api/SpotifyApiClientTypes";
 
 export type TrackDialogType = {
   openTrackDialog: (selectedTrack: tracksType) => void;

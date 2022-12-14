@@ -2,19 +2,20 @@ import { Badge, Flex } from "@mantine/core";
 import { playlistType } from "../api/SpotifyApiClientTypes";
 
 type proptype = {
-  selectedPlaylist: playlistType | undefined;
+  selectedPlaylist: React.MutableRefObject<playlistType | undefined>;
   isFollowed: () => boolean;
 };
 const TopPlaylistGenres = (props: proptype) => {
   const minOccurance =
-    props.selectedPlaylist !== undefined
-      ? Math.floor(props.selectedPlaylist.total * 0.17)
+    props.selectedPlaylist.current !== undefined
+      ? // 1/3 of 50% of the total number of songs is the minimum cutoff
+        Math.round(props.selectedPlaylist.current.total * (0.5 / 3))
       : 2;
   const top_x = 3;
 
   const topGenres =
-    props.selectedPlaylist?.genres !== undefined && props.isFollowed()
-      ? Array.from(props.selectedPlaylist.genres.entries())
+    props.selectedPlaylist.current?.genres !== undefined && props.isFollowed()
+      ? Array.from(props.selectedPlaylist.current.genres.entries())
           .filter(value => value[1] >= minOccurance)
           .sort((a, b) => b[1] - a[1])
           .slice(0, top_x)
