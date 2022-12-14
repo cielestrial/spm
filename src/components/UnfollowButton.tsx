@@ -1,32 +1,28 @@
 import { Button, Group, Modal, Text } from "@mantine/core";
-import { useDisclosure, useForceUpdate } from "@mantine/hooks";
+import { useDisclosure } from "@mantine/hooks";
 import { useSpotifyQuery } from "../api/QueryApi";
 import { unfollowPlaylist } from "../api/SpotifyApiClientSide";
 import { playlistsType, playlistType } from "../api/SpotifyApiClientTypes";
 
 type propsType = {
   playlists: React.MutableRefObject<playlistsType>;
-  playlist: playlistType | undefined;
+  playlist: React.MutableRefObject<playlistType | undefined>;
   setSelected: (selected: playlistType | undefined) => Promise<void>;
   setLoading: React.Dispatch<React.SetStateAction<number>>;
 };
 const UnfollowButton = (props: propsType) => {
   const [opened, { close, open }] = useDisclosure(false);
-  const forceUpdate = useForceUpdate();
 
   const unfollow = async () => {
     props.setLoading(prev => prev + 1);
+
     const unfollowQ = await useSpotifyQuery(
-      async (selectedPlaylist, setSelected) => {
-        console.log("trying to unfollow", selectedPlaylist?.name);
-        const res = await unfollowPlaylist(selectedPlaylist);
-        setSelected(undefined);
-        return res;
-      },
+      unfollowPlaylist,
       0,
-      props.playlist,
-      props.setSelected
+      props.playlist.current
     );
+    props.setSelected(undefined);
+
     props.setLoading(prev => prev - 1);
     return unfollowQ;
   };
@@ -44,7 +40,7 @@ const UnfollowButton = (props: propsType) => {
           Are you sure you want to unfollow
         </Text>
         <Text fs="italic" fw="bold" ta="center">
-          {props.playlist?.name}&#63;
+          {props.playlist.current?.name}&#63;
         </Text>
         <Group grow spacing="md" mt="md">
           <Button
@@ -56,8 +52,6 @@ const UnfollowButton = (props: propsType) => {
             onClick={async () => {
               console.log(props.playlist);
               unfollow();
-              //await props.playlists.mutate();
-              //forceUpdate();
               close();
             }}
           >

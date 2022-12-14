@@ -119,15 +119,17 @@ export const getToken = async () => {
  * @returns
  */
 export const getAuthenticatedUserInfo = async () => {
-  let userInfo: userInfoType | undefined = undefined;
+  let userInfo: userInfoType | undefined | null = null;
   try {
     const res = await axios.post(server + "/user");
+    if (res.data === undefined) return null;
     userInfo = {
       display_name: res.data.display_name,
       premium: res.data.premium
     };
   } catch (err) {
     console.log("Something went wrong with getAuthenticatedUserInfo()", err);
+    return null;
   }
   return userInfo;
 };
@@ -200,6 +202,13 @@ const appendPlaylists = async (newOffset: Promise<number> | number) => {
  */
 export const getTracks = async (playlist: playlistType | undefined) => {
   if (playlist === undefined) throw new Error("Playlist not defined");
+  if (playlist.genres === undefined)
+    playlist.genres = new Map<string, number>();
+  if (playlist.genreSubscriptions === undefined)
+    playlist.genreSubscriptions = [];
+  if (playlist.playlistSubscriptions === undefined)
+    playlist.playlistSubscriptions = new Map<string, playlistType>();
+  if (playlist.total === 0) return playlist;
   if (
     playlist.tracks !== undefined &&
     playlist.total === playlist.tracks.length
@@ -219,12 +228,6 @@ export const getTracks = async (playlist: playlistType | undefined) => {
       });
       rateLimitSpotify(res);
       playlist.tracks = res.data.list;
-      if (playlist.genres === undefined)
-        playlist.genres = new Map<string, number>();
-      if (playlist.genreSubscriptions === undefined)
-        playlist.genreSubscriptions = [];
-      if (playlist.playlistSubscriptions === undefined)
-        playlist.playlistSubscriptions = [];
       newOffset = (newOffset as number) + getLimit;
     } catch (err) {
       console.log("Something went wrong with getTracks()", err);
@@ -304,7 +307,6 @@ export const getAllTracks = async () => {
       promises = [];
       i = 1;
     }
-    await getAllTrackGenres();
   } catch (err) {
     console.log(err);
     return false;
@@ -496,7 +498,7 @@ export const createPlaylist = async (name: string | undefined) => {
       tracks: [],
       genres: new Map<string, number>(),
       genreSubscriptions: [],
-      playlistSubscriptions: []
+      playlistSubscriptions: new Map<string, playlistType>()
     };
     if (playlists === undefined) {
       playlists = {
@@ -700,28 +702,32 @@ export const generalTracksSearch = async (
  * Get genres for all tracks
  */
 export const getAllTrackGenres = async () => {
-  if (duplicateManager.size > 0 && false) {
-    let promises = [];
-    let i = 1;
-    const bundle = postLimit;
-    try {
-      for (const uniqueTrack of duplicateManager.values()) {
-        promises.push(getTrackGenres(uniqueTrack));
-        if (i % bundle === 0) {
-          await Promise.all(promises);
-          promises = [];
-        }
-        i++;
-      }
-      if (promises.length > 0) {
+  /*
+  if (duplicateManager.size === 0) {
+    console.log("Empty duplicate manager");
+    return genreMasterList;
+  }
+  let promises = [];
+  let i = 1;
+  const bundle = postLimit;
+  try {
+    for (const uniqueTrack of duplicateManager.values()) {
+      promises.push(getTrackGenres(uniqueTrack));
+      if (i % bundle === 0) {
         await Promise.all(promises);
         promises = [];
-        i = 1;
       }
-    } catch (err) {
-      console.log(err);
+      i++;
     }
+    if (promises.length > 0) {
+      await Promise.all(promises);
+      promises = [];
+      i = 1;
+    }
+  } catch (err) {
+    console.log(err);
   }
+  */
   return genreMasterList;
 };
 
@@ -811,22 +817,20 @@ export const getTrackGenres = async (uniqueTrack: uniqueType) => {
 };
 
 /**
- * Add subscriptions
+ * Add playlist subscriptions
  */
-export const addSubscriptions = async () => {
-  if (playlists === undefined) return;
+export const addPlaylistSubscriptions = async () => {
+  if (playlists === undefined) return false;
+  let status = true;
   let promises: Promise<boolean>[] = [];
   let tempPlaylist: playlistType;
   let i = 1;
   const bundle = postLimit;
   try {
-    for (const playlist of playlists.list.values()) {
-      const target = playlist;
-      // playlist subscriptions
+    for (const target of playlists.list.values()) {
       if (target.playlistSubscriptions !== undefined) {
-        for (const playlistSub of target.playlistSubscriptions) {
-          tempPlaylist = playlists.list.get(playlistSub) as playlistType;
-          promises.push(addPlaylistToPlaylist(tempPlaylist, target));
+        for (const playlistSub of target.playlistSubscriptions.values()) {
+          promises.push(addPlaylistToPlaylist(playlistSub, target));
           if (i % bundle === 0) {
             await Promise.all(promises);
             promises = [];
@@ -839,7 +843,30 @@ export const addSubscriptions = async () => {
           i = 1;
         }
       }
-      // genre subscriptions
+    }
+  } catch (err) {
+    console.log("Something went wrong with addPlaylistSubscriptions()", err);
+    status = false;
+  }
+  return status;
+};
+
+/**
+ * Add genre subscriptions
+ */
+export const addGenreSubscriptions = async () => {
+  if (playlists === undefined) return false;
+  if (duplicateManager.size === 0) {
+    console.log("Empty duplicate manager");
+    return true;
+  }
+  let status = true;
+  let promises: Promise<boolean>[] = [];
+  let tempPlaylist: playlistType;
+  let i = 1;
+  const bundle = postLimit;
+  try {
+    for (const target of playlists.list.values()) {
       if (target.genreSubscriptions !== undefined) {
         for (const genreSub of target.genreSubscriptions) {
           const allTracks: tracksType[] = [];
@@ -865,8 +892,10 @@ export const addSubscriptions = async () => {
       }
     }
   } catch (err) {
-    console.log("Something went wrong with addSubscriptions()", err);
+    console.log("Something went wrong with addGenreSubscriptions()", err);
+    status = false;
   }
+  return status;
 };
 
 //export const playTrack = () => {};

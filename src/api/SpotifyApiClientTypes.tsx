@@ -21,7 +21,7 @@ export type playlistType = {
   tracks: tracksType[];
   genres: Map<string, number>;
   genreSubscriptions: string[];
-  playlistSubscriptions: string[];
+  playlistSubscriptions: Map<string, playlistType>;
 };
 export type playlistsType = definedPlaylistsType | undefined;
 export type definedPlaylistsType = {

@@ -6,7 +6,7 @@ import { playlistsType, playlistType } from "../api/SpotifyApiClientTypes";
 
 type propsType = {
   playlists: React.MutableRefObject<playlistsType>;
-  playlist: playlistType | undefined;
+  playlist: React.MutableRefObject<playlistType | undefined>;
   setSelected: (selected: playlistType | undefined) => Promise<void>;
   setLoading: React.Dispatch<React.SetStateAction<number>>;
 };
@@ -16,17 +16,15 @@ const FollowButton = (props: propsType) => {
 
   const follow = async () => {
     props.setLoading(prev => prev + 1);
+
     const followQ = await useSpotifyQuery(
-      async (selectedPlaylist, setSelected) => {
-        const res = await followPlaylist(selectedPlaylist);
-        setSelected(undefined);
-        setSelected(selectedPlaylist);
-        return res;
-      },
+      followPlaylist,
       0,
-      props.playlist,
-      props.setSelected
+      props.playlist.current
     );
+    props.setSelected(undefined);
+    props.setSelected(props.playlist.current);
+
     props.setLoading(prev => prev - 1);
     return followQ;
   };
@@ -44,7 +42,7 @@ const FollowButton = (props: propsType) => {
           Would you like to follow
         </Text>
         <Text fs="italic" fw="bold" ta="center">
-          {props.playlist?.name}&#63;
+          {props.playlist.current?.name}&#63;
         </Text>
         <Group grow spacing="md" mt="md">
           <Button

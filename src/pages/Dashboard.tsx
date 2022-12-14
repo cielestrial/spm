@@ -33,21 +33,22 @@ import TopPlaylistGenres from "../components/TopPlaylistGenres";
 import UpdateAllButton from "../components/UpdateAllButton";
 import { useNavigate } from "react-router-dom";
 import {
+  getAllTrackGenres,
   getAllTracks,
   getAuthenticatedUserInfo,
   getPlaylists,
   getToken,
   getTracks
 } from "../api/SpotifyApiClientSide";
-import { useSpotifyQuery } from "../api/QueryApi";
+import { useLastfmQuery, useSpotifyQuery } from "../api/QueryApi";
 
 export let token: tokenType | undefined | null;
-export let userInfo: userInfoType | undefined;
+export let userInfo: userInfoType | undefined | null;
 export let loadingAllTracks: boolean = false;
 
 const Dashboard = () => {
   const navigate = useRef(useNavigate());
-  const [getSelectedPlaylist, setSelectedPlaylist] = useState<playlistType>();
+  const selectedPlaylistRef = useRef<playlistType>();
   const [getSelectedTrack, setSelectedTrack] = useState<tracksType>();
   const [infoIndex, setInfoIndex] = useState(0);
   const [isLoading, setLoading] = useState(true);
@@ -65,8 +66,7 @@ const Dashboard = () => {
         | tokenType
         | undefined
         | null;
-      if (tokenData === null) navigate.current("/");
-      else if (tokenData !== undefined) {
+      if (tokenData !== undefined) {
         token = tokenData;
         const userData = (await useSpotifyQuery(
           getAuthenticatedUserInfo,
@@ -79,7 +79,8 @@ const Dashboard = () => {
           getPlaylists,
           0
         )) as playlistsType;
-        const libraryTracksQ = await useSpotifyQuery(getAllTracks, 0);
+        await useSpotifyQuery(getAllTracks, 0);
+        await useLastfmQuery(getAllTrackGenres, 0);
         setLoadingP(prev => prev - 1);
       }
       setLoading(false);
@@ -88,31 +89,20 @@ const Dashboard = () => {
     start();
   }, []);
 
-  //const libraryTracksQ = allTracksQuery(playlistsQ.current);
-  //loadingAllTracks = libraryTracksQ.isLoading;
-
-  //let displayTracksCheck = tracksQ.isLoading || libraryTracksQ.isLoading
+  useEffect(() => {
+    if (token === null || userInfo === null) navigate.current("/");
+  }, [token, userInfo]);
 
   const setSelectedP = useCallback(
     async (selected: playlistType | undefined) => {
-      if (selected === undefined || isLoadingT) {
-        setLoadingT(prev => prev + 1);
-        tracksQ.current = await useSpotifyQuery(
-          getTracks,
-          0,
-          getSelectedPlaylist
-        );
-        setLoadingT(prev => prev - 1);
-        return;
-      }
-      setSelectedPlaylist(selected);
-      console.log(selected);
+      if (selected === undefined || isLoadingT) return;
+      selectedPlaylistRef.current = selected;
       setInfoIndex(0);
       setLoadingT(prev => prev + 1);
       tracksQ.current = await useSpotifyQuery(
         getTracks,
         0,
-        getSelectedPlaylist
+        selectedPlaylistRef.current
       );
       setLoadingT(prev => prev - 1);
     },
@@ -125,27 +115,26 @@ const Dashboard = () => {
   }, []);
 
   const isFollowed = useCallback(() => {
-    if (getSelectedPlaylist !== undefined && playlistsQ.current !== undefined) {
+    if (
+      selectedPlaylistRef.current !== undefined &&
+      playlistsQ.current !== undefined
+    ) {
       return playlistsQ.current.list.has(
-        generatePlaylistKey(getSelectedPlaylist)
+        generatePlaylistKey(selectedPlaylistRef.current)
       );
     } else return false;
-  }, [getSelectedPlaylist, playlistsQ.current]);
+  }, [selectedPlaylistRef.current, playlistsQ.current]);
 
   const isOwned = useCallback(() => {
     if (
-      getSelectedPlaylist !== undefined &&
+      selectedPlaylistRef.current !== undefined &&
       userInfo !== undefined &&
-      getSelectedPlaylist.owner === userInfo.display_name
+      userInfo !== null &&
+      selectedPlaylistRef.current.owner === userInfo.display_name
     )
       return true;
     else return false;
-  }, [getSelectedPlaylist, userInfo]);
-
-  //const addSubscriptionsQ = addSubscriptionsQuery(setSelectedP);
-
-  //displayTracksCheck = displayTracksCheck || addSubscriptionsQ.isLoading;
-  //displayPlaylistsCheck = displayPlaylistsCheck || createQ.isLoading;
+  }, [selectedPlaylistRef.current, userInfo]);
 
   /**
    * Display list of playlists
@@ -201,7 +190,7 @@ const Dashboard = () => {
           <Loader color="green" size="sm" variant="bars" />
         </Center>
       );
-    if (infoIndex === 0 && getSelectedPlaylist !== undefined) {
+    if (infoIndex === 0 && selectedPlaylistRef.current !== undefined) {
       return (
         <SimpleGrid
           h="100%"
@@ -211,25 +200,28 @@ const Dashboard = () => {
           verticalSpacing={0}
         >
           <Box className="info-card">
-            <Row label={"Name:"} value={getSelectedPlaylist.name} />
+            <Row label={"Name:"} value={selectedPlaylistRef.current.name} />
             <Space h="md" />
-            <Row label={"Owned By:"} value={getSelectedPlaylist.owner} />
+            <Row
+              label={"Owned By:"}
+              value={selectedPlaylistRef.current.owner}
+            />
             <Space h="md" />
             <Flex wrap="wrap" gap="sm">
-              <Row label={"Songs:"} value={getSelectedPlaylist.total} />
+              <Row label={"Songs:"} value={selectedPlaylistRef.current.total} />
               <ShowTracksButton setInfoIndex={setInfoIndex} />
             </Flex>
             <Space h="xs" />
             <Row label={"Top Genres:"} value={null} />
             <TopPlaylistGenres
-              selectedPlaylist={getSelectedPlaylist}
+              selectedPlaylist={selectedPlaylistRef}
               isFollowed={isFollowed}
             />
             <Space h="xs" />
             <Group spacing={0}>
               <Row label={"Subscribed Genres:"} value={null} />
               <GenreSubscriber
-                selectedPlaylist={getSelectedPlaylist}
+                selectedPlaylist={selectedPlaylistRef}
                 isFollowed={isFollowed}
                 isOwned={isOwned}
               />
@@ -238,8 +230,8 @@ const Dashboard = () => {
             <Group spacing={0}>
               <Row label={"Subscribed Playlists:"} value={null} />
               <PlaylistSubscriber
-                playlists={playlistsQ.current?.list}
-                selectedPlaylist={getSelectedPlaylist}
+                playlists={playlistsQ}
+                selectedPlaylist={selectedPlaylistRef}
                 isFollowed={isFollowed}
                 isOwned={isOwned}
               />
@@ -247,10 +239,13 @@ const Dashboard = () => {
           </Box>
         </SimpleGrid>
       );
-    } else if (infoIndex === 1 && getSelectedPlaylist?.tracks !== undefined) {
+    } else if (
+      infoIndex === 1 &&
+      selectedPlaylistRef.current?.tracks !== undefined
+    ) {
       const dynamicList: JSX.Element[] = [];
       let index = 0;
-      for (const track of getSelectedPlaylist.tracks.values()) {
+      for (const track of selectedPlaylistRef.current.tracks.values()) {
         dynamicList.push(
           <Box
             className="not-button"
@@ -306,7 +301,7 @@ const Dashboard = () => {
   };
 
   const displayInfoLabel = () => {
-    const loading = getSelectedPlaylist === undefined || isLoadingT;
+    const loading = selectedPlaylistRef.current === undefined || isLoadingT;
     let label: string;
     switch (infoIndex) {
       case 0:
@@ -326,7 +321,7 @@ const Dashboard = () => {
   };
 
   const displayUserName = () => {
-    if (userInfo !== undefined) {
+    if (userInfo !== undefined && userInfo !== null) {
       if (userInfo.display_name !== null) return ": " + userInfo.display_name;
     }
     return "";
@@ -341,7 +336,7 @@ const Dashboard = () => {
       return (
         <UnfollowButton
           playlists={playlistsQ}
-          playlist={getSelectedPlaylist}
+          playlist={selectedPlaylistRef}
           setSelected={setSelectedP}
           setLoading={setLoadingP}
         />
@@ -350,7 +345,7 @@ const Dashboard = () => {
       return (
         <FollowButton
           playlists={playlistsQ}
-          playlist={getSelectedPlaylist}
+          playlist={selectedPlaylistRef}
           setSelected={setSelectedP}
           setLoading={setLoadingP}
         />
@@ -404,8 +399,10 @@ const Dashboard = () => {
               setLoading={setLoadingP}
             />
             <UpdateAllButton
-              selectedPlaylist={getSelectedPlaylist}
+              selectedPlaylist={selectedPlaylistRef}
               playlists={playlistsQ}
+              setSelected={setSelectedP}
+              setLoading={setLoadingT}
             />
           </Flex>
           <Flex

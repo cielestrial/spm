@@ -4,14 +4,14 @@ import { getWhitelist } from "../api/SpotifyApiClientSide";
 import { playlistType } from "../api/SpotifyApiClientTypes";
 
 type proptype = {
-  selectedPlaylist: playlistType | undefined;
+  selectedPlaylist: React.MutableRefObject<playlistType | undefined>;
   isFollowed: () => boolean;
   isOwned: () => boolean;
 };
 const GenreSubscriber = (props: proptype) => {
   const [value, setValue] = useState<string[]>(
-    props.selectedPlaylist !== undefined
-      ? props.selectedPlaylist.genreSubscriptions
+    props.selectedPlaylist.current !== undefined
+      ? props.selectedPlaylist.current.genreSubscriptions
       : []
   );
   const data = getWhitelist();
@@ -29,8 +29,8 @@ const GenreSubscriber = (props: proptype) => {
       value={value}
       onChange={e => {
         setValue(e);
-        if (props.selectedPlaylist !== undefined)
-          props.selectedPlaylist.genreSubscriptions = e;
+        if (props.selectedPlaylist.current !== undefined && e.length > 0)
+          props.selectedPlaylist.current.genreSubscriptions = e;
       }}
       searchable
       autoComplete="off"

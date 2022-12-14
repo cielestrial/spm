@@ -1,12 +1,9 @@
 To Do:    
-  1) Custom QueryApi (isLoading, retry after interval up to 3 times, refetch?)
-  2) Save and Load from csv files 
-  3) Liked Songs
+  1) Save and Load from csv files 
+  2) Liked Songs
   
-
-
-  5) Visuals
-  6) Hosting
+  3) Visuals
+  4) Hosting
 
 
 Performance:    
