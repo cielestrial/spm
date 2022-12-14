@@ -1,5 +1,5 @@
 To Do:    
-  1) Try SWS
+  1) Custom QueryApi (isLoading, retry after interval up to 3 times, refetch?)
   2) Save and Load from csv files 
   3) Liked Songs
   

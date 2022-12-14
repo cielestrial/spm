@@ -10,22 +10,27 @@ import {
   Text,
   TextInput
 } from "@mantine/core";
-import { useDisclosure, useForceUpdate } from "@mantine/hooks";
-import { useCallback, useRef, useState } from "react";
+import {
+  useDebouncedValue,
+  useDisclosure,
+  useForceUpdate
+} from "@mantine/hooks";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   displayMap,
   generatePlaylistKey,
   inPlaylists
 } from "../api/misc/HelperFunctions";
 import { loadingAllTracks } from "../pages/Dashboard";
-import { playlistsQuery } from "../api/QueryApi";
 import {
   duplicateManager,
   generalPlaylistsSearch,
-  generalTracksSearch
+  generalTracksSearch,
+  getPlaylists
 } from "../api/SpotifyApiClientSide";
 import {
   occuranceType,
+  playlistsType,
   playlistType,
   tracksType,
   uniqueType
@@ -33,6 +38,7 @@ import {
 import Row from "./Row";
 import LoadMoreLibraryButton from "./LoadMoreLibraryButton";
 import LoadMoreGeneralButton from "./LoadMoreGeneralButton";
+import { useSpotifyQuery } from "../api/QueryApi";
 
 type propsType = {
   setSelectedP: (selected: playlistType | undefined) => void;
@@ -46,13 +52,26 @@ const SearchBar = (props: propsType) => {
   // UI stuff
   const [opened, { close, open }] = useDisclosure(false);
   const [playlistValue, setPlaylistValue] = useState("");
+  const waitTime = 750;
+  const debounceWaitTime = Math.round(0.67 * waitTime);
+  let [debouncedPlaylistValue] = useDebouncedValue(
+    playlistValue,
+    debounceWaitTime
+  );
   const playlistValueRef = useRef("");
   const [songValue, setSongValue] = useState("");
+  const [debouncedSongValue] = useDebouncedValue(songValue, debounceWaitTime);
   const songValueRef = useRef("");
   const [artistValue, setArtistValue] = useState("");
+  const [debouncedArtistValue] = useDebouncedValue(
+    artistValue,
+    debounceWaitTime
+  );
   const artistValueRef = useRef("");
   const [albumValue, setAlbumValue] = useState("");
+  const [debouncedAlbumValue] = useDebouncedValue(albumValue, debounceWaitTime);
   const albumValueRef = useRef("");
+
   const selectedCategory = useRef<searchCategoryType>("Playlists");
   const searchCategorySelect: searchCategoryType[] = ["Playlists", "Tracks"];
   const [selectedSearchCategory, setSelectedSearchCategory] =
@@ -72,9 +91,45 @@ const SearchBar = (props: propsType) => {
   });
 
   // Query stuff
-  const libraryPlaylistsQ = playlistsQuery();
-  const playlistsOffsetRef = useRef(0);
-  const tracksOffsetRef = useRef(0);
+  const offsetRef = useRef(0);
+  async function generalPlaylistsQ() {
+    const results = (await useSpotifyQuery(
+      async function (querySearch, offset) {
+        return await generalPlaylistsSearch(
+          querySearch.current,
+          offset.current
+        );
+      },
+      0,
+      playlistValueRef,
+      offsetRef
+    )) as playlistsType;
+    return results;
+  }
+
+  const generalTracksQ = async () => {
+    const results = (await useSpotifyQuery(
+      async function (songQuery, artistQuery, albumQuery, offset) {
+        let querySearch = "";
+        if (songQuery.current !== "")
+          querySearch += "track:" + songQuery.current + " ";
+        if (artistQuery.current !== "")
+          querySearch += "artist:" + artistQuery.current + " ";
+        if (albumQuery.current !== "")
+          querySearch += "album:" + albumQuery.current;
+        const res = (await generalTracksSearch(querySearch, offset.current)) as
+          | playlistType
+          | undefined;
+        return res;
+      },
+      0,
+      songValueRef,
+      artistValueRef,
+      albumValueRef,
+      offsetRef
+    )) as playlistType | undefined;
+    return results;
+  };
 
   // Display query result stuff
   const [searchResults, setSearchResults] = useState<JSX.Element[]>([]);
@@ -88,9 +143,19 @@ const SearchBar = (props: propsType) => {
   const indexRef = useRef(0);
   const pageRef = useRef(0);
   const totalPageRef = useRef(0);
-  const counterRef = useRef(0);
+  const counterRef = useRef(0); // For debug
   const timeout = useRef<NodeJS.Timeout>();
-  const waitTime = 666;
+
+  useEffect(() => {
+    clearTimeout(timeout.current);
+    timeout.current = setTimeout(search, waitTime);
+    return () => clearTimeout(timeout.current);
+  }, [
+    debouncedPlaylistValue,
+    debouncedSongValue,
+    debouncedArtistValue,
+    debouncedAlbumValue
+  ]);
 
   const displayLoader = () => {
     return [
@@ -110,10 +175,12 @@ const SearchBar = (props: propsType) => {
 
   const asyncSearch = async () => {
     if (
-      playlistValueRef.current !== "" ||
-      songValueRef.current !== "" ||
-      artistValueRef.current !== "" ||
-      albumValueRef.current !== ""
+      debouncedPlaylistValue !== "" ||
+      !(
+        debouncedSongValue === "" &&
+        debouncedArtistValue === "" &&
+        debouncedAlbumValue === ""
+      )
     ) {
       if (scrollReset.current !== null)
         mutationObserver.observe(scrollReset.current, {
@@ -186,7 +253,7 @@ const SearchBar = (props: propsType) => {
           dynamicList.current.push(
             <Center key="loadMore" w="calc(80vw - 2rem)">
               <LoadMoreGeneralButton
-                offset={playlistsOffsetRef}
+                offset={offsetRef}
                 page={pageRef}
                 total={totalPageRef}
                 getResults={getGeneralResultsP}
@@ -201,7 +268,7 @@ const SearchBar = (props: propsType) => {
     dynamicList.current,
     indexRef.current,
     pageRef.current,
-    playlistsOffsetRef.current
+    offsetRef.current
   ]);
 
   const searchLibraryPlaylists = async () => {
@@ -212,13 +279,18 @@ const SearchBar = (props: propsType) => {
     totalPageRef.current = 0;
     counterRef.current = 0;
 
-    if (libraryPlaylistsQ.data !== undefined) {
+    const libraryPlaylistsQ = (await useSpotifyQuery(
+      getPlaylists,
+      0
+    )) as playlistsType;
+
+    if (libraryPlaylistsQ !== undefined) {
       playlistResults.current.push(new Map<string, playlistType>());
-      for (const pl of libraryPlaylistsQ.data.list.values()) {
+      for (const pl of libraryPlaylistsQ.list.values()) {
         if (
           pl.name
             .toLocaleLowerCase()
-            .includes(playlistValueRef.current.toLocaleLowerCase())
+            .includes(debouncedPlaylistValue.toLocaleLowerCase())
         ) {
           playlistResults.current[totalPageRef.current].set(
             generatePlaylistKey(pl),
@@ -314,7 +386,7 @@ const SearchBar = (props: propsType) => {
           dynamicList.current.push(
             <Center key="loadMore" w="calc(80vw - 2rem)">
               <LoadMoreGeneralButton
-                offset={tracksOffsetRef}
+                offset={offsetRef}
                 page={pageRef}
                 total={totalPageRef}
                 getResults={getGeneralResultsT}
@@ -329,7 +401,7 @@ const SearchBar = (props: propsType) => {
     dynamicList.current,
     indexRef.current,
     pageRef.current,
-    tracksOffsetRef.current
+    offsetRef.current
   ]);
 
   const searchLibraryTracks = async () => {
@@ -347,14 +419,14 @@ const SearchBar = (props: propsType) => {
           uniqueTrack.track.is_playable &&
           uniqueTrack.track.name
             .toLocaleLowerCase()
-            .includes(songValueRef.current.toLocaleLowerCase()) &&
+            .includes(debouncedSongValue.toLocaleLowerCase()) &&
           uniqueTrack.track.album
             .toLocaleLowerCase()
-            .includes(albumValueRef.current.toLocaleLowerCase()) &&
+            .includes(debouncedAlbumValue.toLocaleLowerCase()) &&
           uniqueTrack.track.artists.some(artist =>
             artist
               .toLocaleLowerCase()
-              .includes(artistValueRef.current.toLocaleLowerCase())
+              .includes(debouncedArtistValue.toLocaleLowerCase())
           )
         ) {
           trackResults.current[totalPageRef.current].add(uniqueTrack);
@@ -383,27 +455,30 @@ const SearchBar = (props: propsType) => {
   };
 
   const getGeneralResultsP = useCallback(async () => {
-    const data = await generalPlaylistsSearch(
-      playlistValueRef.current,
-      playlistsOffsetRef.current
-    );
+    const data = await generalPlaylistsQ();
     if (data !== undefined && playlistResults.current !== undefined) {
-      console.log("res", data.list);
       playlistResults.current[pageRef.current] = data.list;
       totalPageRef.current = data.total;
       counterRef.current = totalPageRef.current;
       addToResultListP();
-    } else console.log("right here", data);
-  }, [playlistResults.current, pageRef.current]);
+    }
+  }, [
+    playlistResults.current,
+    pageRef.current,
+    playlistValueRef.current,
+    offsetRef.current
+  ]);
 
   const searchGeneralPlaylists = async () => {
     dynamicList.current = [];
     playlistResults.current = [];
-    playlistsOffsetRef.current = 0;
+    offsetRef.current = 0;
     indexRef.current = 0;
     pageRef.current = 0;
     totalPageRef.current = 0;
     counterRef.current = 0;
+
+    playlistValueRef.current = debouncedPlaylistValue;
     await getGeneralResultsP();
 
     if (totalPageRef.current === 0) {
@@ -419,18 +494,7 @@ const SearchBar = (props: propsType) => {
 
   const getGeneralResultsT = useCallback(async () => {
     if (trackResults.current !== undefined) {
-      let querySearch = "";
-      if (songValueRef.current !== "")
-        querySearch += "track:" + songValueRef.current + " ";
-      if (artistValueRef.current !== "")
-        querySearch += "artist:" + artistValueRef.current + " ";
-      if (albumValueRef.current !== "")
-        querySearch += "album:" + albumValueRef.current;
-      console.log(querySearch);
-      const data = await generalTracksSearch(
-        querySearch,
-        tracksOffsetRef.current
-      );
+      const data = await generalTracksQ();
       if (data !== undefined) {
         trackResults.current[pageRef.current] = new Set<uniqueType>(
           data.tracks.map(track => ({
@@ -444,17 +508,25 @@ const SearchBar = (props: propsType) => {
         addToResultListT();
       }
     }
-  }, [trackResults.current, pageRef.current, tracksOffsetRef.current]);
+  }, [
+    generalTracksQ,
+    trackResults.current,
+    pageRef.current,
+    offsetRef.current
+  ]);
 
   const searchGeneralTracks = async () => {
     dynamicList.current = [];
     trackResults.current = [];
-    tracksOffsetRef.current = 0;
+    offsetRef.current = 0;
     indexRef.current = 0;
     pageRef.current = 0;
     totalPageRef.current = 0;
     counterRef.current = 0;
 
+    songValueRef.current = debouncedSongValue;
+    artistValueRef.current = debouncedArtistValue;
+    albumValueRef.current = debouncedAlbumValue;
     await getGeneralResultsT();
     if (totalPageRef.current === 0) {
       return [
@@ -467,31 +539,11 @@ const SearchBar = (props: propsType) => {
     } else return dynamicList.current;
   };
 
-  const timer = () => {
-    clearTimeout(timeout.current);
-    timeout.current = setTimeout(() => {
-      const event = new KeyboardEvent("keydown", {
-        key: "Enter",
-        bubbles: true,
-        cancelable: true
-      });
-      nameSearchBar.current?.dispatchEvent(event);
-    }, waitTime);
-  };
-
   const resetHandler = () => {
     setPlaylistValue("");
-    playlistValueRef.current = "";
-
     setSongValue("");
-    songValueRef.current = "";
-
     setArtistValue("");
-    artistValueRef.current = "";
-
     setAlbumValue("");
-    albumValueRef.current = "";
-
     setSearchResults([]);
     setIsLoading(false);
   };
@@ -520,12 +572,7 @@ const SearchBar = (props: propsType) => {
           data-autofocus
           onChange={event => {
             setPlaylistValue(event.currentTarget.value);
-            playlistValueRef.current = event.currentTarget.value;
             setIsLoading(true);
-            timer();
-          }}
-          onKeyDown={event => {
-            if (event.key === "Enter") search();
           }}
           value={playlistValue}
         />
@@ -555,12 +602,7 @@ const SearchBar = (props: propsType) => {
             data-autofocus
             onChange={event => {
               setSongValue(event.currentTarget.value);
-              songValueRef.current = event.currentTarget.value;
               setIsLoading(true);
-              timer();
-            }}
-            onKeyDown={event => {
-              if (event.key === "Enter") search();
             }}
             value={songValue}
           />
@@ -577,12 +619,7 @@ const SearchBar = (props: propsType) => {
             variant="filled"
             onChange={event => {
               setArtistValue(event.currentTarget.value);
-              artistValueRef.current = event.currentTarget.value;
               setIsLoading(true);
-              timer();
-            }}
-            onKeyDown={event => {
-              if (event.key === "Enter") search();
             }}
             value={artistValue}
           />
@@ -600,12 +637,7 @@ const SearchBar = (props: propsType) => {
             variant="filled"
             onChange={event => {
               setAlbumValue(event.currentTarget.value);
-              albumValueRef.current = event.currentTarget.value;
               setIsLoading(true);
-              timer();
-            }}
-            onKeyDown={event => {
-              if (event.key === "Enter") search();
             }}
             value={albumValue}
           />

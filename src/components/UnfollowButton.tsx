@@ -1,21 +1,35 @@
 import { Button, Group, Modal, Text } from "@mantine/core";
-import { useDisclosure } from "@mantine/hooks";
-import { UseQueryResult } from "react-query";
-import { playlistType } from "../api/SpotifyApiClientTypes";
+import { useDisclosure, useForceUpdate } from "@mantine/hooks";
+import { useSpotifyQuery } from "../api/QueryApi";
+import { unfollowPlaylist } from "../api/SpotifyApiClientSide";
+import { playlistsType, playlistType } from "../api/SpotifyApiClientTypes";
 
 type propsType = {
-  playlists: UseQueryResult<
-    {
-      total: number;
-      list: Map<string, playlistType>;
-    },
-    unknown
-  >;
+  playlists: React.MutableRefObject<playlistsType>;
   playlist: playlistType | undefined;
-  unfollow: UseQueryResult<boolean, unknown>;
+  setSelected: (selected: playlistType | undefined) => Promise<void>;
+  setLoading: React.Dispatch<React.SetStateAction<number>>;
 };
 const UnfollowButton = (props: propsType) => {
   const [opened, { close, open }] = useDisclosure(false);
+  const forceUpdate = useForceUpdate();
+
+  const unfollow = async () => {
+    props.setLoading(prev => prev + 1);
+    const unfollowQ = await useSpotifyQuery(
+      async (selectedPlaylist, setSelected) => {
+        console.log("trying to unfollow", selectedPlaylist?.name);
+        const res = await unfollowPlaylist(selectedPlaylist);
+        setSelected(undefined);
+        return res;
+      },
+      0,
+      props.playlist,
+      props.setSelected
+    );
+    props.setLoading(prev => prev - 1);
+    return unfollowQ;
+  };
 
   return (
     <>
@@ -39,8 +53,11 @@ const UnfollowButton = (props: propsType) => {
             color="yellow"
             radius="xl"
             size="sm"
-            onClick={() => {
-              props.unfollow.refetch();
+            onClick={async () => {
+              console.log(props.playlist);
+              unfollow();
+              //await props.playlists.mutate();
+              //forceUpdate();
               close();
             }}
           >

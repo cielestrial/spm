@@ -401,7 +401,7 @@ const searchTracks = (req, res) => {
         include_external: "audio"
       })
       .then(data => {
-        console.log("Found tracks are", data.body.tracks);
+        console.log("Found tracks", data.body.tracks.total);
         res.json({
           total: data.body.tracks.total,
           list: data.body.tracks.items

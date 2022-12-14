@@ -1,22 +1,36 @@
 import { Modal, Group, Button, Text } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
-import { UseQueryResult } from "react-query";
-import { playlistType } from "../api/SpotifyApiClientTypes";
+import { useSpotifyQuery } from "../api/QueryApi";
+import { followPlaylist } from "../api/SpotifyApiClientSide";
+import { playlistsType, playlistType } from "../api/SpotifyApiClientTypes";
 
 type propsType = {
-  playlists: UseQueryResult<
-    {
-      total: number;
-      list: Map<string, playlistType>;
-    },
-    unknown
-  >;
+  playlists: React.MutableRefObject<playlistsType>;
   playlist: playlistType | undefined;
-  follow: UseQueryResult<boolean, unknown>;
+  setSelected: (selected: playlistType | undefined) => Promise<void>;
+  setLoading: React.Dispatch<React.SetStateAction<number>>;
 };
 
 const FollowButton = (props: propsType) => {
   const [opened, { close, open }] = useDisclosure(false);
+
+  const follow = async () => {
+    props.setLoading(prev => prev + 1);
+    const followQ = await useSpotifyQuery(
+      async (selectedPlaylist, setSelected) => {
+        const res = await followPlaylist(selectedPlaylist);
+        setSelected(undefined);
+        setSelected(selectedPlaylist);
+        return res;
+      },
+      0,
+      props.playlist,
+      props.setSelected
+    );
+    props.setLoading(prev => prev - 1);
+    return followQ;
+  };
+
   return (
     <>
       <Modal
@@ -40,7 +54,7 @@ const FollowButton = (props: propsType) => {
             radius="xl"
             size="sm"
             onClick={() => {
-              props.follow.refetch();
+              follow();
               close();
             }}
           >
