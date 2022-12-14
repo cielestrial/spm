@@ -1,23 +1,37 @@
 import { Button, Group, Modal, TextInput } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { useDisclosure } from "@mantine/hooks";
-import { UseQueryResult } from "react-query";
-import { refetchCreate } from "../api/QueryApi";
-import { playlistType } from "../api/SpotifyApiClientTypes";
+import { playlistsType, playlistType } from "../api/SpotifyApiClientTypes";
+import { useSpotifyQuery } from "../api/QueryApi";
+import { createPlaylist } from "../api/SpotifyApiClientSide";
+import { useState } from "react";
 
 type propsType = {
-  playlists: UseQueryResult<
-    {
-      total: number;
-      list: Map<string, playlistType>;
-    },
-    unknown
-  >;
-  setName: React.Dispatch<React.SetStateAction<string>>;
+  playlists: React.MutableRefObject<playlistsType>;
+  setSelected: (selected: playlistType | undefined) => Promise<void>;
+  setLoading: React.Dispatch<React.SetStateAction<number>>;
 };
 
 const CreatePlaylistButton = (props: propsType) => {
   const [opened, { close, open }] = useDisclosure(false);
+  const [getName, setName] = useState("");
+
+  const create = async () => {
+    props.setLoading(prev => prev + 1);
+    const createQ = await useSpotifyQuery(
+      async (playlistName, setSelected) => {
+        const res = await createPlaylist(playlistName);
+        setSelected(res);
+        return res;
+      },
+      0,
+      getName,
+      props.setSelected
+    );
+    props.setLoading(prev => prev - 1);
+    return createQ;
+  };
+
   const form = useForm({
     initialValues: {
       name: ""
@@ -45,9 +59,8 @@ const CreatePlaylistButton = (props: propsType) => {
       >
         <form
           onSubmit={form.onSubmit(values => {
-            props.setName(values.name);
-            refetchCreate();
-            props.playlists.refetch();
+            setName(values.name);
+            create();
             form.reset();
             close();
           })}

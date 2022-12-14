@@ -2,8 +2,9 @@ import { SelectItem, MultiSelect } from "@mantine/core";
 import { useForceUpdate } from "@mantine/hooks";
 import { useState } from "react";
 import { generatePlaylistKey } from "../api/misc/HelperFunctions";
-import { generalPlaylistsQuery } from "../api/QueryApi";
-import { playlistType } from "../api/SpotifyApiClientTypes";
+import { useSpotifyQuery } from "../api/QueryApi";
+import { generalPlaylistsSearch } from "../api/SpotifyApiClientSide";
+import { playlistsType, playlistType } from "../api/SpotifyApiClientTypes";
 
 type proptype = {
   playlists: Map<string, playlistType> | undefined;
@@ -11,6 +12,10 @@ type proptype = {
   isFollowed: () => boolean;
   isOwned: () => boolean;
 };
+type dataType = {
+  value: string;
+  label: string;
+}[];
 const PlaylistSubscriber = (props: proptype) => {
   const [selectValue, setSelectValue] = useState<string[]>(
     props.selectedPlaylist !== undefined
@@ -19,8 +24,17 @@ const PlaylistSubscriber = (props: proptype) => {
   );
   const forceUpdate = useForceUpdate();
   const [searchValue, onSearchChange] = useState("");
-  const resultLimit = 30;
-  const generalPlaylistsQ = generalPlaylistsQuery(searchValue, resultLimit);
+
+  const searchGeneralPlaylists = async () => {
+    const generalPlaylistsQ = (await useSpotifyQuery(
+      generalPlaylistsSearch,
+      0,
+      searchValue,
+      0
+    )) as playlistsType;
+    return generalPlaylistsQ;
+  };
+
   const key = generatePlaylistKey(props.selectedPlaylist);
   const data1 = props.playlists
     ? Array.from(props.playlists.entries()).map(value => ({
@@ -38,17 +52,17 @@ const PlaylistSubscriber = (props: proptype) => {
 
   const updateData = async () => {
     if (searchValue !== "") {
-      const res = await generalPlaylistsQ.refetch();
-      if (res.data?.list.has(key)) res.data.list.delete(key);
-      for (const item of data1) {
-        if (res.data?.list.has(item.value)) res.data.list.delete(item.value);
+      let data2: dataType = {} as dataType;
+      const data = await searchGeneralPlaylists();
+      if (data !== undefined) {
+        if (data.list.has(key)) data.list.delete(key);
+        for (const item of data1)
+          if (data.list.has(item.value)) data.list.delete(item.value);
+        data2 = Array.from(data.list.entries()).map(value => ({
+          value: value[0],
+          label: value[1].name
+        }));
       }
-      const data2 = res.data
-        ? Array.from(res.data.list.entries()).map(value => ({
-            value: value[0],
-            label: value[1].name
-          }))
-        : [];
       setData(data1.concat(data2));
       forceUpdate();
     }

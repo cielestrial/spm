@@ -200,7 +200,6 @@ const appendPlaylists = async (newOffset: Promise<number> | number) => {
  */
 export const getTracks = async (playlist: playlistType | undefined) => {
   if (playlist === undefined) throw new Error("Playlist not defined");
-
   if (
     playlist.tracks !== undefined &&
     playlist.total === playlist.tracks.length
@@ -504,8 +503,12 @@ export const createPlaylist = async (name: string | undefined) => {
         total: 0,
         list: new Map<string, playlistType>()
       };
-    }
-    playlists.list.set(generatePlaylistKey(playlist), playlist);
+      playlists.list.set(generatePlaylistKey(playlist), playlist);
+    } else
+      playlists.list = new Map<string, playlistType>([
+        [generatePlaylistKey(playlist), playlist],
+        ...playlists.list
+      ]);
     playlists.total++;
   } catch (err) {
     console.log("Something went wrong with createPlaylist()", err);

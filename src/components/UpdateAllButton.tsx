@@ -1,29 +1,21 @@
 import { Button } from "@mantine/core";
-import { UseQueryResult } from "react-query";
 import { generatePlaylistKey } from "../api/misc/HelperFunctions";
-import { playlistType } from "../api/SpotifyApiClientTypes";
+import { playlistsType, playlistType } from "../api/SpotifyApiClientTypes";
 
 type proptype = {
   selectedPlaylist: playlistType | undefined;
-  playlists: UseQueryResult<
-    {
-      total: number;
-      list: Map<string, playlistType>;
-    },
-    unknown
-  >;
-  addSubscriptions: UseQueryResult<void, unknown>;
+  playlists: React.MutableRefObject<playlistsType>;
 };
 
 const UpdateAllButton = (props: proptype) => {
   const updateHandler = async () => {
     if (
-      props.playlists.data === undefined ||
+      props.playlists.current === undefined ||
       props.selectedPlaylist === undefined
     )
       return;
     console.log(generatePlaylistKey(props.selectedPlaylist));
-    props.addSubscriptions.refetch();
+    //props.addSubscriptions.mutate();
   };
 
   return (

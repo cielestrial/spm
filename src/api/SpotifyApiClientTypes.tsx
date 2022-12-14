@@ -23,12 +23,11 @@ export type playlistType = {
   genreSubscriptions: string[];
   playlistSubscriptions: string[];
 };
-export type playlistsType =
-  | {
-      total: number;
-      list: Map<string, playlistType>;
-    }
-  | undefined;
+export type playlistsType = definedPlaylistsType | undefined;
+export type definedPlaylistsType = {
+  total: number;
+  list: Map<string, playlistType>;
+};
 export type tracksType = {
   is_local: boolean;
   id: string;

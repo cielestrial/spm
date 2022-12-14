@@ -13,6 +13,7 @@ import {
 import { useCallback, useEffect, useRef, useState } from "react";
 import UnfollowButton from "../components/UnfollowButton";
 import {
+  playlistsType,
   playlistType,
   tokenType,
   tracksType,
@@ -20,18 +21,6 @@ import {
 } from "../api/SpotifyApiClientTypes";
 import CreatePlaylistButton from "../components/CreatePlaylistButton";
 import SearchBar from "../components/SearchBar";
-import {
-  addSubscriptionsQuery,
-  allTracksQuery,
-  createQuery,
-  followQuery,
-  playlistsQuery,
-  refetchTracks,
-  tokenQuery,
-  tracksQuery,
-  unfollowQuery,
-  userQuery
-} from "../api/QueryApi";
 import FollowButton from "../components/FollowButton";
 import { generatePlaylistKey, inPlaylists } from "../api/misc/HelperFunctions";
 import GenreTestButton from "../components/GenreTestButton";
@@ -43,6 +32,14 @@ import PlaylistSubscriber from "../components/PlaylistSubscriber";
 import TopPlaylistGenres from "../components/TopPlaylistGenres";
 import UpdateAllButton from "../components/UpdateAllButton";
 import { useNavigate } from "react-router-dom";
+import {
+  getAllTracks,
+  getAuthenticatedUserInfo,
+  getPlaylists,
+  getToken,
+  getTracks
+} from "../api/SpotifyApiClientSide";
+import { useSpotifyQuery } from "../api/QueryApi";
 
 export let token: tokenType | undefined | null;
 export let userInfo: userInfoType | undefined;
@@ -52,33 +49,74 @@ const Dashboard = () => {
   const navigate = useRef(useNavigate());
   const [getSelectedPlaylist, setSelectedPlaylist] = useState<playlistType>();
   const [getSelectedTrack, setSelectedTrack] = useState<tracksType>();
-  const [getCreatedPlaylistName, setCreatedPlaylistName] = useState("");
   const [infoIndex, setInfoIndex] = useState(0);
+  const [isLoading, setLoading] = useState(true);
+  const [isLoadingP, setLoadingP] = useState(0);
+  const [isLoadingT, setLoadingT] = useState(0);
 
-  const { data: tokenData, isFetching: tokenStatus } = tokenQuery();
-  token = tokenData;
+  const playlistsQ = useRef<playlistsType>(undefined);
+  const tracksQ = useRef<playlistType | undefined>(undefined);
+
   useEffect(() => {
-    if (tokenData === null) navigate.current("/");
-  }, [tokenData]);
+    const start = async () => {
+      setLoading(true);
 
-  const { data: userData, isFetching: userStatus } = userQuery();
-  userInfo = userData;
-  const playlistsQ = playlistsQuery();
-  const libraryTracksQ = allTracksQuery(playlistsQ.data);
-  loadingAllTracks = libraryTracksQ.isFetching;
-  const tracksQ = tracksQuery(getSelectedPlaylist);
-  let displayTracksCheck = tracksQ.isFetching || libraryTracksQ.isFetching;
-  let displayPlaylistsCheck = playlistsQ.isFetching;
+      const tokenData = (await useSpotifyQuery(getToken, 0)) as
+        | tokenType
+        | undefined
+        | null;
+      if (tokenData === null) navigate.current("/");
+      else if (tokenData !== undefined) {
+        token = tokenData;
+        const userData = (await useSpotifyQuery(
+          getAuthenticatedUserInfo,
+          0
+        )) as userInfoType | undefined;
+        if (userData !== undefined) userInfo = userData;
+        setLoading(false);
+        setLoadingP(prev => prev + 1);
+        playlistsQ.current = (await useSpotifyQuery(
+          getPlaylists,
+          0
+        )) as playlistsType;
+        const libraryTracksQ = await useSpotifyQuery(getAllTracks, 0);
+        setLoadingP(prev => prev - 1);
+      }
+      setLoading(false);
+    };
+
+    start();
+  }, []);
+
+  //const libraryTracksQ = allTracksQuery(playlistsQ.current);
+  //loadingAllTracks = libraryTracksQ.isLoading;
+
+  //let displayTracksCheck = tracksQ.isLoading || libraryTracksQ.isLoading
 
   const setSelectedP = useCallback(
-    (selected: playlistType | undefined) => {
-      if (selected === undefined || displayTracksCheck) return;
+    async (selected: playlistType | undefined) => {
+      if (selected === undefined || isLoadingT) {
+        setLoadingT(prev => prev + 1);
+        tracksQ.current = await useSpotifyQuery(
+          getTracks,
+          0,
+          getSelectedPlaylist
+        );
+        setLoadingT(prev => prev - 1);
+        return;
+      }
+      setSelectedPlaylist(selected);
       console.log(selected);
       setInfoIndex(0);
-      setSelectedPlaylist(selected);
-      refetchTracks();
+      setLoadingT(prev => prev + 1);
+      tracksQ.current = await useSpotifyQuery(
+        getTracks,
+        0,
+        getSelectedPlaylist
+      );
+      setLoadingT(prev => prev - 1);
     },
-    [displayTracksCheck]
+    [isLoadingT]
   );
 
   const setSelectedT = useCallback((track: tracksType) => {
@@ -87,10 +125,12 @@ const Dashboard = () => {
   }, []);
 
   const isFollowed = useCallback(() => {
-    if (getSelectedPlaylist !== undefined && playlistsQ.data !== undefined) {
-      return playlistsQ.data.list.has(generatePlaylistKey(getSelectedPlaylist));
+    if (getSelectedPlaylist !== undefined && playlistsQ.current !== undefined) {
+      return playlistsQ.current.list.has(
+        generatePlaylistKey(getSelectedPlaylist)
+      );
     } else return false;
-  }, [getSelectedPlaylist, playlistsQ.data]);
+  }, [getSelectedPlaylist, playlistsQ.current]);
 
   const isOwned = useCallback(() => {
     if (
@@ -102,30 +142,26 @@ const Dashboard = () => {
     else return false;
   }, [getSelectedPlaylist, userInfo]);
 
-  const createQ = createQuery(getCreatedPlaylistName, setSelectedP);
-  const unfollowQ = unfollowQuery(getSelectedPlaylist, setSelectedP);
-  const followQ = followQuery(getSelectedPlaylist, setSelectedP);
-  const addSubscriptionsQ = addSubscriptionsQuery(setSelectedP);
+  //const addSubscriptionsQ = addSubscriptionsQuery(setSelectedP);
 
-  displayTracksCheck = displayTracksCheck || addSubscriptionsQ.isFetching;
-  displayPlaylistsCheck =
-    displayPlaylistsCheck || createQ.isFetching || unfollowQ.isFetching;
+  //displayTracksCheck = displayTracksCheck || addSubscriptionsQ.isLoading;
+  //displayPlaylistsCheck = displayPlaylistsCheck || createQ.isLoading;
 
   /**
    * Display list of playlists
    * @returns
    */
   const displayPlaylists = () => {
-    if (displayPlaylistsCheck)
+    if (isLoadingP)
       return (
         <Center h="100%" className="loading">
           <Loader color="green" size="sm" variant="bars" />
         </Center>
       );
-    if (playlistsQ.data !== undefined) {
+    if (playlistsQ.current !== undefined) {
       const dynamicList: JSX.Element[] = [];
       let index = 0;
-      for (const playlist of playlistsQ.data.list.values()) {
+      for (const playlist of playlistsQ.current.list.values()) {
         dynamicList.push(
           <Box
             className="not-button"
@@ -159,7 +195,7 @@ const Dashboard = () => {
    * @returns
    */
   const displayInfo = () => {
-    if (displayTracksCheck)
+    if (isLoadingT)
       return (
         <Center h="100%" className="loading">
           <Loader color="green" size="sm" variant="bars" />
@@ -202,7 +238,7 @@ const Dashboard = () => {
             <Group spacing={0}>
               <Row label={"Subscribed Playlists:"} value={null} />
               <PlaylistSubscriber
-                playlists={playlistsQ.data?.list}
+                playlists={playlistsQ.current?.list}
                 selectedPlaylist={getSelectedPlaylist}
                 isFollowed={isFollowed}
                 isOwned={isOwned}
@@ -259,9 +295,9 @@ const Dashboard = () => {
   };
 
   const displayPlaylistsLabel = () => {
-    const loading = playlistsQ.data === undefined || displayPlaylistsCheck;
-    const number = loading ? "" : playlistsQ.data?.total;
-    const label = playlistsQ.data?.total === 1 ? "Playlist" : "Playlists";
+    const loading = playlistsQ.current === undefined || isLoadingP;
+    const number = loading ? "" : playlistsQ.current?.total;
+    const label = playlistsQ.current?.total === 1 ? "Playlist" : "Playlists";
     return (
       <Text className="text">
         {"Your"} {number} {label}
@@ -270,7 +306,7 @@ const Dashboard = () => {
   };
 
   const displayInfoLabel = () => {
-    const loading = getSelectedPlaylist === undefined || displayTracksCheck;
+    const loading = getSelectedPlaylist === undefined || isLoadingT;
     let label: string;
     switch (infoIndex) {
       case 0:
@@ -306,7 +342,8 @@ const Dashboard = () => {
         <UnfollowButton
           playlists={playlistsQ}
           playlist={getSelectedPlaylist}
-          unfollow={unfollowQ}
+          setSelected={setSelectedP}
+          setLoading={setLoadingP}
         />
       );
     else
@@ -314,12 +351,13 @@ const Dashboard = () => {
         <FollowButton
           playlists={playlistsQ}
           playlist={getSelectedPlaylist}
-          follow={followQ}
+          setSelected={setSelectedP}
+          setLoading={setLoadingP}
         />
       );
   };
 
-  if (tokenStatus || userStatus) {
+  if (isLoading) {
     return (
       <div className="background center loading">
         <Loader color="green" size="lg" variant="bars" />
@@ -362,12 +400,12 @@ const Dashboard = () => {
           >
             <CreatePlaylistButton
               playlists={playlistsQ}
-              setName={setCreatedPlaylistName}
+              setSelected={setSelectedP}
+              setLoading={setLoadingP}
             />
             <UpdateAllButton
               selectedPlaylist={getSelectedPlaylist}
               playlists={playlistsQ}
-              addSubscriptions={addSubscriptionsQ}
             />
           </Flex>
           <Flex
