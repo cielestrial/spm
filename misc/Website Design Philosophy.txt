@@ -33,14 +33,15 @@ Updates all playlists by adding the tracks from the playlists or genres they are
 Then removes duplicates
 
 Local storage feature: 
+On load:
 Compare playlist snapshot id
 snapshot
 : 
 "MTY2OTkwODk2MiwwMDAwMDAwMDBiNjFiY2QxNTNkMTdkZjM2MDAwYmUyNjE3M2RmODE5"
 
+Save:
 playlistKey: metadata, [subscribed genres], [subscribed playlists]
 
 
-
 datasets:
-  genreMasterList, artistGenreMasterList, whitelist, blacklist 
+  genreMasterList, artistGenreMasterList,(whitelist, blacklist)

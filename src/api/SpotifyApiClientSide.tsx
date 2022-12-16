@@ -45,6 +45,7 @@ export const AUTH_URL =
 const server = "http://localhost:8080";
 export const duplicateManager = new Map<string, uniqueType>();
 export const genreMasterList = new Map<string, number>();
+
 export const updateWhitelist = (genres: TransferListItem[]) => {
   for (let i = genres.length - 1; i <= 0; i--)
     if (genreMasterList.has(genres[i].label))
@@ -63,7 +64,7 @@ export const getWhitelist = () => {
       label: element[0],
     }));
 };
-const artistGenreMasterList = new Map<string, string[]>();
+export const artistMasterList = new Map<string, string[]>();
 let playlists: playlistsType;
 const options: optionsType = { offset: 0, limit: 0 };
 const getLimit = 50;
@@ -766,8 +767,8 @@ export const getTrackGenres = async (uniqueTrack: uniqueType) => {
   let genreList: string[] | undefined = [];
   artists = uniqueTrack.track.artists;
   for (const artist of artists) {
-    if (artistGenreMasterList.has(artist)) {
-      genreList = artistGenreMasterList.get(artist);
+    if (artistMasterList.has(artist)) {
+      genreList = artistMasterList.get(artist);
       if (genreList !== undefined) {
         for (const genre of genreList) {
           if (!uniqueTrack.track.genres.has(genre))

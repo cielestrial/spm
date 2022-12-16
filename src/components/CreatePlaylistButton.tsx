@@ -1,10 +1,9 @@
 import { Button, Group, Modal, TextInput } from "@mantine/core";
-import { useForm } from "@mantine/form";
 import { useDisclosure } from "@mantine/hooks";
 import { playlistsType, playlistType } from "../api/SpotifyApiClientTypes";
 import { useSpotifyQuery } from "../api/QueryApi";
 import { createPlaylist } from "../api/SpotifyApiClientSide";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 
 type propsType = {
   playlists: React.MutableRefObject<playlistsType>;
@@ -14,6 +13,7 @@ type propsType = {
 
 const CreatePlaylistButton = (props: propsType) => {
   const [opened, { close, open }] = useDisclosure(false);
+  const [name, setName] = useState("");
   const playlistName = useRef("");
 
   const create = async () => {
@@ -31,22 +31,13 @@ const CreatePlaylistButton = (props: propsType) => {
     return createQ;
   };
 
-  const form = useForm({
-    initialValues: {
-      name: "",
-    },
-    validate: {
-      name: (value) => (value.length > 100 ? "Invalid playlist name" : null),
-    },
-  });
-
   return (
     <>
       <Modal
         centered
         opened={opened}
         onClose={() => {
-          form.reset();
+          setName("");
           close();
         }}
         withCloseButton={false}
@@ -56,45 +47,50 @@ const CreatePlaylistButton = (props: propsType) => {
           modal: { backgroundColor: "transparent" },
         })}
       >
-        <form
-          onSubmit={form.onSubmit((values) => {
-            playlistName.current = values.name;
-            create();
-            form.reset();
-            close();
-          })}
-        >
-          <Group position="center" w="60vw" spacing={0}>
-            <TextInput
-              size="md"
-              w="60%"
-              autoComplete="off"
-              autoCorrect="false"
-              miw="min-content"
-              radius="0.33rem 0 0 0.33rem"
-              placeholder="Enter Playlist Name"
-              variant="filled"
-              data-autofocus
-              {...form.getInputProps("name")}
-            />
-            <Button
-              compact
-              w="15%"
-              miw="min-content"
-              type="submit"
-              variant="filled"
-              color="green"
-              size="xl"
-              styles={(theme) => ({
-                root: {
-                  borderRadius: "0 0.33rem 0.33rem 0",
-                },
-              })}
-            >
-              Create
-            </Button>
-          </Group>
-        </form>
+        <Group position="center" w="60vw" spacing={0}>
+          <TextInput
+            size="md"
+            w="60%"
+            autoComplete="off"
+            autoCorrect="false"
+            miw="min-content"
+            placeholder="Enter Playlist Name"
+            variant="filled"
+            data-autofocus
+            value={name}
+            onChange={(e) => {
+              setName(e.currentTarget.value);
+              playlistName.current = e.currentTarget.value;
+            }}
+            error={name.length > 100 ? "Playlist name too long" : null}
+            styles={(theme) => ({
+              root: {
+                borderRadius: "0.33rem 0 0 0.33rem",
+              },
+            })}
+          />
+          <Button
+            compact
+            w="15%"
+            miw="min-content"
+            type="submit"
+            variant="filled"
+            color="green"
+            size="xl"
+            onClick={() => {
+              create();
+              setName("");
+              close();
+            }}
+            styles={(theme) => ({
+              root: {
+                borderRadius: "0 0.33rem 0.33rem 0",
+              },
+            })}
+          >
+            Create
+          </Button>
+        </Group>
       </Modal>
 
       <Button

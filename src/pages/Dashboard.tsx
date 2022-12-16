@@ -25,8 +25,7 @@ import FollowButton from "../components/FollowButton";
 import {
   generatePlaylistKey,
   inPlaylists,
-  replacer,
-  savePlaylistsToFiles,
+  saveDataToFiles,
 } from "../api/misc/HelperFunctions";
 import GenreTestButton from "../components/GenreTestButton";
 import BackButton from "../components/BackButton";
@@ -38,7 +37,6 @@ import TopPlaylistGenres from "../components/TopPlaylistGenres";
 import UpdateAllButton from "../components/UpdateAllButton";
 import { useNavigate } from "react-router-dom";
 import {
-  genreMasterList,
   getAllTrackGenres,
   getAllTracks,
   getAuthenticatedUserInfo,
@@ -128,7 +126,7 @@ const Dashboard = () => {
         userInfo !== null &&
         playlistsQ.current !== undefined
       )
-        await savePlaylistsToFiles(userInfo, playlistsQ.current);
+        await saveDataToFiles(playlistsQ);
 
       setLoadingT((prev) => prev - 1);
     },
