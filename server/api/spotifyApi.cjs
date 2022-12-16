@@ -3,7 +3,7 @@ const SpotifyWebApi = require("spotify-web-api-node");
 const spotifyApi = new SpotifyWebApi({
   redirectUri: "http://localhost:3000",
   clientId: "d03dd28afb3f40d1aad5e6a45d9bff7f",
-  clientSecret: "e75eb0904b534609ac65376077d10329"
+  clientSecret: "e75eb0904b534609ac65376077d10329",
 });
 
 /**
@@ -40,24 +40,26 @@ const rateLimit = (err, res) => {
     console.log(err.headers["retry-after"]);
     res.json({
       errorCode: err.statusCode,
-      retryAfter: err.headers["retry-after"]
+      retryAfter: err.headers["retry-after"],
     });
   } else if (err.statusCode === 400 || err.statusCode === 401) {
     spotifyApi
       .refreshAccessToken()
-      .then(data => {
+      .then((data) => {
         accessToken = data.body.access_token;
         expriresIn = data.body.expires_in;
         spotifyApi.setAccessToken(accessToken);
         res.json({
           accessToken: accessToken,
           refreshToken: refreshToken,
-          expriresIn: expriresIn
+          expriresIn: expriresIn,
         });
       })
-      .catch(err => {
+      .catch((err) => {
         console.log("Something went wrong with refreshing accessToken", err);
-        res.json(undefined);
+        res.json({
+          errorCode: err.statusCode,
+        });
       });
   }
 };
@@ -69,7 +71,7 @@ const login = (req, res) => {
   const code = req.body.code;
   spotifyApi
     .authorizationCodeGrant(code)
-    .then(data => {
+    .then((data) => {
       accessToken = data.body.access_token;
       refreshToken = data.body.refresh_token;
       expriresIn = data.body.expires_in;
@@ -78,10 +80,10 @@ const login = (req, res) => {
       res.json({
         accessToken: accessToken,
         refreshToken: refreshToken,
-        expriresIn: expriresIn
+        expriresIn: expriresIn,
       });
     })
-    .catch(err => {
+    .catch((err) => {
       rateLimit(err, res);
     });
 };
@@ -92,7 +94,7 @@ const login = (req, res) => {
 const getUser = (req, res) => {
   spotifyApi
     .getMe()
-    .then(data => {
+    .then((data) => {
       userId = data.body.id;
       country = data.body.country;
       premium = data.body.product === "premium" ? true : false;
@@ -109,10 +111,10 @@ const getUser = (req, res) => {
       );
       res.json({
         display_name: data.body.display_name,
-        premium: premium
+        premium: premium,
       });
     })
-    .catch(err => {
+    .catch((err) => {
       console.log("Something went wrong with user", err);
     });
 };
@@ -128,9 +130,9 @@ const getPlaylists = (req, res) => {
   spotifyApi
     .getUserPlaylists({
       offset: offset,
-      limit: limit
+      limit: limit,
     })
-    .then(data => {
+    .then((data) => {
       console.log(
         "Successfully retrieved playlists at",
         "Offset:",
@@ -142,17 +144,17 @@ const getPlaylists = (req, res) => {
       );
       res.json({
         total: data.body.total,
-        list: data.body.items.map(playlist => ({
+        list: data.body.items.map((playlist) => ({
           id: playlist.id,
           name: playlist.name,
           owner: playlist.owner.display_name,
           uri: playlist.uri,
           snapshot: playlist.snapshot_id,
-          total: playlist.tracks.total
-        }))
+          total: playlist.tracks.total,
+        })),
       });
     })
-    .catch(err => {
+    .catch((err) => {
       console.log("Something went wrong with retrieving playlists", err);
       rateLimit(err, res);
     });
@@ -166,7 +168,7 @@ const create = (req, res) => {
   const description = req.body.description;
   spotifyApi
     .createPlaylist(name, { description: description })
-    .then(data => {
+    .then((data) => {
       console.log("Successfully created playlists", data.body.name);
       res.json({
         id: data.body.id,
@@ -174,10 +176,10 @@ const create = (req, res) => {
         owner: data.body.owner.display_name,
         uri: data.body.uri,
         snapshot: data.body.snapshot_id,
-        total: data.body.tracks.total
+        total: data.body.tracks.total,
       });
     })
-    .catch(err => {
+    .catch((err) => {
       console.log("Something went wrong with playlist creation", err);
       rateLimit(err, res);
     });
@@ -197,7 +199,7 @@ const add = (req, res) => {
       : maxPostLimit;
   spotifyApi
     .addTracksToPlaylist(playlistId, uris, { position: 0 })
-    .then(data => {
+    .then((data) => {
       console.log(
         "Successfully added tracks to playlist",
         "Offset:",
@@ -209,7 +211,7 @@ const add = (req, res) => {
       );
       res.json({ snapshot: data.body.snapshot_id });
     })
-    .catch(err => {
+    .catch((err) => {
       console.log("Something went wrong with adding songs to playlist", err);
       rateLimit(err, res);
     });
@@ -230,7 +232,7 @@ const remove = (req, res) => {
       : maxPostLimit;
   spotifyApi
     .removeTracksFromPlaylist(playlistId, uris, { snapshot_id: snapshot })
-    .then(data => {
+    .then((data) => {
       console.log(
         "Successfully removed tracks from playlist",
         "Offset:",
@@ -242,7 +244,7 @@ const remove = (req, res) => {
       );
       res.json({ snapshot: data.body.snapshot_id });
     })
-    .catch(err => {
+    .catch((err) => {
       console.log(
         "Something went wrong with removing songs from playlist",
         err
@@ -258,11 +260,11 @@ const unfollow = (req, res) => {
   const playlistId = req.body.playlistId;
   spotifyApi
     .unfollowPlaylist(playlistId)
-    .then(data => {
+    .then((data) => {
       console.log("Successfully unfollowed playlist");
       res.json("success");
     })
-    .catch(err => {
+    .catch((err) => {
       console.log("Something went wrong with unfollowing the playlist", err);
       rateLimit(err, res);
     });
@@ -275,11 +277,11 @@ const follow = (req, res) => {
   const playlistId = req.body.playlistId;
   spotifyApi
     .followPlaylist(playlistId)
-    .then(data => {
+    .then((data) => {
       console.log("Successfully followed playlist");
       res.json("success");
     })
-    .catch(err => {
+    .catch((err) => {
       console.log("Something went wrong with following the playlist", err);
       rateLimit(err, res);
     });
@@ -303,9 +305,9 @@ const getTracks = (req, res) => {
         "items(is_local, " +
         "track(album.name, album.artists, artists.name, duration_ms, " +
         "id, name, uri, is_playable, linked_from(id, uri))), " +
-        "offset, total"
+        "offset, total",
     })
-    .then(data => {
+    .then((data) => {
       console.log(
         "Successfully retrieved tracks at",
         "Offset:",
@@ -316,7 +318,7 @@ const getTracks = (req, res) => {
         limit
       );
       res.json({
-        list: data.body.items.map(track => ({
+        list: data.body.items.map((track) => ({
           is_local: track.is_local,
           is_playable: track.track.is_playable,
           id: track.track.id,
@@ -326,17 +328,17 @@ const getTracks = (req, res) => {
             track.track.linked_from !== undefined
               ? {
                   id: track.track.linked_from.id,
-                  uri: track.track.linked_from.uri
+                  uri: track.track.linked_from.uri,
                 }
               : undefined,
           duration: track.track.duration_ms,
           album: track.track.album.name,
-          album_artists: track.track.album.artists.map(artist => artist.name),
-          artists: track.track.artists.map(artist => artist.name)
-        }))
+          album_artists: track.track.album.artists.map((artist) => artist.name),
+          artists: track.track.artists.map((artist) => artist.name),
+        })),
       });
     })
-    .catch(err => {
+    .catch((err) => {
       console.log("Something went wrong with retrieving tracks", err);
       rateLimit(err, res);
     });
@@ -359,22 +361,22 @@ const searchPlaylists = (req, res) => {
         market: country,
         offset: offset,
         limit: limit,
-        include_external: "audio"
+        include_external: "audio",
       })
-      .then(data => {
+      .then((data) => {
         console.log("Found playlists", data.body.playlists.total);
         res.json({
           total: data.body.playlists.total,
-          list: data.body.playlists.items.map(playlist => ({
+          list: data.body.playlists.items.map((playlist) => ({
             id: playlist.id,
             name: playlist.name,
             owner: playlist.owner.display_name,
             uri: playlist.uri,
-            total: playlist.tracks.total
-          }))
+            total: playlist.tracks.total,
+          })),
         });
       })
-      .catch(err => {
+      .catch((err) => {
         console.log("Something went wrong with searching for playlists", err);
         rateLimit(err, res);
       });
@@ -398,15 +400,15 @@ const searchTracks = (req, res) => {
         market: country,
         offset: offset,
         limit: limit,
-        include_external: "audio"
+        include_external: "audio",
       })
-      .then(data => {
+      .then((data) => {
         console.log("Found tracks", data.body.tracks.total);
         res.json({
           total: data.body.tracks.total,
           list: data.body.tracks.items
-            .filter(tr => !tr.is_local && tr.is_playable)
-            .map(track => ({
+            .filter((tr) => !tr.is_local && tr.is_playable)
+            .map((track) => ({
               is_local: track.is_local,
               is_playable: track.is_playable,
               id: track.id,
@@ -414,18 +416,52 @@ const searchTracks = (req, res) => {
               uri: track.uri,
               duration: track.duration_ms,
               album: track.album.name,
-              album_artists: track.album.artists.map(artist => artist.name),
-              artists: track.artists.map(artist => artist.name)
-            }))
+              album_artists: track.album.artists.map((artist) => artist.name),
+              artists: track.artists.map((artist) => artist.name),
+            })),
         });
       })
-      .catch(err => {
+      .catch((err) => {
         console.log("Something went wrong with searching for tracks", err);
         rateLimit(err, res);
       });
   }
 };
+/*
+// Get tracks in the signed in user's Your Music library
+spotifyApi
+  .getMySavedTracks({
+    limit: 2,
+    offset: 1,
+  })
+  .then(
+    function (data) {
+      console.log("Done!");
+    },
+    function (err) {
+      console.log("Something went wrong!", err);
+    }
+  );
+// Remove tracks from the signed in user's Your Music library
+spotifyApi.removeFromMySavedTracks(["3VNWq8rTnQG6fM1eldSpZ0"]).then(
+  function (data) {
+    console.log("Removed!");
+  },
+  function (err) {
+    console.log("Something went wrong!", err);
+  }
+);
 
+// Add tracks to the signed in user's Your Music library
+spotifyApi.addToMySavedTracks(["3VNWq8rTnQG6fM1eldSpZ0"]).then(
+  function (data) {
+    console.log("Added track!");
+  },
+  function (err) {
+    console.log("Something went wrong!", err);
+  }
+);
+*/
 module.exports = {
   login,
   getUser,
@@ -439,5 +475,5 @@ module.exports = {
   searchPlaylists,
   searchTracks,
   userId,
-  rateLimit
+  rateLimit,
 };

@@ -7,7 +7,7 @@ const artistGenreMasterList = new Map();
 const lastFm = new LastFmNode({
   api_key: "8439b97f6094e7c5bc2f90150fa9e090",
   secret: "2b124e2c7dd8dc3fa7496ef1574d9030",
-  useragent: "YSPM/" + userId
+  useragent: "YSPM/" + userId,
 });
 
 const filter = new Filter();
@@ -33,10 +33,10 @@ const getArtistGenres = (req, res) => {
     lastFm.request("artist.getTopTags", {
       artist,
       handlers: {
-        success: data => {
+        success: (data) => {
           confidenceResult = data.toptags.tag
             .filter(
-              toptags =>
+              (toptags) =>
                 toptags.count >= lowerConfidenceBound &&
                 !filter.isProfane(toptags.name)
             )
@@ -45,11 +45,11 @@ const getArtistGenres = (req, res) => {
           artistGenreMasterList.set(artist, confidenceResult);
           res.json(confidenceResult);
         },
-        error: err => {
+        error: (err) => {
           if (err.statusCode === 429) rateLimit(err, res);
           else res.json(undefined);
-        }
-      }
+        },
+      },
     });
   } else res.json(artistGenreMasterList.get(artist));
 };

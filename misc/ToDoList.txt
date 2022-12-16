@@ -1,5 +1,6 @@
 To Do:    
-  1) Save and Load from csv files 
+  1) Save and Load from csv files (file name is user name + something)  
+  1.5) songs with 2 artists get 6 genres? instead of 3?
   2) Liked Songs
   
   3) Visuals

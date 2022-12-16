@@ -8,7 +8,7 @@ import {
   Loader,
   SimpleGrid,
   Space,
-  Text
+  Text,
 } from "@mantine/core";
 import { useCallback, useEffect, useRef, useState } from "react";
 import UnfollowButton from "../components/UnfollowButton";
@@ -17,12 +17,17 @@ import {
   playlistType,
   tokenType,
   tracksType,
-  userInfoType
+  userInfoType,
 } from "../api/SpotifyApiClientTypes";
 import CreatePlaylistButton from "../components/CreatePlaylistButton";
 import SearchBar from "../components/SearchBar";
 import FollowButton from "../components/FollowButton";
-import { generatePlaylistKey, inPlaylists } from "../api/misc/HelperFunctions";
+import {
+  generatePlaylistKey,
+  inPlaylists,
+  replacer,
+  savePlaylistsToFiles,
+} from "../api/misc/HelperFunctions";
 import GenreTestButton from "../components/GenreTestButton";
 import BackButton from "../components/BackButton";
 import Row from "../components/Row";
@@ -33,16 +38,20 @@ import TopPlaylistGenres from "../components/TopPlaylistGenres";
 import UpdateAllButton from "../components/UpdateAllButton";
 import { useNavigate } from "react-router-dom";
 import {
+  genreMasterList,
   getAllTrackGenres,
   getAllTracks,
   getAuthenticatedUserInfo,
   getPlaylists,
   getToken,
-  getTracks
+  getTracks,
 } from "../api/SpotifyApiClientSide";
 import { useLastfmQuery, useSpotifyQuery } from "../api/QueryApi";
 
 export let token: tokenType | undefined | null;
+export const setToken = (tokenValue: tokenType | undefined | null) => {
+  token = tokenValue;
+};
 export let userInfo: userInfoType | undefined | null;
 export let loadingAllTracks: boolean = false;
 
@@ -66,23 +75,29 @@ const Dashboard = () => {
         | tokenType
         | undefined
         | null;
-      if (tokenData !== undefined) {
-        token = tokenData;
+      if (tokenData !== undefined && tokenData !== null) {
+        setToken(tokenData);
         const userData = (await useSpotifyQuery(
           getAuthenticatedUserInfo,
           0
-        )) as userInfoType | undefined;
-        if (userData !== undefined) userInfo = userData;
-        setLoading(false);
-        setLoadingP(prev => prev + 1);
-        playlistsQ.current = (await useSpotifyQuery(
-          getPlaylists,
-          0
-        )) as playlistsType;
-        await useSpotifyQuery(getAllTracks, 0);
-        await useLastfmQuery(getAllTrackGenres, 0);
-        setLoadingP(prev => prev - 1);
-      }
+        )) as userInfoType | undefined | null;
+        if (userData !== undefined && userData !== null) {
+          userInfo = userData;
+
+          setLoading(false);
+          setLoadingP((prev) => prev + 1);
+
+          playlistsQ.current = (await useSpotifyQuery(
+            getPlaylists,
+            0
+          )) as playlistsType;
+          await useSpotifyQuery(getAllTracks, 0);
+          await useLastfmQuery(getAllTrackGenres, 0);
+
+          setLoadingP((prev) => prev - 1);
+        } else userInfo = null;
+      } else setToken(null);
+
       setLoading(false);
     };
 
@@ -93,22 +108,36 @@ const Dashboard = () => {
     if (token === null || userInfo === null) navigate.current("/");
   }, [token, userInfo]);
 
+  /**
+   *
+   */
   const setSelectedP = useCallback(
     async (selected: playlistType | undefined) => {
       if (selected === undefined || isLoadingT) return;
       selectedPlaylistRef.current = selected;
       setInfoIndex(0);
-      setLoadingT(prev => prev + 1);
+      setLoadingT((prev) => prev + 1);
+
       tracksQ.current = await useSpotifyQuery(
         getTracks,
         0,
         selectedPlaylistRef.current
       );
-      setLoadingT(prev => prev - 1);
+      if (
+        userInfo !== undefined &&
+        userInfo !== null &&
+        playlistsQ.current !== undefined
+      )
+        await savePlaylistsToFiles(userInfo, playlistsQ.current);
+
+      setLoadingT((prev) => prev - 1);
     },
     [isLoadingT]
   );
 
+  /**
+   *
+   */
   const setSelectedT = useCallback((track: tracksType) => {
     setSelectedTrack(track);
     setInfoIndex(2);
@@ -282,6 +311,11 @@ const Dashboard = () => {
           <Row label={"Artists:"} value={getSelectedTrack.artists.join(", ")} />
           <Space h="md" />
           <Row label={"Album:"} value={getSelectedTrack.album} />
+          <Space h="md" />
+          <Row
+            label={"Genres:"}
+            value={Array.from(getSelectedTrack.genres).join(", ")}
+          />
           <Space h="md" />
           <Row label={"Playlists:"} value={inPlaylists(getSelectedTrack)} />
         </Box>

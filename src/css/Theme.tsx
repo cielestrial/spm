@@ -9,14 +9,14 @@ export const myTheme: MantineThemeOverride = {
     TextInput: {
       styles: {
         label: {
-          marginLeft: "0.33rem" // same as border-radius
-        }
-      }
+          marginLeft: "0.33rem", // same as border-radius
+        },
+      },
     },
     NativeSelect: {
       styles: {
-        label: { marginLeft: "0.33rem" } // Same as border-radius
-      }
-    }
-  }
+        label: { marginLeft: "0.33rem" }, // Same as border-radius
+      },
+    },
+  },
 };

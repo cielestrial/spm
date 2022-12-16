@@ -15,7 +15,7 @@ const FollowButton = (props: propsType) => {
   const [opened, { close, open }] = useDisclosure(false);
 
   const follow = async () => {
-    props.setLoading(prev => prev + 1);
+    props.setLoading((prev) => prev + 1);
 
     const followQ = await useSpotifyQuery(
       followPlaylist,
@@ -25,7 +25,7 @@ const FollowButton = (props: propsType) => {
     props.setSelected(undefined);
     props.setSelected(props.playlist.current);
 
-    props.setLoading(prev => prev - 1);
+    props.setLoading((prev) => prev - 1);
     return followQ;
   };
 

@@ -1,5 +1,5 @@
 import axios, { AxiosResponse } from "axios";
-import { token, userInfo } from "../pages/Dashboard";
+import { setToken, token, userInfo } from "../pages/Dashboard";
 import { generatePlaylistKey, generateTrackKey } from "./misc/HelperFunctions";
 import { code } from "../pages/LandingPage";
 import {
@@ -11,7 +11,7 @@ import {
   tracksType,
   userInfoType,
   duplicateType,
-  occuranceType
+  occuranceType,
 } from "./SpotifyApiClientTypes";
 import { genreBlackList } from "./misc/GenreBlackList";
 import { TransferListItem } from "@mantine/core";
@@ -55,12 +55,12 @@ export const getWhitelist = () => {
     .sort((a, b) =>
       a[0].localeCompare(b[0], undefined, {
         sensitivity: "accent",
-        ignorePunctuation: true
+        ignorePunctuation: true,
       })
     )
-    .map(element => ({
+    .map((element) => ({
       value: element[0],
-      label: element[0]
+      label: element[0],
     }));
 };
 const artistGenreMasterList = new Map<string, string[]>();
@@ -88,7 +88,14 @@ const rateLimitLastfm = (res: AxiosResponse<any, any>) => {
   if (res.data.errorCode === 429) {
     setRetryAfterLastfm(res.data.retryAfter);
     throw new Error(
-      "Rate limit hit for lastfm. Wait for " + res.data.retryAfter
+      "Rate limit hit for lastfm." + "\n" + "Wait for " + res.data.retryAfter
+    );
+  } else if (res.data.errorCode === 400 || res.data.errorCode === 401) {
+    setToken(null);
+    throw new Error(
+      "Token expired and could not be refreshed." +
+        "\n" +
+        "Returning to landing page."
     );
   }
 };
@@ -103,7 +110,8 @@ export const getToken = async () => {
   let tokenTemp = {} as tokenType;
   try {
     const res = await axios.post(server + "/login", { code });
-    if (res.data === undefined) return null;
+    if (res.data === undefined || res.data.accessToken === undefined)
+      return null;
     tokenTemp.accessToken = res.data.accessToken;
     tokenTemp.refreshToken = res.data.refreshToken;
     tokenTemp.expiresIn = res.data.expriresIn;
@@ -122,10 +130,11 @@ export const getAuthenticatedUserInfo = async () => {
   let userInfo: userInfoType | undefined | null = null;
   try {
     const res = await axios.post(server + "/user");
-    if (res.data === undefined) return null;
+    if (res.data === undefined || res.data.display_name === undefined)
+      return null;
     userInfo = {
       display_name: res.data.display_name,
-      premium: res.data.premium
+      premium: res.data.premium,
     };
   } catch (err) {
     console.log("Something went wrong with getAuthenticatedUserInfo()", err);
@@ -148,7 +157,7 @@ export const getPlaylists = async () => {
   options.limit = getLimit;
   try {
     const res = await axios.post(server + "/playlists", {
-      options
+      options,
     });
     rateLimitSpotify(res);
     playlists = {
@@ -156,9 +165,9 @@ export const getPlaylists = async () => {
       list: new Map<string, playlistType>(
         res.data.list.map((playlist: playlistType) => [
           generatePlaylistKey(playlist),
-          playlist
+          playlist,
         ])
-      )
+      ),
     };
     newOffset = (newOffset as number) + getLimit;
   } catch (err) {
@@ -184,7 +193,7 @@ const appendPlaylists = async (newOffset: Promise<number> | number) => {
   options.offset = newOffset;
   try {
     const res = await axios.post(server + "/playlists", {
-      options
+      options,
     });
     rateLimitSpotify(res);
     for (const playlist of res.data.list)
@@ -202,12 +211,16 @@ const appendPlaylists = async (newOffset: Promise<number> | number) => {
  */
 export const getTracks = async (playlist: playlistType | undefined) => {
   if (playlist === undefined) throw new Error("Playlist not defined");
+
   if (playlist.genres === undefined)
     playlist.genres = new Map<string, number>();
+  // Can be loaded from file
   if (playlist.genreSubscriptions === undefined)
     playlist.genreSubscriptions = [];
+  // Can be loaded from file
   if (playlist.playlistSubscriptions === undefined)
     playlist.playlistSubscriptions = new Map<string, playlistType>();
+
   if (playlist.total === 0) return playlist;
   if (
     playlist.tracks !== undefined &&
@@ -216,6 +229,7 @@ export const getTracks = async (playlist: playlistType | undefined) => {
     console.log("Tracks retrieved from client");
     return playlist;
   }
+
   for (let i = 0; i < 2; i++) {
     const playlistId = playlist.id;
     let newOffset: Promise<number> | number = 0;
@@ -224,7 +238,7 @@ export const getTracks = async (playlist: playlistType | undefined) => {
     try {
       const res = await axios.post(server + "/tracks", {
         playlistId,
-        options
+        options,
       });
       rateLimitSpotify(res);
       playlist.tracks = res.data.list;
@@ -271,10 +285,10 @@ const appendTracks = async (
   try {
     const res = await axios.post(server + "/tracks", {
       playlistId,
-      options
+      options,
     });
     rateLimitSpotify(res);
-    for (const track of res.data.list) playlist.tracks?.push(track);
+    playlist.tracks?.push(...res.data.list);
     newOffset = (newOffset as number) + getLimit;
   } catch (err) {
     console.log("Something went wrong with appendTracks()", err);
@@ -340,7 +354,7 @@ const getOccurances = async (playlist: playlistType) => {
                 ? new Map<string, duplicateType>()
                     .set(track.uri, { uri: track.uri })
                     .set(track.linked_from.uri, { uri: track.linked_from.uri })
-                : new Map<string, duplicateType>()
+                : new Map<string, duplicateType>(),
           }
         );
         duplicateManager.set(trackKey, uniqueTrack);
@@ -356,7 +370,7 @@ const getOccurances = async (playlist: playlistType) => {
                 ? new Map<string, duplicateType>()
                     .set(track.uri, { uri: track.uri })
                     .set(track.linked_from.uri, { uri: track.linked_from.uri })
-                : new Map<string, duplicateType>()
+                : new Map<string, duplicateType>(),
           });
         } else {
           duplicate = uniqueTrack.in_playlists.get(
@@ -370,7 +384,7 @@ const getOccurances = async (playlist: playlistType) => {
             !duplicate.duplicate_uris.has(track.linked_from.uri)
           )
             duplicate.duplicate_uris.set(track.linked_from.uri, {
-              uri: track.linked_from.uri
+              uri: track.linked_from.uri,
             });
         }
       }
@@ -433,7 +447,7 @@ export const removeDuplicates = async (playlist: playlistType) => {
         uris,
         total,
         options,
-        snapshot
+        snapshot,
       });
       rateLimitSpotify(res);
       playlist.snapshot = res.data.snapshot;
@@ -458,7 +472,7 @@ export const checkIfPlaylistExists = (name: string | undefined) => {
     if (
       name?.localeCompare(pl.name, undefined, {
         sensitivity: "accent",
-        ignorePunctuation: true
+        ignorePunctuation: true,
       }) === 0
     ) {
       playlist = pl;
@@ -485,7 +499,7 @@ export const createPlaylist = async (name: string | undefined) => {
   try {
     const res = await axios.post(server + "/create", {
       name,
-      description: "Generated by YSPM."
+      description: "Generated by YSPM.",
     });
     rateLimitSpotify(res);
     playlist = {
@@ -498,18 +512,18 @@ export const createPlaylist = async (name: string | undefined) => {
       tracks: [],
       genres: new Map<string, number>(),
       genreSubscriptions: [],
-      playlistSubscriptions: new Map<string, playlistType>()
+      playlistSubscriptions: new Map<string, playlistType>(),
     };
     if (playlists === undefined) {
       playlists = {
         total: 0,
-        list: new Map<string, playlistType>()
+        list: new Map<string, playlistType>(),
       };
       playlists.list.set(generatePlaylistKey(playlist), playlist);
     } else
       playlists.list = new Map<string, playlistType>([
         [generatePlaylistKey(playlist), playlist],
-        ...playlists.list
+        ...playlists.list,
       ]);
     playlists.total++;
   } catch (err) {
@@ -531,8 +545,8 @@ export const addPlaylistToPlaylist = async (
 
   const tracks = await getTracks(source);
   const uris = tracks?.tracks
-    ?.filter(track => isUnique(track, target))
-    .map(track => track.uri);
+    ?.filter((track) => isUnique(track, target))
+    .map((track) => track.uri);
 
   /**
    * Add tracks to playlist
@@ -562,7 +576,7 @@ export const addPlaylistToPlaylist = async (
           playlistId,
           uris,
           total,
-          options
+          options,
         });
         rateLimitSpotify(res);
         playlist.snapshot = res.data.snapshot;
@@ -641,7 +655,7 @@ export const generalPlaylistsSearch = async (
   try {
     const res = await axios.post(server + "/search-playlists", {
       querySearch,
-      options
+      options,
     });
     rateLimitSpotify(res);
     if (res.data !== undefined) {
@@ -650,9 +664,9 @@ export const generalPlaylistsSearch = async (
         list: new Map<string, playlistType>(
           res.data.list.map((playlist: playlistType) => [
             generatePlaylistKey(playlist),
-            playlist
+            playlist,
           ])
-        )
+        ),
       };
     }
   } catch (err) {
@@ -682,7 +696,7 @@ export const generalTracksSearch = async (
   try {
     const res = await axios.post(server + "/search-tracks", {
       querySearch,
-      options
+      options,
     });
     rateLimitSpotify(res);
     if (res.data !== undefined) {
@@ -702,7 +716,6 @@ export const generalTracksSearch = async (
  * Get genres for all tracks
  */
 export const getAllTrackGenres = async () => {
-  /*
   if (duplicateManager.size === 0) {
     console.log("Empty duplicate manager");
     return genreMasterList;
@@ -727,7 +740,6 @@ export const getAllTrackGenres = async () => {
   } catch (err) {
     console.log(err);
   }
-  */
   return genreMasterList;
 };
 
@@ -780,7 +792,7 @@ export const getTrackGenres = async (uniqueTrack: uniqueType) => {
     try {
       const res = await axios.post(server + "/genres", {
         artist,
-        genreBlackList
+        genreBlackList,
       });
       rateLimitLastfm(res);
       // Keep track of genre popularity with count and genreMasterList <genre, popularityCount>
@@ -823,7 +835,6 @@ export const addPlaylistSubscriptions = async () => {
   if (playlists === undefined) return false;
   let status = true;
   let promises: Promise<boolean>[] = [];
-  let tempPlaylist: playlistType;
   let i = 1;
   const bundle = postLimit;
   try {

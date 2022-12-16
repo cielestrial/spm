@@ -4,7 +4,7 @@ export let genreBlackList = [
   "seen live",
   "female vocalists",
   "singer-songwriter",
-  "united states"
+  "united states",
 ];
 
 export const getBlacklist = () => {
@@ -12,15 +12,15 @@ export const getBlacklist = () => {
     .sort((a, b) =>
       a.localeCompare(b, undefined, {
         sensitivity: "accent",
-        ignorePunctuation: true
+        ignorePunctuation: true,
       })
     )
-    .map(element => ({
+    .map((element) => ({
       value: element,
-      label: element
+      label: element,
     }));
 };
 
 export const setBlacklist = (genres: TransferListItem[]) => {
-  genreBlackList = genres.map(item => item.label);
+  genreBlackList = genres.map((item) => item.label);
 };

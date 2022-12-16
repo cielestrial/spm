@@ -204,7 +204,7 @@ const country_list = [
   "Virgin Islands (US)",
   "Yemen",
   "Zambia",
-  "Zimbabwe"
+  "Zimbabwe",
 ];
 const nationalities = [
   "Afghan",
@@ -399,6 +399,6 @@ const nationalities = [
   "Welsh",
   "Yemenite",
   "Zambian",
-  "Zimbabwean"
+  "Zimbabwean",
 ];
 module.exports = { misc, country_list, nationalities };

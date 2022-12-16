@@ -33,4 +33,14 @@ Updates all playlists by adding the tracks from the playlists or genres they are
 Then removes duplicates
 
 Local storage feature: 
-save playlists and duplicate manager and tracks and genre master list to local storage. Compare playlist snapshot id
+Compare playlist snapshot id
+snapshot
+: 
+"MTY2OTkwODk2MiwwMDAwMDAwMDBiNjFiY2QxNTNkMTdkZjM2MDAwYmUyNjE3M2RmODE5"
+
+playlistKey: metadata, [subscribed genres], [subscribed playlists]
+
+
+
+datasets:
+  genreMasterList, artistGenreMasterList, whitelist, blacklist 

@@ -41,14 +41,14 @@ const LoadMoreGeneralButton = (props: propType) => {
         onClick={async () => {
           await loadMore();
         }}
-        styles={theme => ({
+        styles={(theme) => ({
           root: {
             display:
               props.offset.current + resultLimit > maxOffset ||
               props.offset.current + resultLimit >= props.total.current
                 ? "none"
-                : "initial"
-          }
+                : "initial",
+          },
         })}
       >
         Load More

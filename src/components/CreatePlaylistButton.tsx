@@ -17,7 +17,7 @@ const CreatePlaylistButton = (props: propsType) => {
   const playlistName = useRef("");
 
   const create = async () => {
-    props.setLoading(prev => prev + 1);
+    props.setLoading((prev) => prev + 1);
 
     const createQ = (await useSpotifyQuery(
       createPlaylist,
@@ -27,17 +27,17 @@ const CreatePlaylistButton = (props: propsType) => {
     )) as playlistType | undefined;
     props.setSelected(createQ);
 
-    props.setLoading(prev => prev - 1);
+    props.setLoading((prev) => prev - 1);
     return createQ;
   };
 
   const form = useForm({
     initialValues: {
-      name: ""
+      name: "",
     },
     validate: {
-      name: value => (value.length > 100 ? "Invalid playlist name" : null)
-    }
+      name: (value) => (value.length > 100 ? "Invalid playlist name" : null),
+    },
   });
 
   return (
@@ -52,12 +52,12 @@ const CreatePlaylistButton = (props: propsType) => {
         withCloseButton={false}
         size="auto"
         padding={0}
-        styles={theme => ({
-          modal: { backgroundColor: "transparent" }
+        styles={(theme) => ({
+          modal: { backgroundColor: "transparent" },
         })}
       >
         <form
-          onSubmit={form.onSubmit(values => {
+          onSubmit={form.onSubmit((values) => {
             playlistName.current = values.name;
             create();
             form.reset();
@@ -85,10 +85,10 @@ const CreatePlaylistButton = (props: propsType) => {
               variant="filled"
               color="green"
               size="xl"
-              styles={theme => ({
+              styles={(theme) => ({
                 root: {
-                  borderRadius: "0 0.33rem 0.33rem 0"
-                }
+                  borderRadius: "0 0.33rem 0.33rem 0",
+                },
               })}
             >
               Create

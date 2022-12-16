@@ -3,7 +3,7 @@ import { generatePlaylistKey } from "../api/misc/HelperFunctions";
 import { useSpotifyQuery } from "../api/QueryApi";
 import {
   addGenreSubscriptions,
-  addPlaylistSubscriptions
+  addPlaylistSubscriptions,
 } from "../api/SpotifyApiClientSide";
 import { playlistsType, playlistType } from "../api/SpotifyApiClientTypes";
 
@@ -16,15 +16,15 @@ type proptype = {
 
 const UpdateAllButton = (props: proptype) => {
   const addSubscriptions = async () => {
-    props.setLoading(prev => prev + 1);
+    props.setLoading((prev) => prev + 1);
 
     const resAll = await Promise.allSettled([
       useSpotifyQuery(addPlaylistSubscriptions, 0),
-      useSpotifyQuery(addGenreSubscriptions, 0)
+      useSpotifyQuery(addGenreSubscriptions, 0),
     ]);
     props.setSelected(undefined);
 
-    props.setLoading(prev => prev - 1);
+    props.setLoading((prev) => prev - 1);
     return resAll;
   };
 

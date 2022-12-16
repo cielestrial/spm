@@ -2,7 +2,7 @@ import {
   Flex,
   TransferList,
   TransferListData,
-  TransferListItem
+  TransferListItem,
 } from "@mantine/core";
 import { useEffect, useState } from "react";
 import { getBlacklist, setBlacklist } from "../api/misc/GenreBlackList";
@@ -47,10 +47,10 @@ const GenreManager = () => {
         w="80vw"
         h="85vh"
         breakpoint="sm"
-        styles={theme => ({
+        styles={(theme) => ({
           transferListTitle: {
             textAlign: "center",
-            fontSize: "1.66rem"
+            fontSize: "1.66rem",
           },
           transferListItems: {
             minHeight: "calc(95% - 2rem)",
@@ -58,11 +58,11 @@ const GenreManager = () => {
             marginRight: "1rem",
             padding: "0.66rem 0 0.99rem 0.66rem",
             borderStyle: "inset outset outset inset",
-            borderColor: "rgba(255, 255, 255, 0.66)"
+            borderColor: "rgba(255, 255, 255, 0.66)",
           },
           transferListBody: {
-            padding: "0.33rem 1rem 1.33rem"
-          }
+            padding: "0.33rem 1rem 1.33rem",
+          },
         })}
       />
     </Flex>

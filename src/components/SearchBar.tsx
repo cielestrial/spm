@@ -8,32 +8,32 @@ import {
   SimpleGrid,
   Space,
   Text,
-  TextInput
+  TextInput,
 } from "@mantine/core";
 import {
   useDebouncedValue,
   useDisclosure,
-  useForceUpdate
+  useForceUpdate,
 } from "@mantine/hooks";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   displayMap,
   generatePlaylistKey,
-  inPlaylists
+  inPlaylists,
 } from "../api/misc/HelperFunctions";
 import { loadingAllTracks } from "../pages/Dashboard";
 import {
   duplicateManager,
   generalPlaylistsSearch,
   generalTracksSearch,
-  getPlaylists
+  getPlaylists,
 } from "../api/SpotifyApiClientSide";
 import {
   occuranceType,
   playlistsType,
   playlistType,
   tracksType,
-  uniqueType
+  uniqueType,
 } from "../api/SpotifyApiClientTypes";
 import Row from "./Row";
 import LoadMoreLibraryButton from "./LoadMoreLibraryButton";
@@ -150,20 +150,20 @@ const SearchBar = (props: propsType) => {
     debouncedPlaylistValue,
     debouncedSongValue,
     debouncedArtistValue,
-    debouncedAlbumValue
+    debouncedAlbumValue,
   ]);
 
   const displayLoader = () => {
     return [
       <Center key={"loader"} className="loading" h="100%">
         <Loader color="green" size="md" variant="bars" />
-      </Center>
+      </Center>,
     ];
   };
 
   const search = () => {
     asyncSearch()
-      .then(res => {
+      .then((res) => {
         setSearchResults(res);
       })
       .finally(() => setIsLoading(false));
@@ -180,7 +180,7 @@ const SearchBar = (props: propsType) => {
     ) {
       if (scrollReset.current !== null)
         mutationObserver.observe(scrollReset.current, {
-          childList: true
+          childList: true,
         });
       if (selectedSearchCategory === "Playlists") {
         if (selectedSearchArea === "Library")
@@ -264,7 +264,7 @@ const SearchBar = (props: propsType) => {
     dynamicList.current,
     indexRef.current,
     pageRef.current,
-    offsetRef.current
+    offsetRef.current,
   ]);
 
   const searchLibraryPlaylists = async () => {
@@ -311,7 +311,7 @@ const SearchBar = (props: propsType) => {
           <Text fw="bold" color="crimson">
             No Playlists Found
           </Text>
-        </Center>
+        </Center>,
       ];
     } else return dynamicList.current;
   };
@@ -397,7 +397,7 @@ const SearchBar = (props: propsType) => {
     dynamicList.current,
     indexRef.current,
     pageRef.current,
-    offsetRef.current
+    offsetRef.current,
   ]);
 
   const searchLibraryTracks = async () => {
@@ -419,7 +419,7 @@ const SearchBar = (props: propsType) => {
           uniqueTrack.track.album
             .toLocaleLowerCase()
             .includes(debouncedAlbumValue.toLocaleLowerCase()) &&
-          uniqueTrack.track.artists.some(artist =>
+          uniqueTrack.track.artists.some((artist) =>
             artist
               .toLocaleLowerCase()
               .includes(debouncedArtistValue.toLocaleLowerCase())
@@ -445,7 +445,7 @@ const SearchBar = (props: propsType) => {
           <Text fw="bold" color="crimson">
             No Tracks Found
           </Text>
-        </Center>
+        </Center>,
       ];
     } else return dynamicList.current;
   };
@@ -462,7 +462,7 @@ const SearchBar = (props: propsType) => {
     playlistResults.current,
     pageRef.current,
     playlistValueRef.current,
-    offsetRef.current
+    offsetRef.current,
   ]);
 
   const searchGeneralPlaylists = async () => {
@@ -483,7 +483,7 @@ const SearchBar = (props: propsType) => {
           <Text fw="bold" color="crimson">
             No Playlists Found
           </Text>
-        </Center>
+        </Center>,
       ];
     } else return dynamicList.current;
   };
@@ -492,10 +492,10 @@ const SearchBar = (props: propsType) => {
     const data = await generalTracksQ();
     if (data !== undefined && trackResults.current !== undefined) {
       trackResults.current[pageRef.current] = new Set<uniqueType>(
-        data.tracks.map(track => ({
+        data.tracks.map((track) => ({
           track: track,
           total_occurances: 1,
-          in_playlists: new Map<string, occuranceType>()
+          in_playlists: new Map<string, occuranceType>(),
         }))
       );
       totalPageRef.current = data.total;
@@ -506,7 +506,7 @@ const SearchBar = (props: propsType) => {
     trackValueRef.current,
     trackResults.current,
     pageRef.current,
-    offsetRef.current
+    offsetRef.current,
   ]);
 
   const searchGeneralTracks = async () => {
@@ -526,7 +526,7 @@ const SearchBar = (props: propsType) => {
           <Text fw="bold" color="crimson">
             No Tracks Found
           </Text>
-        </Center>
+        </Center>,
       ];
     } else return dynamicList.current;
   };
@@ -562,7 +562,7 @@ const SearchBar = (props: propsType) => {
           mt="md"
           mx="xl"
           data-autofocus
-          onChange={event => {
+          onChange={(event) => {
             setPlaylistValue(event.currentTarget.value);
             setIsLoading(true);
           }}
@@ -592,7 +592,7 @@ const SearchBar = (props: propsType) => {
             placeholder="Search Songs"
             variant="filled"
             data-autofocus
-            onChange={event => {
+            onChange={(event) => {
               setSongValue(event.currentTarget.value);
               setIsLoading(true);
             }}
@@ -609,7 +609,7 @@ const SearchBar = (props: propsType) => {
             radius="xl"
             placeholder="Search Artists"
             variant="filled"
-            onChange={event => {
+            onChange={(event) => {
               setArtistValue(event.currentTarget.value);
               setIsLoading(true);
             }}
@@ -627,7 +627,7 @@ const SearchBar = (props: propsType) => {
             mt="xs"
             placeholder="Search Albums"
             variant="filled"
-            onChange={event => {
+            onChange={(event) => {
               setAlbumValue(event.currentTarget.value);
               setIsLoading(true);
             }}
@@ -647,11 +647,11 @@ const SearchBar = (props: propsType) => {
         }}
         withCloseButton={false}
         padding={0}
-        styles={theme => ({
+        styles={(theme) => ({
           modal: {
             width: "80vw",
-            minHeight: "fit-content"
-          }
+            minHeight: "fit-content",
+          },
         })}
       >
         <Flex
@@ -681,7 +681,7 @@ const SearchBar = (props: propsType) => {
               radius="xl"
               size="sm"
               value={selectedSearchCategory}
-              onChange={e => {
+              onChange={(e) => {
                 resetHandler();
                 selectedCategory.current = e.currentTarget
                   .value as searchCategoryType;
@@ -699,7 +699,7 @@ const SearchBar = (props: propsType) => {
               miw="fit-content"
               size="sm"
               value={selectedSearchArea}
-              onChange={e => {
+              onChange={(e) => {
                 resetHandler();
                 selectedArea.current = e.currentTarget.value as searchAreaType;
                 setSelectedSearchArea(e.currentTarget.value as searchAreaType);

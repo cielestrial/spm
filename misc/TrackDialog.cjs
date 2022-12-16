@@ -1,23 +1,17 @@
 import { Dialog } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import { forwardRef, useImperativeHandle } from "react";
-import { tracksType } from "../src/api/SpotifyApiClientTypes";
 
-export type TrackDialogType = {
-  openTrackDialog: (selectedTrack: tracksType) => void;
-};
-type propsType = {};
-
-const TrackDialog = forwardRef<TrackDialogType, propsType>((props, ref) => {
+const TrackDialog = forwardRef((props, ref) => {
   const [opened, { close, open }] = useDisclosure(false);
 
   useImperativeHandle(
     ref,
     () => ({
-      openTrackDialog: (selectedTrack: tracksType) => {
+      openTrackDialog: () => {
         if (opened) close();
         open();
-      }
+      },
     }),
     []
   );

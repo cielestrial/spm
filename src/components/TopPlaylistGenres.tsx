@@ -16,10 +16,10 @@ const TopPlaylistGenres = (props: proptype) => {
   const topGenres =
     props.selectedPlaylist.current?.genres !== undefined && props.isFollowed()
       ? Array.from(props.selectedPlaylist.current.genres.entries())
-          .filter(value => value[1] >= minOccurance)
+          .filter((value) => value[1] >= minOccurance)
           .sort((a, b) => b[1] - a[1])
           .slice(0, top_x)
-          .map(value => (
+          .map((value) => (
             <Badge key={value[0]} color="green" size="md" variant="outline">
               {value[0]}
             </Badge>

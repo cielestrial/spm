@@ -14,7 +14,7 @@ const UnfollowButton = (props: propsType) => {
   const [opened, { close, open }] = useDisclosure(false);
 
   const unfollow = async () => {
-    props.setLoading(prev => prev + 1);
+    props.setLoading((prev) => prev + 1);
 
     const unfollowQ = await useSpotifyQuery(
       unfollowPlaylist,
@@ -23,7 +23,7 @@ const UnfollowButton = (props: propsType) => {
     );
     props.setSelected(undefined);
 
-    props.setLoading(prev => prev - 1);
+    props.setLoading((prev) => prev - 1);
     return unfollowQ;
   };
 

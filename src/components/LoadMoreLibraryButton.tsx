@@ -25,10 +25,10 @@ const LoadMoreLibraryButton = (props: propType) => {
       radius="xl"
       size="md"
       onClick={loadMore}
-      styles={theme => ({
+      styles={(theme) => ({
         root: {
-          display: props.page.current >= props.totalPages ? "none" : "initial"
-        }
+          display: props.page.current >= props.totalPages ? "none" : "initial",
+        },
       })}
     >
       Load More

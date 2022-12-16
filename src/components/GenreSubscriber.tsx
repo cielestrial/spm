@@ -27,7 +27,7 @@ const GenreSubscriber = (props: proptype) => {
       aria-label="Genre Selector"
       data={data}
       value={value}
-      onChange={e => {
+      onChange={(e) => {
         setValue(e);
         if (props.selectedPlaylist.current !== undefined && e.length > 0)
           props.selectedPlaylist.current.genreSubscriptions = e;
@@ -43,14 +43,14 @@ const GenreSubscriber = (props: proptype) => {
       disabled={!props.isFollowed() || !props.isOwned()}
       size="sm"
       w="100%"
-      styles={theme => ({
+      styles={(theme) => ({
         value: {
-          fontWeight: "bold"
+          fontWeight: "bold",
         },
         item: {
           borderStyle: "inset outset outset inset",
-          borderColor: "rgba(255, 255, 255, 0.66)"
-        }
+          borderColor: "rgba(255, 255, 255, 0.66)",
+        },
       })}
     />
   );
