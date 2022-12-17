@@ -1,21 +1,21 @@
 import { Badge, Flex } from "@mantine/core";
-import { playlistType } from "../api/SpotifyApiClientTypes";
+import { useContext } from "react";
+import { StateContext } from "../api/ContextProvider";
 
-type proptype = {
-  selectedPlaylist: React.MutableRefObject<playlistType | undefined>;
-  isFollowed: () => boolean;
-};
+type proptype = {};
 const TopPlaylistGenres = (props: proptype) => {
+  const context = useContext(StateContext);
   const minOccurance =
-    props.selectedPlaylist.current !== undefined
+    context.selectedPlaylist.current !== undefined
       ? // 1/3 of 50% of the total number of songs is the minimum cutoff
-        Math.round(props.selectedPlaylist.current.total * (0.5 / 3))
+        Math.round(context.selectedPlaylist.current.total * (0.5 / 3))
       : 2;
   const top_x = 3;
 
   const topGenres =
-    props.selectedPlaylist.current?.genres !== undefined && props.isFollowed()
-      ? Array.from(props.selectedPlaylist.current.genres.entries())
+    context.selectedPlaylist.current?.genres !== undefined &&
+    context.isFollowed()
+      ? Array.from(context.selectedPlaylist.current.genres.entries())
           .filter((value) => value[1] >= minOccurance)
           .sort((a, b) => b[1] - a[1])
           .slice(0, top_x)
@@ -27,7 +27,7 @@ const TopPlaylistGenres = (props: proptype) => {
       : [];
 
   return (
-    <Flex wrap="wrap" gap="xs" mt={props.isFollowed() ? "xs" : 0}>
+    <Flex wrap="wrap" gap="xs" mt={context.isFollowed() ? "xs" : 0}>
       {topGenres}
     </Flex>
   );

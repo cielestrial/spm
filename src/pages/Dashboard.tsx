@@ -10,23 +10,13 @@ import {
   Space,
   Text,
 } from "@mantine/core";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useContext, useEffect, useRef, useState } from "react";
 import UnfollowButton from "../components/UnfollowButton";
-import {
-  playlistsType,
-  playlistType,
-  tokenType,
-  tracksType,
-  userInfoType,
-} from "../api/SpotifyApiClientTypes";
+import { playlistType, tracksType } from "../api/SpotifyApiClientTypes";
 import CreatePlaylistButton from "../components/CreatePlaylistButton";
 import SearchBar from "../components/SearchBar";
 import FollowButton from "../components/FollowButton";
-import {
-  generatePlaylistKey,
-  inPlaylists,
-  saveDataToFiles,
-} from "../api/misc/HelperFunctions";
+import { generatePlaylistKey, inPlaylists } from "../api/misc/HelperFunctions";
 import GenreTestButton from "../components/GenreTestButton";
 import BackButton from "../components/BackButton";
 import Row from "../components/Row";
@@ -35,76 +25,28 @@ import GenreSubscriber from "../components/GenreSubscriber";
 import PlaylistSubscriber from "../components/PlaylistSubscriber";
 import TopPlaylistGenres from "../components/TopPlaylistGenres";
 import UpdateAllButton from "../components/UpdateAllButton";
-import { useNavigate } from "react-router-dom";
-import {
-  getAllTrackGenres,
-  getAllTracks,
-  getAuthenticatedUserInfo,
-  getPlaylists,
-  getToken,
-  getTracks,
-} from "../api/SpotifyApiClientSide";
-import { useLastfmQuery, useSpotifyQuery } from "../api/QueryApi";
+import { StateContext, token, userInfo } from "../api/ContextProvider";
+import { useSpotifyQuery } from "../api/QueryApi";
+import { getTracks } from "../api/SpotifyApiClientSide";
 
-export let token: tokenType | undefined | null;
-export const setToken = (tokenValue: tokenType | undefined | null) => {
-  token = tokenValue;
-};
-export let userInfo: userInfoType | undefined | null;
 export let loadingAllTracks: boolean = false;
 
 const Dashboard = () => {
-  const navigate = useRef(useNavigate());
-  const selectedPlaylistRef = useRef<playlistType>();
+  const context = useContext(StateContext);
   const [getSelectedTrack, setSelectedTrack] = useState<tracksType>();
   const [infoIndex, setInfoIndex] = useState(0);
-  const [isLoading, setLoading] = useState(true);
   const [isLoadingP, setLoadingP] = useState(0);
   const [isLoadingT, setLoadingT] = useState(0);
-
-  const playlistsQ = useRef<playlistsType>(undefined);
   const tracksQ = useRef<playlistType | undefined>(undefined);
 
   useEffect(() => {
-    const start = async () => {
-      setLoading(true);
-
-      const tokenData = (await useSpotifyQuery(getToken, 0)) as
-        | tokenType
-        | undefined
-        | null;
-      if (tokenData !== undefined && tokenData !== null) {
-        setToken(tokenData);
-        const userData = (await useSpotifyQuery(
-          getAuthenticatedUserInfo,
-          0
-        )) as userInfoType | undefined | null;
-        if (userData !== undefined && userData !== null) {
-          userInfo = userData;
-
-          setLoading(false);
-          setLoadingP((prev) => prev + 1);
-
-          playlistsQ.current = (await useSpotifyQuery(
-            getPlaylists,
-            0
-          )) as playlistsType;
-          await useSpotifyQuery(getAllTracks, 0);
-          await useLastfmQuery(getAllTrackGenres, 0);
-
-          setLoadingP((prev) => prev - 1);
-        } else userInfo = null;
-      } else setToken(null);
-
-      setLoading(false);
-    };
-
-    start();
-  }, []);
+    if (token === null || userInfo === null) context.navigate.current("/");
+  }, [token, userInfo]);
 
   useEffect(() => {
-    if (token === null || userInfo === null) navigate.current("/");
-  }, [token, userInfo]);
+    if (context.playlistsQ.current === undefined)
+      context.navigate.current("/loading");
+  }, [context.playlistsQ.current]);
 
   /**
    *
@@ -112,21 +54,15 @@ const Dashboard = () => {
   const setSelectedP = useCallback(
     async (selected: playlistType | undefined) => {
       if (selected === undefined || isLoadingT) return;
-      selectedPlaylistRef.current = selected;
+      context.selectedPlaylist.current = selected;
       setInfoIndex(0);
       setLoadingT((prev) => prev + 1);
 
       tracksQ.current = await useSpotifyQuery(
         getTracks,
         0,
-        selectedPlaylistRef.current
+        context.selectedPlaylist.current
       );
-      if (
-        userInfo !== undefined &&
-        userInfo !== null &&
-        playlistsQ.current !== undefined
-      )
-        await saveDataToFiles(playlistsQ);
 
       setLoadingT((prev) => prev - 1);
     },
@@ -141,28 +77,6 @@ const Dashboard = () => {
     setInfoIndex(2);
   }, []);
 
-  const isFollowed = useCallback(() => {
-    if (
-      selectedPlaylistRef.current !== undefined &&
-      playlistsQ.current !== undefined
-    ) {
-      return playlistsQ.current.list.has(
-        generatePlaylistKey(selectedPlaylistRef.current)
-      );
-    } else return false;
-  }, [selectedPlaylistRef.current, playlistsQ.current]);
-
-  const isOwned = useCallback(() => {
-    if (
-      selectedPlaylistRef.current !== undefined &&
-      userInfo !== undefined &&
-      userInfo !== null &&
-      selectedPlaylistRef.current.owner === userInfo.display_name
-    )
-      return true;
-    else return false;
-  }, [selectedPlaylistRef.current, userInfo]);
-
   /**
    * Display list of playlists
    * @returns
@@ -174,10 +88,10 @@ const Dashboard = () => {
           <Loader color="green" size="sm" variant="bars" />
         </Center>
       );
-    if (playlistsQ.current !== undefined) {
+    if (context.playlistsQ.current !== undefined) {
       const dynamicList: JSX.Element[] = [];
       let index = 0;
-      for (const playlist of playlistsQ.current.list.values()) {
+      for (const playlist of context.playlistsQ.current.list.values()) {
         dynamicList.push(
           <Box
             className="not-button"
@@ -217,7 +131,7 @@ const Dashboard = () => {
           <Loader color="green" size="sm" variant="bars" />
         </Center>
       );
-    if (infoIndex === 0 && selectedPlaylistRef.current !== undefined) {
+    if (infoIndex === 0 && context.selectedPlaylist.current !== undefined) {
       return (
         <SimpleGrid
           h="100%"
@@ -227,52 +141,46 @@ const Dashboard = () => {
           verticalSpacing={0}
         >
           <Box className="info-card">
-            <Row label={"Name:"} value={selectedPlaylistRef.current.name} />
+            <Row
+              label={"Name:"}
+              value={context.selectedPlaylist.current.name}
+            />
             <Space h="md" />
             <Row
               label={"Owned By:"}
-              value={selectedPlaylistRef.current.owner}
+              value={context.selectedPlaylist.current.owner}
             />
             <Space h="md" />
             <Flex wrap="wrap" gap="sm">
-              <Row label={"Songs:"} value={selectedPlaylistRef.current.total} />
+              <Row
+                label={"Songs:"}
+                value={context.selectedPlaylist.current.total}
+              />
               <ShowTracksButton setInfoIndex={setInfoIndex} />
             </Flex>
             <Space h="xs" />
             <Row label={"Top Genres:"} value={null} />
-            <TopPlaylistGenres
-              selectedPlaylist={selectedPlaylistRef}
-              isFollowed={isFollowed}
-            />
+            <TopPlaylistGenres />
             <Space h="xs" />
             <Group spacing={0}>
               <Row label={"Subscribed Genres:"} value={null} />
-              <GenreSubscriber
-                selectedPlaylist={selectedPlaylistRef}
-                isFollowed={isFollowed}
-                isOwned={isOwned}
-              />
+              <GenreSubscriber />
             </Group>
             <Space h="md" />
             <Group spacing={0}>
               <Row label={"Subscribed Playlists:"} value={null} />
-              <PlaylistSubscriber
-                playlists={playlistsQ}
-                selectedPlaylist={selectedPlaylistRef}
-                isFollowed={isFollowed}
-                isOwned={isOwned}
-              />
+              <PlaylistSubscriber />
             </Group>
           </Box>
         </SimpleGrid>
       );
     } else if (
       infoIndex === 1 &&
-      selectedPlaylistRef.current?.tracks !== undefined
+      context.selectedPlaylist.current?.tracks !== undefined
     ) {
       const dynamicList: JSX.Element[] = [];
       let index = 0;
-      for (const track of selectedPlaylistRef.current.tracks.values()) {
+      for (const track of context.selectedPlaylist.current.tracks.values()) {
         dynamicList.push(
           <Box
             className="not-button"
@@ -322,18 +230,20 @@ const Dashboard = () => {
   };
 
   const displayPlaylistsLabel = () => {
-    const loading = playlistsQ.current === undefined || isLoadingP;
-    const number = loading ? "" : playlistsQ.current?.total;
-    const label = playlistsQ.current?.total === 1 ? "Playlist" : "Playlists";
+    const loading = context.playlistsQ.current === undefined || isLoadingP;
+    const number = loading ? "" : context.playlistsQ.current?.total;
+    const label =
+      context.playlistsQ.current?.total === 1 ? "Playlist" : "Playlists";
     return (
-      <Text className="text">
+      <Text w="100%" className="text">
         {"Your"} {number} {label}
       </Text>
     );
   };
 
   const displayInfoLabel = () => {
-    const loading = selectedPlaylistRef.current === undefined || isLoadingT;
+    const loading =
+      context.selectedPlaylist.current === undefined || isLoadingT;
     let label: string;
     switch (infoIndex) {
       case 0:
@@ -349,7 +259,11 @@ const Dashboard = () => {
         label = "";
     }
     const title = loading ? "" : label;
-    return <Text className="text">{title}</Text>;
+    return (
+      <Text w="100%" className="text">
+        {title}
+      </Text>
+    );
   };
 
   const displayUserName = () => {
@@ -363,83 +277,77 @@ const Dashboard = () => {
    * Decides whether to display the follow or unfollow button
    */
   const displayFollowOrUnfollow = () => {
-    let decider = isFollowed();
+    let decider = context.isFollowed();
     if (decider)
       return (
-        <UnfollowButton
-          playlists={playlistsQ}
-          playlist={selectedPlaylistRef}
-          setSelected={setSelectedP}
-          setLoading={setLoadingP}
-        />
+        <UnfollowButton setSelected={setSelectedP} setLoading={setLoadingP} />
       );
     else
       return (
-        <FollowButton
-          playlists={playlistsQ}
-          playlist={selectedPlaylistRef}
-          setSelected={setSelectedP}
-          setLoading={setLoadingP}
-        />
+        <FollowButton setSelected={setSelectedP} setLoading={setLoadingP} />
       );
   };
+  return (
+    <div className="background start">
+      <Flex
+        my="xl"
+        gap="xl"
+        justify="center"
+        align="center"
+        direction="row"
+        wrap="nowrap"
+      >
+        <Center>
+          <p className="title column-element">YSPM{displayUserName()}</p>
+        </Center>
+        <SearchBar setSelectedP={setSelectedP} setSelectedT={setSelectedT} />
+        <Logout />
+        <GenreTestButton />
+      </Flex>
 
-  if (isLoading) {
-    return (
-      <div className="background center loading">
-        <Loader color="green" size="lg" variant="bars" />
-      </div>
-    );
-  } else {
-    return (
-      <div className="background start">
-        <Flex
-          my="xl"
-          gap="xl"
-          justify="center"
-          align="center"
-          direction="row"
-          wrap="nowrap"
-        >
-          <Center>
-            <p className="title column-element">YSPM{displayUserName()}</p>
-          </Center>
-          <SearchBar setSelectedP={setSelectedP} setSelectedT={setSelectedT} />
-          <Logout />
-          <GenreTestButton />
-        </Flex>
-
-        <div className="listDisplayArea">
+      <Flex
+        gap="xl"
+        justify="center"
+        align="center"
+        direction="row"
+        wrap="wrap"
+        w="100%"
+        mt="xl"
+        mb="xl"
+      >
+        <Group miw="min-content" position="center" spacing={0}>
           {displayPlaylistsLabel()}
-          {displayInfoLabel()}
           <div id="playlistsDisplay" className="list">
             {displayPlaylists()}
           </div>
+          <Flex
+            align="center"
+            justify="space-evenly"
+            w="80%"
+            h="100%"
+            mt="lg"
+            wrap="nowrap"
+          >
+            <CreatePlaylistButton
+              setSelected={setSelectedP}
+              setLoading={setLoadingP}
+            />
+            <UpdateAllButton
+              setSelected={setSelectedP}
+              setLoading={setLoadingT}
+            />
+          </Flex>
+        </Group>
+
+        <Group miw="min-content" position="center" spacing={0}>
+          {displayInfoLabel()}
           <div id="infoDisplay" className="list">
             {displayInfo()}
           </div>
           <Flex
             align="center"
             justify="space-evenly"
-            h="100%"
-            mt="lg"
-            wrap="nowrap"
-          >
-            <CreatePlaylistButton
-              playlists={playlistsQ}
-              setSelected={setSelectedP}
-              setLoading={setLoadingP}
-            />
-            <UpdateAllButton
-              selectedPlaylist={selectedPlaylistRef}
-              playlists={playlistsQ}
-              setSelected={setSelectedP}
-              setLoading={setLoadingT}
-            />
-          </Flex>
-          <Flex
-            align="center"
-            justify="space-evenly"
+            w="80%"
             h="100%"
             mt="lg"
             wrap="nowrap"
@@ -447,10 +355,10 @@ const Dashboard = () => {
             <BackButton infoIndex={infoIndex} setInfoIndex={setInfoIndex} />
             {displayFollowOrUnfollow()}
           </Flex>
-        </div>
-      </div>
-    );
-  }
+        </Group>
+      </Flex>
+    </div>
+  );
 };
 
 export default Dashboard;

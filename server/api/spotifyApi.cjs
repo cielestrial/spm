@@ -56,7 +56,10 @@ const rateLimit = (err, res) => {
         });
       })
       .catch((err) => {
-        console.log("Something went wrong with refreshing accessToken", err);
+        console.error(
+          "Something went wrong with refreshing accessToken\n",
+          err
+        );
         res.json({
           errorCode: err.statusCode,
         });
@@ -115,7 +118,7 @@ const getUser = (req, res) => {
       });
     })
     .catch((err) => {
-      console.log("Something went wrong with user", err);
+      console.error("Something went wrong with user\n", err);
     });
 };
 
@@ -155,7 +158,7 @@ const getPlaylists = (req, res) => {
       });
     })
     .catch((err) => {
-      console.log("Something went wrong with retrieving playlists", err);
+      console.error("Something went wrong with retrieving playlists\n", err);
       rateLimit(err, res);
     });
 };
@@ -180,7 +183,7 @@ const create = (req, res) => {
       });
     })
     .catch((err) => {
-      console.log("Something went wrong with playlist creation", err);
+      console.error("Something went wrong with playlist creation\n", err);
       rateLimit(err, res);
     });
 };
@@ -212,7 +215,10 @@ const add = (req, res) => {
       res.json({ snapshot: data.body.snapshot_id });
     })
     .catch((err) => {
-      console.log("Something went wrong with adding songs to playlist", err);
+      console.error(
+        "Something went wrong with adding songs to playlist\n",
+        err
+      );
       rateLimit(err, res);
     });
 };
@@ -245,7 +251,7 @@ const remove = (req, res) => {
       res.json({ snapshot: data.body.snapshot_id });
     })
     .catch((err) => {
-      console.log(
+      console.error(
         "Something went wrong with removing songs from playlist",
         err
       );
@@ -265,7 +271,10 @@ const unfollow = (req, res) => {
       res.json("success");
     })
     .catch((err) => {
-      console.log("Something went wrong with unfollowing the playlist", err);
+      console.error(
+        "Something went wrong with unfollowing the playlist\n",
+        err
+      );
       rateLimit(err, res);
     });
 };
@@ -282,7 +291,7 @@ const follow = (req, res) => {
       res.json("success");
     })
     .catch((err) => {
-      console.log("Something went wrong with following the playlist", err);
+      console.error("Something went wrong with following the playlist\n", err);
       rateLimit(err, res);
     });
 };
@@ -339,7 +348,7 @@ const getTracks = (req, res) => {
       });
     })
     .catch((err) => {
-      console.log("Something went wrong with retrieving tracks", err);
+      console.error("Something went wrong with retrieving tracks\n", err);
       rateLimit(err, res);
     });
 };
@@ -377,7 +386,7 @@ const searchPlaylists = (req, res) => {
         });
       })
       .catch((err) => {
-        console.log("Something went wrong with searching for playlists", err);
+        console.log("Something went wrong with searching for playlists\n", err);
         rateLimit(err, res);
       });
   }
@@ -422,7 +431,7 @@ const searchTracks = (req, res) => {
         });
       })
       .catch((err) => {
-        console.log("Something went wrong with searching for tracks", err);
+        console.log("Something went wrong with searching for tracks\n", err);
         rateLimit(err, res);
       });
   }
@@ -439,7 +448,7 @@ spotifyApi
       console.log("Done!");
     },
     function (err) {
-      console.log("Something went wrong!", err);
+      console.log("Something went wrong!\n", err);
     }
   );
 // Remove tracks from the signed in user's Your Music library
@@ -448,7 +457,7 @@ spotifyApi.removeFromMySavedTracks(["3VNWq8rTnQG6fM1eldSpZ0"]).then(
     console.log("Removed!");
   },
   function (err) {
-    console.log("Something went wrong!", err);
+    console.log("Something went wrong!\n", err);
   }
 );
 
@@ -458,7 +467,7 @@ spotifyApi.addToMySavedTracks(["3VNWq8rTnQG6fM1eldSpZ0"]).then(
     console.log("Added track!");
   },
   function (err) {
-    console.log("Something went wrong!", err);
+    console.log("Something went wrong!\n", err);
   }
 );
 */

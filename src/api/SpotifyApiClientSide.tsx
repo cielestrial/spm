@@ -1,5 +1,4 @@
 import axios, { AxiosResponse } from "axios";
-import { setToken, token, userInfo } from "../pages/Dashboard";
 import { generatePlaylistKey, generateTrackKey } from "./misc/HelperFunctions";
 import { code } from "../pages/LandingPage";
 import {
@@ -13,10 +12,11 @@ import {
   duplicateType,
   occuranceType,
 } from "./SpotifyApiClientTypes";
-import { genreBlackList } from "./misc/GenreBlackList";
+import { genreBlacklist } from "./misc/GenreBlacklist";
 import { TransferListItem } from "@mantine/core";
 import { setRetryAfterLastfm, setRetryAfterSpotify } from "./QueryApi";
 import { resultLimit } from "../components/SearchBar";
+import { setToken, token, userInfo } from "./ContextProvider";
 const scope =
   "&scope=" +
   "playlist-read-private" +
@@ -43,16 +43,32 @@ export const AUTH_URL =
   "&show_dialog=true";
 
 const server = "http://localhost:8080";
-export const duplicateManager = new Map<string, uniqueType>();
-export const genreMasterList = new Map<string, number>();
 
+export const duplicateManager = new Map<string, uniqueType>();
+
+export let genreWhitelist = new Map<string, number>();
+export const loadWhitelistFromFile = (
+  whitelist: Map<string, number>,
+  blacklist: string[]
+) => {
+  for (let i = 0; i < blacklist.length; i++) {
+    if (whitelist.has(blacklist[i])) whitelist.delete(blacklist[i]);
+  }
+  genreWhitelist = whitelist;
+};
 export const updateWhitelist = (genres: TransferListItem[]) => {
-  for (let i = genres.length - 1; i <= 0; i--)
-    if (genreMasterList.has(genres[i].label))
-      genreMasterList.delete(genres[i].label);
+  genreWhitelist = new Map<string, number>(
+    genres.map((item) => {
+      if (genreWhitelist.has(item.label)) {
+        const value = genreWhitelist.get(item.label);
+        if (value !== undefined) return [item.label, value];
+      }
+      return [item.label, 0];
+    })
+  );
 };
 export const getWhitelist = () => {
-  return Array.from(genreMasterList.entries())
+  return Array.from(genreWhitelist.entries())
     .sort((a, b) =>
       a[0].localeCompare(b[0], undefined, {
         sensitivity: "accent",
@@ -64,7 +80,12 @@ export const getWhitelist = () => {
       label: element[0],
     }));
 };
-export const artistMasterList = new Map<string, string[]>();
+
+export let artistMasterList = new Map<string, string[]>();
+export const loadArtistsFromFile = (artists: Map<string, string[]>) => {
+  artistMasterList = artists;
+};
+
 let playlists: playlistsType;
 const options: optionsType = { offset: 0, limit: 0 };
 const getLimit = 50;
@@ -117,7 +138,7 @@ export const getToken = async () => {
     tokenTemp.refreshToken = res.data.refreshToken;
     tokenTemp.expiresIn = res.data.expriresIn;
   } catch (err) {
-    console.log("Something went wrong with getToken()", err);
+    console.error("Something went wrong with getToken()\n", err);
     return null;
   }
   return tokenTemp;
@@ -138,7 +159,10 @@ export const getAuthenticatedUserInfo = async () => {
       premium: res.data.premium,
     };
   } catch (err) {
-    console.log("Something went wrong with getAuthenticatedUserInfo()", err);
+    console.error(
+      "Something went wrong with getAuthenticatedUserInfo()\n",
+      err
+    );
     return null;
   }
   return userInfo;
@@ -172,7 +196,7 @@ export const getPlaylists = async () => {
     };
     newOffset = (newOffset as number) + getLimit;
   } catch (err) {
-    console.log("Something went wrong with getPlaylists()", err);
+    console.error("Something went wrong with getPlaylists()\n", err);
   }
   if (playlists !== undefined) {
     while (0 < newOffset && newOffset < playlists.total) {
@@ -201,7 +225,7 @@ const appendPlaylists = async (newOffset: Promise<number> | number) => {
       playlists?.list.set(generatePlaylistKey(playlist), playlist);
     newOffset = (newOffset as number) + getLimit;
   } catch (err) {
-    console.log("Something went wrong with appendPlaylists()", err);
+    console.error("Something went wrong with appendPlaylists()\n", err);
   }
   return newOffset;
 };
@@ -245,7 +269,7 @@ export const getTracks = async (playlist: playlistType | undefined) => {
       playlist.tracks = res.data.list;
       newOffset = (newOffset as number) + getLimit;
     } catch (err) {
-      console.log("Something went wrong with getTracks()", err);
+      console.error("Something went wrong with getTracks()\n", err);
     }
     if (playlist.tracks !== undefined) {
       while (0 < newOffset && newOffset < playlist.total) {
@@ -292,7 +316,7 @@ const appendTracks = async (
     playlist.tracks?.push(...res.data.list);
     newOffset = (newOffset as number) + getLimit;
   } catch (err) {
-    console.log("Something went wrong with appendTracks()", err);
+    console.error("Something went wrong with appendTracks()\n", err);
   }
   return newOffset;
 };
@@ -323,7 +347,7 @@ export const getAllTracks = async () => {
       i = 1;
     }
   } catch (err) {
-    console.log(err);
+    console.error(err);
     return false;
   }*/
   return true;
@@ -456,7 +480,7 @@ export const removeDuplicates = async (playlist: playlistType) => {
     } while (0 < newOffset && newOffset < total);
     playlist.total -= total;
   } catch (err) {
-    console.log("Something went wrong with removeDuplicates()", err);
+    console.error("Something went wrong with removeDuplicates()\n", err);
   }
   return allOriginals;
 };
@@ -528,7 +552,7 @@ export const createPlaylist = async (name: string | undefined) => {
       ]);
     playlists.total++;
   } catch (err) {
-    console.log("Something went wrong with createPlaylist()", err);
+    console.error("Something went wrong with createPlaylist()\n", err);
   }
   return playlist;
 };
@@ -586,7 +610,7 @@ export const addPlaylistToPlaylist = async (
       status = true;
       playlist.total += total;
     } catch (err) {
-      console.log("Something went wrong with addTracksToPlaylist()", err);
+      console.error("Something went wrong with addTracksToPlaylist()\n", err);
     }
     return status;
   };
@@ -610,7 +634,7 @@ export const unfollowPlaylist = async (playlist: playlistType | undefined) => {
       if (status) playlists.total--;
     }
   } catch (err) {
-    console.log("Something went wrong with unfollowPlaylist()", err);
+    console.error("Something went wrong with unfollowPlaylist()\n", err);
   }
   return status;
 };
@@ -631,7 +655,7 @@ export const followPlaylist = async (playlist: playlistType | undefined) => {
       status = true;
     }
   } catch (err) {
-    console.log("Something went wrong with followPlaylist()", err);
+    console.error("Something went wrong with followPlaylist()\n", err);
   }
   return status;
 };
@@ -671,7 +695,7 @@ export const generalPlaylistsSearch = async (
       };
     }
   } catch (err) {
-    console.log("Something went wrong with generalPlaylistsSearch()", err);
+    console.error("Something went wrong with generalPlaylistsSearch()\n", err);
   }
   if (queriedPlaylists !== undefined) {
     return queriedPlaylists;
@@ -706,7 +730,7 @@ export const generalTracksSearch = async (
       queriedTracks.tracks = res.data.list;
     }
   } catch (err) {
-    console.log("Something went wrong with generalTracksSearch()", err);
+    console.error("Something went wrong with generalTracksSearch()\n", err);
   }
   if (queriedTracks !== undefined) {
     return queriedTracks;
@@ -719,7 +743,7 @@ export const generalTracksSearch = async (
 export const getAllTrackGenres = async () => {
   if (duplicateManager.size === 0) {
     console.log("Empty duplicate manager");
-    return genreMasterList;
+    return genreWhitelist;
   }
   let promises = [];
   let i = 1;
@@ -739,9 +763,9 @@ export const getAllTrackGenres = async () => {
       i = 1;
     }
   } catch (err) {
-    console.log(err);
+    console.error(err);
   }
-  return genreMasterList;
+  return genreWhitelist;
 };
 
 /**
@@ -755,13 +779,12 @@ export const getTrackGenres = async (uniqueTrack: uniqueType) => {
 
   if (!uniqueTrack.track.is_playable) {
     uniqueTrack.track.genres.add("unplayable");
-    if (!genreMasterList.has("unplayable"))
-      genreMasterList.set("unplayable", 1);
+    if (!genreWhitelist.has("unplayable")) genreWhitelist.set("unplayable", 1);
     return status;
   }
   if (uniqueTrack.track.is_local) {
     uniqueTrack.track.genres.add("local");
-    if (!genreMasterList.has("local")) genreMasterList.set("local", 1);
+    if (!genreWhitelist.has("local")) genreWhitelist.set("local", 1);
     return status;
   }
   let genreList: string[] | undefined = [];
@@ -782,9 +805,9 @@ export const getTrackGenres = async (uniqueTrack: uniqueType) => {
               occurance.playlist.genres.set(genre, popularity);
             }
           }
-          popularity = genreMasterList.get(genre) as number;
+          popularity = genreWhitelist.get(genre) as number;
           popularity++;
-          genreMasterList.set(genre, popularity);
+          genreWhitelist.set(genre, popularity);
         }
       }
       console.log("Genres retrieved from client");
@@ -793,10 +816,10 @@ export const getTrackGenres = async (uniqueTrack: uniqueType) => {
     try {
       const res = await axios.post(server + "/genres", {
         artist,
-        genreBlackList,
+        genreBlacklist,
       });
       rateLimitLastfm(res);
-      // Keep track of genre popularity with count and genreMasterList <genre, popularityCount>
+      // Keep track of genre popularity with count and genreWhitelist <genre, popularityCount>
       // Also look into how count is calculated
       if (res.data !== undefined) {
         for (const data of res.data) {
@@ -812,21 +835,28 @@ export const getTrackGenres = async (uniqueTrack: uniqueType) => {
               occurance.playlist.genres.set(genre, popularity);
             }
           }
-          if (!genreMasterList.has(genre)) genreMasterList.set(genre, 1);
+          if (!genreWhitelist.has(genre)) genreWhitelist.set(genre, 1);
           else {
-            popularity = genreMasterList.get(genre) as number;
+            popularity = genreWhitelist.get(genre) as number;
             popularity++;
-            genreMasterList.set(genre, popularity);
+            genreWhitelist.set(genre, popularity);
           }
         }
         console.log("Genres retrieved from server");
       }
     } catch (err) {
-      console.log("Something went wrong with getTrackGenres()", err);
+      console.error("Something went wrong with getTrackGenres()\n", err);
       status = false;
     }
   }
   return status;
+};
+
+export const resetGenres = async () => {
+  try {
+  } catch (err) {
+    console.error;
+  }
 };
 
 /**
@@ -857,7 +887,10 @@ export const addPlaylistSubscriptions = async () => {
       }
     }
   } catch (err) {
-    console.log("Something went wrong with addPlaylistSubscriptions()", err);
+    console.error(
+      "Something went wrong with addPlaylistSubscriptions()\n",
+      err
+    );
     status = false;
   }
   return status;
@@ -904,7 +937,7 @@ export const addGenreSubscriptions = async () => {
       }
     }
   } catch (err) {
-    console.log("Something went wrong with addGenreSubscriptions()", err);
+    console.error("Something went wrong with addGenreSubscriptions()\n", err);
     status = false;
   }
   return status;

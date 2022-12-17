@@ -57,3 +57,8 @@ export type occuranceType = {
   occurances: number;
   duplicate_uris: Map<string, duplicateType>;
 };
+
+export type genreMasterListType = {
+  whitelist: Map<string, number>;
+  blacklist: string[];
+};

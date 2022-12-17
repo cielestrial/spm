@@ -1,14 +1,12 @@
 import { TransferListItem } from "@mantine/core";
 
-export let genreBlackList = [
-  "seen live",
-  "female vocalists",
-  "singer-songwriter",
-  "united states",
-];
+export let genreBlacklist: string[] = [];
+export const loadBlacklistFromFile = (blacklist: string[]) => {
+  genreBlacklist = blacklist;
+};
 
 export const getBlacklist = () => {
-  return genreBlackList
+  return genreBlacklist
     .sort((a, b) =>
       a.localeCompare(b, undefined, {
         sensitivity: "accent",
@@ -22,5 +20,5 @@ export const getBlacklist = () => {
 };
 
 export const setBlacklist = (genres: TransferListItem[]) => {
-  genreBlackList = genres.map((item) => item.label);
+  genreBlacklist = genres.map((item) => item.label);
 };

@@ -1,20 +1,22 @@
 import { Button, Group, Modal, TextInput } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
-import { playlistsType, playlistType } from "../api/SpotifyApiClientTypes";
+import { playlistType } from "../api/SpotifyApiClientTypes";
 import { useSpotifyQuery } from "../api/QueryApi";
 import { createPlaylist } from "../api/SpotifyApiClientSide";
-import { useRef, useState } from "react";
+import { useContext, useRef, useState } from "react";
+import { StateContext } from "../api/ContextProvider";
 
 type propsType = {
-  playlists: React.MutableRefObject<playlistsType>;
   setSelected: (selected: playlistType | undefined) => Promise<void>;
   setLoading: React.Dispatch<React.SetStateAction<number>>;
 };
 
 const CreatePlaylistButton = (props: propsType) => {
+  const context = useContext(StateContext);
   const [opened, { close, open }] = useDisclosure(false);
   const [name, setName] = useState("");
   const playlistName = useRef("");
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const create = async () => {
     props.setLoading((prev) => prev + 1);
@@ -49,22 +51,28 @@ const CreatePlaylistButton = (props: propsType) => {
       >
         <Group position="center" w="60vw" spacing={0}>
           <TextInput
+            ref={inputRef}
             size="md"
             w="60%"
+            miw="min-content"
             autoComplete="off"
             autoCorrect="false"
-            miw="min-content"
             placeholder="Enter Playlist Name"
             variant="filled"
             data-autofocus
             value={name}
             onChange={(e) => {
-              setName(e.currentTarget.value);
-              playlistName.current = e.currentTarget.value;
+              if (name.length > 100) {
+                console.error("Playlist name too long");
+                setName("");
+              } else {
+                setName(e.currentTarget.value);
+                playlistName.current = e.currentTarget.value;
+              }
+              inputRef.current?.blur();
             }}
-            error={name.length > 100 ? "Playlist name too long" : null}
             styles={(theme) => ({
-              root: {
+              input: {
                 borderRadius: "0.33rem 0 0 0.33rem",
               },
             })}
@@ -72,8 +80,8 @@ const CreatePlaylistButton = (props: propsType) => {
           <Button
             compact
             w="15%"
+            h="2.6rem"
             miw="min-content"
-            type="submit"
             variant="filled"
             color="green"
             size="xl"

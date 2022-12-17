@@ -46,6 +46,7 @@ const getArtistGenres = (req, res) => {
           res.json(confidenceResult);
         },
         error: (err) => {
+          console.error("Error getting genre for", artist, "\n", err);
           if (err.statusCode === 429) rateLimit(err, res);
           else res.json(undefined);
         },
@@ -54,4 +55,9 @@ const getArtistGenres = (req, res) => {
   } else res.json(artistGenreMasterList.get(artist));
 };
 
-module.exports = { getArtistGenres };
+const resetArtistGenres = (req, res) => {
+  artistGenreMasterList.clear();
+  res.json("success");
+};
+
+module.exports = { getArtistGenres, resetArtistGenres };

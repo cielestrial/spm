@@ -1,17 +1,14 @@
 import { MultiSelect, SelectItem } from "@mantine/core";
-import { useState } from "react";
+import { useContext, useState } from "react";
+import { StateContext } from "../api/ContextProvider";
 import { getWhitelist } from "../api/SpotifyApiClientSide";
-import { playlistType } from "../api/SpotifyApiClientTypes";
 
-type proptype = {
-  selectedPlaylist: React.MutableRefObject<playlistType | undefined>;
-  isFollowed: () => boolean;
-  isOwned: () => boolean;
-};
+type proptype = {};
 const GenreSubscriber = (props: proptype) => {
-  const [value, setValue] = useState<string[]>(
-    props.selectedPlaylist.current !== undefined
-      ? props.selectedPlaylist.current.genreSubscriptions
+  const context = useContext(StateContext);
+  const [genres, setGenres] = useState<string[]>(
+    context.selectedPlaylist.current !== undefined
+      ? context.selectedPlaylist.current.genreSubscriptions
       : []
   );
   const data = getWhitelist();
@@ -26,21 +23,23 @@ const GenreSubscriber = (props: proptype) => {
       variant="filled"
       aria-label="Genre Selector"
       data={data}
-      value={value}
+      value={genres}
       onChange={(e) => {
-        setValue(e);
-        if (props.selectedPlaylist.current !== undefined && e.length > 0)
-          props.selectedPlaylist.current.genreSubscriptions = e;
+        setGenres(e);
+        if (context.selectedPlaylist.current !== undefined && e.length > 0)
+          context.selectedPlaylist.current.genreSubscriptions = e;
       }}
       searchable
       autoComplete="off"
       autoCorrect="false"
-      placeholder={props.isFollowed() && props.isOwned() ? "Select genres" : ""}
+      placeholder={
+        context.isFollowed() && context.isOwned() ? "Select genres" : ""
+      }
       nothingFound="Genre not found"
       filter={searchFilter}
       maxDropdownHeight={288}
       dropdownPosition="top"
-      disabled={!props.isFollowed() || !props.isOwned()}
+      disabled={!context.isFollowed() || !context.isOwned()}
       size="sm"
       w="100%"
       styles={(theme) => ({

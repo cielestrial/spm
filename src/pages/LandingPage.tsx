@@ -1,7 +1,7 @@
 import Login from "../components/Login";
-import { useEffect, useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import { useContext, useEffect } from "react";
 import { getCode } from "../App";
+import { StateContext } from "../api/ContextProvider";
 
 export let code: string | null;
 export const setCode = (newCode: string | null) => {
@@ -9,12 +9,11 @@ export const setCode = (newCode: string | null) => {
 };
 
 const LandingPage = () => {
-  const navigate = useRef(useNavigate());
-
+  const context = useContext(StateContext);
   useEffect(() => {
     if (getCode() !== null) {
       setCode(getCode());
-      navigate.current("/dashboard");
+      context.navigate.current("/loading");
     }
   }, []);
 

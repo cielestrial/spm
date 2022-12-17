@@ -1,16 +1,17 @@
 import { Button, Group, Modal, Text } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
+import { useContext } from "react";
+import { StateContext } from "../api/ContextProvider";
 import { useSpotifyQuery } from "../api/QueryApi";
 import { unfollowPlaylist } from "../api/SpotifyApiClientSide";
-import { playlistsType, playlistType } from "../api/SpotifyApiClientTypes";
+import { playlistType } from "../api/SpotifyApiClientTypes";
 
 type propsType = {
-  playlists: React.MutableRefObject<playlistsType>;
-  playlist: React.MutableRefObject<playlistType | undefined>;
   setSelected: (selected: playlistType | undefined) => Promise<void>;
   setLoading: React.Dispatch<React.SetStateAction<number>>;
 };
 const UnfollowButton = (props: propsType) => {
+  const context = useContext(StateContext);
   const [opened, { close, open }] = useDisclosure(false);
 
   const unfollow = async () => {
@@ -19,7 +20,7 @@ const UnfollowButton = (props: propsType) => {
     const unfollowQ = await useSpotifyQuery(
       unfollowPlaylist,
       0,
-      props.playlist.current
+      context.selectedPlaylist.current
     );
     props.setSelected(undefined);
 
@@ -40,7 +41,7 @@ const UnfollowButton = (props: propsType) => {
           Are you sure you want to unfollow
         </Text>
         <Text fs="italic" fw="bold" ta="center">
-          {props.playlist.current?.name}&#63;
+          {context.selectedPlaylist.current?.name}&#63;
         </Text>
         <Group grow spacing="md" mt="md">
           <Button
@@ -50,7 +51,7 @@ const UnfollowButton = (props: propsType) => {
             radius="xl"
             size="sm"
             onClick={async () => {
-              console.log(props.playlist);
+              console.log(context.selectedPlaylist.current);
               unfollow();
               close();
             }}
@@ -77,7 +78,7 @@ const UnfollowButton = (props: propsType) => {
         miw="min-content"
         compact
         variant="outline"
-        disabled={props.playlist === undefined}
+        disabled={context.selectedPlaylist.current === undefined}
         color="green"
         radius="xl"
         size="md"

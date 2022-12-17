@@ -24,7 +24,7 @@ export async function useSpotifyQuery(
     // On success goes here
     retryAfterSpotify = defaultWait;
   } catch (err) {
-    console.log(func.name + " is running but failing", err);
+    console.error(func.name + " is running but failing\n", err);
     setTimeout(
       () => useSpotifyQuery(func, retryCounter + 1, ...args),
       retryAfterSpotify
@@ -47,7 +47,7 @@ export async function useLastfmQuery(
     // On success goes here
     retryAfterLastfm = defaultWait;
   } catch (err) {
-    console.log(func.name + " is running but failing", err);
+    console.error(func.name + " is running but failing\n", err);
     setTimeout(
       () => useSpotifyQuery(func, retryCounter + 1, ...args),
       retryAfterLastfm

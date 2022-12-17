@@ -1,28 +1,27 @@
 import { SelectItem, MultiSelect } from "@mantine/core";
 import { useDebouncedValue, useForceUpdate } from "@mantine/hooks";
-import { useEffect, useRef, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
+import { StateContext } from "../api/ContextProvider";
 import { generatePlaylistKey } from "../api/misc/HelperFunctions";
 import { useSpotifyQuery } from "../api/QueryApi";
 import { generalPlaylistsSearch } from "../api/SpotifyApiClientSide";
 import { playlistsType, playlistType } from "../api/SpotifyApiClientTypes";
 import { debounceWaitTime, waitTime } from "./SearchBar";
 
-type proptype = {
-  playlists: React.MutableRefObject<playlistsType>;
-  selectedPlaylist: React.MutableRefObject<playlistType | undefined>;
-  isFollowed: () => boolean;
-  isOwned: () => boolean;
-};
+type proptype = {};
 type dataArrayType = dataType[];
 type dataType = {
   value: string;
   label: string;
 };
 const PlaylistSubscriber = (props: proptype) => {
+  const context = useContext(StateContext);
   const [isLoading, setLoading] = useState(false);
   const [subscribedPlaylists, setSubscribedPlaylists] = useState<string[]>(
-    props.selectedPlaylist.current !== undefined
-      ? Array.from(props.selectedPlaylist.current.playlistSubscriptions.keys())
+    context.selectedPlaylist.current !== undefined
+      ? Array.from(
+          context.selectedPlaylist.current.playlistSubscriptions.keys()
+        )
       : []
   );
 
@@ -54,17 +53,17 @@ const PlaylistSubscriber = (props: proptype) => {
     return generalPlaylistsQ;
   };
 
-  const key = generatePlaylistKey(props.selectedPlaylist.current);
-  let data1 = props.playlists.current?.list
-    ? Array.from(props.playlists.current.list.entries()).map((value) => ({
+  const key = generatePlaylistKey(context.selectedPlaylist.current);
+  let data1 = context.playlistsQ.current?.list
+    ? Array.from(context.playlistsQ.current.list.entries()).map((value) => ({
         value: value[0],
         label: value[1].name,
       }))
     : [];
   data1 = data1.concat(
-    props.selectedPlaylist.current
+    context.selectedPlaylist.current
       ? Array.from(
-          props.selectedPlaylist.current.playlistSubscriptions.entries()
+          context.selectedPlaylist.current.playlistSubscriptions.entries()
         ).map((value) => ({
           value: value[0],
           label: value[1].name,
@@ -74,7 +73,7 @@ const PlaylistSubscriber = (props: proptype) => {
 
   data1.splice(
     data1.findIndex(
-      (value) => value.label === props.selectedPlaylist.current?.name
+      (value) => value.label === context.selectedPlaylist.current?.name
     ),
     1
   );
@@ -138,27 +137,27 @@ const PlaylistSubscriber = (props: proptype) => {
 
   const updateSubscriptionList = (subbedPlaylistKeys: string[]) => {
     const updatedSubscriptionList: [string, playlistType][] = [];
-    if (props.selectedPlaylist.current !== undefined) {
+    if (context.selectedPlaylist.current !== undefined) {
       for (const subbedPlaylistKey of subbedPlaylistKeys) {
         if (
-          props.selectedPlaylist.current.playlistSubscriptions.has(
+          context.selectedPlaylist.current.playlistSubscriptions.has(
             subbedPlaylistKey
           )
         )
           updatedSubscriptionList.push([
             subbedPlaylistKey,
-            props.selectedPlaylist.current.playlistSubscriptions.get(
+            context.selectedPlaylist.current.playlistSubscriptions.get(
               subbedPlaylistKey
             ) as playlistType,
           ]);
         else {
           if (
-            props.playlists.current !== undefined &&
-            props.playlists.current.list.has(subbedPlaylistKey)
+            context.playlistsQ.current !== undefined &&
+            context.playlistsQ.current.list.has(subbedPlaylistKey)
           )
             updatedSubscriptionList.push([
               subbedPlaylistKey,
-              props.playlists.current.list.get(
+              context.playlistsQ.current.list.get(
                 subbedPlaylistKey
               ) as playlistType,
             ]);
@@ -172,7 +171,7 @@ const PlaylistSubscriber = (props: proptype) => {
             ]);
         }
       }
-      props.selectedPlaylist.current.playlistSubscriptions = new Map<
+      context.selectedPlaylist.current.playlistSubscriptions = new Map<
         string,
         playlistType
       >(updatedSubscriptionList);
@@ -204,13 +203,13 @@ const PlaylistSubscriber = (props: proptype) => {
       autoComplete="off"
       autoCorrect="false"
       placeholder={
-        props.isFollowed() && props.isOwned() ? "Select playlists" : ""
+        context.isFollowed() && context.isOwned() ? "Select playlists" : ""
       }
       nothingFound={isLoading ? "Searching..." : "Playlist not found"}
       filter={searchFilter}
       maxDropdownHeight={288}
       dropdownPosition="top"
-      disabled={!props.isFollowed() || !props.isOwned()}
+      disabled={!context.isFollowed() || !context.isOwned()}
       size="sm"
       w="100%"
       styles={(theme) => ({

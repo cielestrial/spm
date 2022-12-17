@@ -1,18 +1,22 @@
 import saveAs from "file-saver";
 import JSZip from "jszip";
-import { userInfo } from "../../pages/Dashboard";
+import { userInfo } from "../ContextProvider";
 import {
   artistMasterList,
   duplicateManager,
-  genreMasterList,
+  genreWhitelist,
+  loadArtistsFromFile,
+  loadWhitelistFromFile,
 } from "../SpotifyApiClientSide";
 import {
+  definedPlaylistsType,
+  genreMasterListType,
   occuranceType,
   playlistsType,
   playlistType,
   tracksType,
 } from "../SpotifyApiClientTypes";
-import { genreBlackList } from "./GenreBlackList";
+import { genreBlacklist, loadBlacklistFromFile } from "./GenreBlacklist";
 
 export const span = "7rem";
 
@@ -86,21 +90,18 @@ export const reviver = (key: string, value: any) => {
 export const saveDataToFiles = async (
   playlists: React.MutableRefObject<playlistsType>
 ) => {
-  if (
-    userInfo === undefined ||
-    userInfo === null ||
-    userInfo.display_name === null
-  )
+  if (userInfo?.display_name === undefined || userInfo?.display_name === null)
     return false;
   const zip = new JSZip();
-
+  const genreMasterList: genreMasterListType = {
+    whitelist: genreWhitelist,
+    blacklist: genreBlacklist,
+  };
   zip
     .folder(userInfo.display_name)
     ?.file(
       "Genre_Master_List.json",
-      JSON.stringify({ whitelist: { genreMasterList } }, replacer, 2) +
-        "\n\n" +
-        JSON.stringify({ blacklist: { value: genreBlackList } }, replacer, 2)
+      JSON.stringify(genreMasterList, replacer, 2)
     );
   zip
     .folder(userInfo.display_name)
@@ -115,15 +116,9 @@ export const saveDataToFiles = async (
     ?.file(
       "Playlists.json",
       JSON.stringify(
-        {
-          dataType: "Map",
-          value: "placeholder",
-        },
+        generatePlaylistsMetaData(zip, userInfo.display_name, playlists),
         replacer,
         2
-      ).replace(
-        '"placeholder"',
-        generatePlaylistsMetaData(zip, userInfo.display_name, playlists)
       )
     );
 
@@ -134,7 +129,7 @@ export const saveDataToFiles = async (
       saveAs(content, "yspm.zip");
     })
     .catch((err) => {
-      console.log("Failed to save zip file\n", err);
+      console.error("Failed to save zip file\n", err);
     });
   return true;
 };
@@ -144,54 +139,127 @@ const generatePlaylistsMetaData = (
   username: string,
   playlists: React.MutableRefObject<playlistsType>
 ) => {
-  let output: string = "";
-  let cleanPlaylist = {} as playlistType;
-  if (playlists.current !== undefined && playlists.current.list !== undefined)
+  if (playlists.current !== undefined && playlists.current.list !== undefined) {
+    const playlistsMetaData = {} as definedPlaylistsType;
+    playlistsMetaData.total = playlists.current.total;
+    playlistsMetaData.list = new Map<string, playlistType>();
+
+    let cleanPlaylist = {} as playlistType;
     for (const playlist of playlists.current.list.entries()) {
       cleanPlaylist = { ...playlist[1], tracks: [] };
-      output += JSON.stringify([playlist[0], cleanPlaylist], replacer, 2);
-
-      zip
-        .folder(username)
-        ?.folder("Playlists")
-        ?.folder("Tracks")
-        ?.file(
-          playlist[0] + ".json",
-          JSON.stringify(playlist[1].tracks, replacer, 2)
-        );
+      playlistsMetaData.list.set(playlist[0], cleanPlaylist);
+      if (playlist[1].tracks !== undefined && playlist[1].tracks.length > 0) {
+        zip
+          .folder(username)
+          ?.folder("Playlists")
+          ?.folder("Tracks")
+          ?.file(
+            playlist[0] + ".json",
+            JSON.stringify(playlist[1].tracks, replacer, 2)
+          );
+      }
     }
-  return output;
+    return playlistsMetaData;
+  }
+  return undefined;
 };
 
-export const loadDataFromFiles = async () => {
-  let fileReader = new FileReader();
-  /*
-  fileReader.onload = function (loadedFile) {
-    let storedData = loadedFile.target.result;
-    // Debug
-    // console.log(storedData);
-    parseData(storedData);
-    graphData(storedData.charAt(0));
-  };
-  fileReader.onerror = function (loadedFile) {
-    alert(
-      "Failed to read file." +
-        "\n" +
-        "Please make sure you are inputting the correct file." +
-        "\n" +
-        "Example filename: D;2021_8.txt"
-    );
-  };
-  fileReader.readAsText(fileName);
-  */
-  // genre_master_list.json (white list into genreMasterList and black list into genreBlacklist
-  // then call updateWhiteList)
+export const loadDataFromFiles = async (
+  file: File,
+  playlists: React.MutableRefObject<playlistsType>
+) => {
+  JSZip.loadAsync(file)
+    .then(function (zip) {
+      if (
+        userInfo?.display_name !== undefined &&
+        userInfo?.display_name !== null
+      ) {
+        const username = userInfo.display_name;
+        zip
+          .folder(username)
+          ?.file("Genre_Master_List.json")
+          ?.async("string")
+          .then((content) => {
+            if (content.length > 0) {
+              const genreMasterList: genreMasterListType = JSON.parse(
+                content,
+                reviver
+              );
+              loadBlacklistFromFile(genreMasterList.blacklist);
+              loadWhitelistFromFile(
+                genreMasterList.whitelist,
+                genreMasterList.blacklist
+              );
+            }
+          })
+          .catch((err) => {
+            console.error("Failed to load genreMasterList metadata\n", err);
+          });
 
-  //artist_master_list.json into artistMAsterList
+        zip
+          .folder(username)
+          ?.file("Artist_Master_List.json")
+          ?.async("string")
+          .then((content) => {
+            if (content.length > 0)
+              loadArtistsFromFile(JSON.parse(content, reviver));
+          })
+          .catch((err) => {
+            console.error("Failed to load artistMasterList metadata\n", err);
+          });
 
-  // read playlists.json into a new map
-  // carry over subscribed genres and subscribed playlists
-  // then perform a consistency check against playlist
-  // if snapshot matches then read corresponding file from track folder into tracks[]
-  return true;
+        zip
+          .folder(username)
+          ?.folder("Playlists")
+          ?.file("Playlists.json")
+          ?.async("string")
+          .then((content) => {
+            if (playlists.current !== undefined && content.length > 0) {
+              const playlistsMetaData: definedPlaylistsType = JSON.parse(
+                content,
+                reviver
+              );
+
+              for (const playlist of playlists.current.list.entries()) {
+                if (playlistsMetaData.list.has(playlist[0])) {
+                  const playlistMetaData = playlistsMetaData.list.get(
+                    playlist[0]
+                  ) as playlistType;
+                  playlist[1].genreSubscriptions =
+                    playlistMetaData.genreSubscriptions;
+                  playlist[1].playlistSubscriptions =
+                    playlistMetaData.playlistSubscriptions;
+                  if (playlist[1].snapshot === playlistMetaData.snapshot) {
+                    zip
+                      .folder(username)
+                      ?.folder("Playlists")
+                      ?.folder("Tracks")
+                      ?.file(playlist[0] + ".json")
+                      ?.async("string")
+                      .then((moreContent) => {
+                        if (moreContent.length > 0)
+                          playlist[1].tracks = JSON.parse(moreContent, reviver);
+                      })
+                      .catch((err) => {
+                        console.error(
+                          "Failed to load",
+                          playlist[1].name,
+                          "track metadata\n",
+                          err
+                        );
+                      });
+                  }
+                }
+              }
+              // if snapshot matches then read corresponding file from track folder into tracks[]
+            }
+          })
+          .catch((err) => {
+            console.error("Failed to load playlists metadata\n", err);
+          });
+      }
+    })
+    .catch((err) => {
+      console.error("Failed to load data from zip file\n", err);
+    });
 };

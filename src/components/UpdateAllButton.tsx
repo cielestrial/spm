@@ -1,20 +1,21 @@
 import { Button } from "@mantine/core";
+import { useContext } from "react";
+import { StateContext } from "../api/ContextProvider";
 import { generatePlaylistKey } from "../api/misc/HelperFunctions";
 import { useSpotifyQuery } from "../api/QueryApi";
 import {
   addGenreSubscriptions,
   addPlaylistSubscriptions,
 } from "../api/SpotifyApiClientSide";
-import { playlistsType, playlistType } from "../api/SpotifyApiClientTypes";
+import { playlistType } from "../api/SpotifyApiClientTypes";
 
 type proptype = {
-  selectedPlaylist: React.MutableRefObject<playlistType | undefined>;
-  playlists: React.MutableRefObject<playlistsType>;
   setSelected: (selected: playlistType | undefined) => Promise<void>;
   setLoading: React.Dispatch<React.SetStateAction<number>>;
 };
 
 const UpdateAllButton = (props: proptype) => {
+  const context = useContext(StateContext);
   const addSubscriptions = async () => {
     props.setLoading((prev) => prev + 1);
 
@@ -30,11 +31,11 @@ const UpdateAllButton = (props: proptype) => {
 
   const updateHandler = async () => {
     if (
-      props.playlists.current === undefined ||
-      props.selectedPlaylist.current === undefined
+      context.playlistsQ.current === undefined ||
+      context.selectedPlaylist.current === undefined
     )
       return;
-    console.log(generatePlaylistKey(props.selectedPlaylist.current));
+    console.log(generatePlaylistKey(context.selectedPlaylist.current));
     await addSubscriptions();
   };
 
@@ -44,7 +45,7 @@ const UpdateAllButton = (props: proptype) => {
       miw="min-content"
       compact
       variant="outline"
-      disabled={props.playlists === undefined}
+      disabled={context.playlistsQ.current === undefined}
       color="green"
       radius="xl"
       size="md"
