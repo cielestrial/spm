@@ -18,13 +18,22 @@ const UpdateAllButton = (props: proptype) => {
   const context = useContext(StateContext);
   const addSubscriptions = async () => {
     props.setLoading((prev) => prev + 1);
-
+    if (
+      context.userInfo?.display_name === undefined ||
+      context.userInfo.display_name === null
+    ) {
+      console.error("Could not read display_name");
+      return;
+    }
     const resAll = await Promise.allSettled([
-      useSpotifyQuery(addPlaylistSubscriptions, 0),
-      useSpotifyQuery(addGenreSubscriptions, 0),
+      useSpotifyQuery(
+        addPlaylistSubscriptions,
+        0,
+        context.userInfo.display_name
+      ),
+      useSpotifyQuery(addGenreSubscriptions, 0, context.userInfo.display_name),
     ]);
     props.setSelected(undefined);
-
     props.setLoading((prev) => prev - 1);
     return resAll;
   };
@@ -42,7 +51,7 @@ const UpdateAllButton = (props: proptype) => {
   return (
     <Button
       w="35%"
-      miw="min-content"
+      miw="7rem"
       compact
       variant="outline"
       disabled={context.playlistsQ.current === undefined}

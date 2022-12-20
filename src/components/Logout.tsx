@@ -1,19 +1,29 @@
 import { Button } from "@mantine/core";
-import { useNavigate } from "react-router-dom";
-import { useRef } from "react";
+import { useContext } from "react";
 import { setCode } from "../pages/LandingPage";
+import { StateContext } from "../api/ContextProvider";
 
-const Logout = () => {
-  const navigate = useRef(useNavigate());
+type propType = {
+  height: string | number | undefined;
+};
+
+const Logout = (props: propType) => {
+  const context = useContext(StateContext);
+
   return (
     <Button
-      variant="outline"
+      miw="7rem"
+      h={props.height}
+      compact
+      variant="subtle"
       color="green"
-      radius="xl"
-      size="md"
-      onClick={() => {
+      size="xl"
+      component="a"
+      onClick={async () => {
         setCode(null);
-        navigate.current("/");
+        context.setUserInfo(null);
+        context.setToken(null);
+        context.navigate.current("/");
       }}
     >
       Logout

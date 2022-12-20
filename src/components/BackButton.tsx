@@ -11,7 +11,7 @@ const BackButton = (props: proptype) => {
   return (
     <Button
       w="35%"
-      miw="min-content"
+      miw="7rem"
       compact
       variant="outline"
       disabled={props.infoIndex === 0}

@@ -1,23 +1,31 @@
 import "../css/dashboard.scss";
-import Logout from "../components/Logout";
 import {
   Box,
   Center,
   Flex,
   Group,
   Loader,
+  MediaQuery,
+  ScrollArea,
   SimpleGrid,
   Space,
+  Stack,
   Text,
 } from "@mantine/core";
-import { useCallback, useContext, useEffect, useRef, useState } from "react";
+import {
+  forwardRef,
+  useCallback,
+  useContext,
+  useEffect,
+  useImperativeHandle,
+  useRef,
+  useState,
+} from "react";
 import UnfollowButton from "../components/UnfollowButton";
 import { playlistType, tracksType } from "../api/SpotifyApiClientTypes";
 import CreatePlaylistButton from "../components/CreatePlaylistButton";
-import SearchBar from "../components/SearchBar";
 import FollowButton from "../components/FollowButton";
-import { generatePlaylistKey, inPlaylists } from "../api/misc/HelperFunctions";
-import GenreTestButton from "../components/GenreTestButton";
+import { inPlaylists } from "../api/misc/HelperFunctions";
 import BackButton from "../components/BackButton";
 import Row from "../components/Row";
 import ShowTracksButton from "../components/ShowTracksButton";
@@ -25,13 +33,21 @@ import GenreSubscriber from "../components/GenreSubscriber";
 import PlaylistSubscriber from "../components/PlaylistSubscriber";
 import TopPlaylistGenres from "../components/TopPlaylistGenres";
 import UpdateAllButton from "../components/UpdateAllButton";
-import { StateContext, token, userInfo } from "../api/ContextProvider";
+import { StateContext } from "../api/ContextProvider";
 import { useSpotifyQuery } from "../api/QueryApi";
 import { getTracks } from "../api/SpotifyApiClientSide";
+import { GiPlainArrow } from "react-icons/gi";
+import { debounceWaitTime } from "../components/SearchBar";
 
 export let loadingAllTracks: boolean = false;
 
-const Dashboard = () => {
+type propType = {};
+export type dashboardRefType = {
+  setSelectedP: (selected: playlistType | undefined) => Promise<void>;
+  setSelectedT: (track: tracksType) => void;
+};
+
+const Dashboard = forwardRef<dashboardRefType, propType>((props, ref) => {
   const context = useContext(StateContext);
   const [getSelectedTrack, setSelectedTrack] = useState<tracksType>();
   const [infoIndex, setInfoIndex] = useState(0);
@@ -40,13 +56,19 @@ const Dashboard = () => {
   const tracksQ = useRef<playlistType | undefined>(undefined);
 
   useEffect(() => {
-    if (token === null || userInfo === null) context.navigate.current("/");
-  }, [token, userInfo]);
+    if (context.token === null || context.userInfo === null)
+      context.navigate.current("/dashboard");
+  }, [context.token, context.userInfo]);
 
   useEffect(() => {
     if (context.playlistsQ.current === undefined)
-      context.navigate.current("/loading");
+      context.navigate.current("/dashboard");
   }, [context.playlistsQ.current]);
+
+  useEffect(() => {
+    context.setCurrentPage("dashboard");
+    context.setShowHeader(true);
+  }, []);
 
   /**
    *
@@ -57,13 +79,17 @@ const Dashboard = () => {
       context.selectedPlaylist.current = selected;
       setInfoIndex(0);
       setLoadingT((prev) => prev + 1);
-
-      tracksQ.current = await useSpotifyQuery(
-        getTracks,
-        0,
-        context.selectedPlaylist.current
-      );
-
+      if (
+        context.userInfo?.display_name !== undefined &&
+        context.userInfo.display_name !== null
+      )
+        tracksQ.current = await useSpotifyQuery(
+          getTracks,
+          0,
+          context.selectedPlaylist.current,
+          context.userInfo.display_name
+        );
+      else console.error("Could not read display_name");
       setLoadingT((prev) => prev - 1);
     },
     [isLoadingT]
@@ -76,6 +102,15 @@ const Dashboard = () => {
     setSelectedTrack(track);
     setInfoIndex(2);
   }, []);
+
+  useImperativeHandle(
+    ref,
+    () => ({
+      setSelectedP,
+      setSelectedT,
+    }),
+    []
+  );
 
   /**
    * Display list of playlists
@@ -235,7 +270,7 @@ const Dashboard = () => {
     const label =
       context.playlistsQ.current?.total === 1 ? "Playlist" : "Playlists";
     return (
-      <Text w="100%" className="text">
+      <Text className="text">
         {"Your"} {number} {label}
       </Text>
     );
@@ -247,30 +282,23 @@ const Dashboard = () => {
     let label: string;
     switch (infoIndex) {
       case 0:
-        label = "Playlist Info";
+        label = "Playlist Details";
         break;
       case 1:
         label = "Playlist Songs";
         break;
       case 2:
-        label = "Track Info";
+        label = "Track Details";
         break;
       default:
-        label = "";
+        label = "Details";
     }
-    const title = loading ? "" : label;
+    const title = loading ? "Details" : label;
     return (
       <Text w="100%" className="text">
         {title}
       </Text>
     );
-  };
-
-  const displayUserName = () => {
-    if (userInfo !== undefined && userInfo !== null) {
-      if (userInfo.display_name !== null) return ": " + userInfo.display_name;
-    }
-    return "";
   };
 
   /**
@@ -287,78 +315,128 @@ const Dashboard = () => {
         <FollowButton setSelected={setSelectedP} setLoading={setLoadingP} />
       );
   };
+
+  //
   return (
-    <div className="background start">
-      <Flex
-        my="xl"
-        gap="xl"
-        justify="center"
-        align="center"
-        direction="row"
-        wrap="nowrap"
-      >
-        <Center>
-          <p className="title column-element">YSPM{displayUserName()}</p>
+    <Flex
+      align="center"
+      justify="center"
+      gap={0}
+      direction={{ base: "column", xs: "row" }}
+    >
+      <Stack miw="min-content" justify="center" align="center" spacing={0}>
+        {displayPlaylistsLabel()}
+        <ScrollArea.Autosize
+          maxHeight={"60vh"}
+          type="auto"
+          offsetScrollbars
+          scrollbarSize={8}
+          scrollHideDelay={debounceWaitTime}
+          styles={(theme) => ({
+            root: {
+              borderStyle: "inset outset outset inset",
+              borderColor: "rgba(255, 255, 255, 0.66)",
+              height: "60vh",
+              width: "35vw",
+              minWidth: "15rem",
+            },
+            scrollbar: {
+              '&[data-orientation="vertical"] .mantine-ScrollArea-thumb': {
+                backgroundColor: "forestgreen",
+              },
+              '&[data-orientation="horizontal"] .mantine-ScrollArea-thumb': {
+                backgroundColor: "forestgreen",
+              },
+            },
+            corner: {
+              opacity: 1,
+              background:
+                theme.colorScheme === "dark"
+                  ? theme.colors.dark[6]
+                  : theme.colors.gray[0],
+            },
+          })}
+        >
+          {displayPlaylists()}
+        </ScrollArea.Autosize>
+        <Flex
+          align="center"
+          justify="space-evenly"
+          w="35vw"
+          gap="xs"
+          mt="lg"
+          wrap="wrap"
+        >
+          <CreatePlaylistButton
+            setSelected={setSelectedP}
+            setLoading={setLoadingP}
+          />
+          <UpdateAllButton
+            setSelected={setSelectedP}
+            setLoading={setLoadingT}
+          />
+        </Flex>
+      </Stack>
+
+      {/* Arrow */}
+      <MediaQuery smallerThan="xs" styles={{ transform: "rotate(90deg)" }}>
+        <Center mt="lg" mx="xl" h="100%">
+          <GiPlainArrow
+            fontSize="5rem"
+            style={{ transform: "rotate(-90deg)" }}
+          />
         </Center>
-        <SearchBar setSelectedP={setSelectedP} setSelectedT={setSelectedT} />
-        <Logout />
-        <GenreTestButton />
-      </Flex>
+      </MediaQuery>
 
-      <Flex
-        gap="xl"
-        justify="center"
-        align="center"
-        direction="row"
-        wrap="wrap"
-        w="100%"
-        mt="xl"
-        mb="xl"
-      >
-        <Group miw="min-content" position="center" spacing={0}>
-          {displayPlaylistsLabel()}
-          <div id="playlistsDisplay" className="list">
-            {displayPlaylists()}
-          </div>
-          <Flex
-            align="center"
-            justify="space-evenly"
-            w="80%"
-            h="100%"
-            mt="lg"
-            wrap="nowrap"
-          >
-            <CreatePlaylistButton
-              setSelected={setSelectedP}
-              setLoading={setLoadingP}
-            />
-            <UpdateAllButton
-              setSelected={setSelectedP}
-              setLoading={setLoadingT}
-            />
-          </Flex>
-        </Group>
-
-        <Group miw="min-content" position="center" spacing={0}>
-          {displayInfoLabel()}
-          <div id="infoDisplay" className="list">
-            {displayInfo()}
-          </div>
-          <Flex
-            align="center"
-            justify="space-evenly"
-            w="80%"
-            h="100%"
-            mt="lg"
-            wrap="nowrap"
-          >
-            <BackButton infoIndex={infoIndex} setInfoIndex={setInfoIndex} />
-            {displayFollowOrUnfollow()}
-          </Flex>
-        </Group>
-      </Flex>
-    </div>
+      <Stack miw="min-content" justify="center" align="center" spacing={0}>
+        {displayInfoLabel()}
+        <ScrollArea.Autosize
+          maxHeight={"60vh"}
+          type="always"
+          offsetScrollbars
+          scrollbarSize={8}
+          scrollHideDelay={debounceWaitTime}
+          styles={(theme) => ({
+            root: {
+              borderStyle: "inset outset outset inset",
+              borderColor: "rgba(255, 255, 255, 0.66)",
+              height: "60vh",
+              width: "35vw",
+              minWidth: "15rem",
+            },
+            scrollbar: {
+              '&[data-orientation="vertical"] .mantine-ScrollArea-thumb': {
+                backgroundColor: "forestgreen",
+              },
+              '&[data-orientation="horizontal"] .mantine-ScrollArea-thumb': {
+                backgroundColor: "forestgreen",
+              },
+            },
+            corner: {
+              opacity: 1,
+              background:
+                theme.colorScheme === "dark"
+                  ? theme.colors.dark[6]
+                  : theme.colors.gray[0],
+            },
+          })}
+        >
+          {displayInfo()}
+        </ScrollArea.Autosize>
+        <Flex
+          align="center"
+          justify="space-evenly"
+          w="35vw"
+          gap="xs"
+          mt="lg"
+          wrap="wrap"
+        >
+          <BackButton infoIndex={infoIndex} setInfoIndex={setInfoIndex} />
+          {displayFollowOrUnfollow()}
+        </Flex>
+      </Stack>
+    </Flex>
   );
-};
+});
 
 export default Dashboard;

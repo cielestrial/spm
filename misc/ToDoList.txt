@@ -1,9 +1,9 @@
 To Do:    
-  1) Save and Load from csv files (file name is user name + something)  
-  1.5) songs with 2 artists get 6 genres? instead of 3?
-  2) Liked Songs
-  
-  3) Visuals
+ 
+  3) Liked Songs
+  4) Genre re-pull buggy
+
+  1) Visuals
   4) Hosting
 
 
@@ -19,10 +19,11 @@ Hosting:
 Bugs: 
 
 Visuals: 
-  Navbar
   Theme
+  Animations
   Fonts
-  Visual Overhaul
 
 Extras:
+  Multi-select tracks to remove or add to another playlist (change arrow direction)
   Track player capabilities (will only work for premium though....).
+  Proper shuffle

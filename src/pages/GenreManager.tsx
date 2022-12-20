@@ -1,52 +1,68 @@
 import {
   Button,
   Center,
-  Flex,
+  Loader,
+  Stack,
   TransferList,
   TransferListData,
   TransferListItem,
 } from "@mantine/core";
 import { useContext, useEffect, useState } from "react";
-import { StateContext, token, userInfo } from "../api/ContextProvider";
+import { StateContext } from "../api/ContextProvider";
 import { getBlacklist, setBlacklist } from "../api/misc/GenreBlacklist";
-import { saveDataToFiles } from "../api/misc/HelperFunctions";
-import { getWhitelist, updateWhitelist } from "../api/SpotifyApiClientSide";
+import { useLastfmQuery } from "../api/QueryApi";
+import {
+  getAllTrackGenres,
+  getWhitelist,
+  resetGenres,
+  updateWhitelist,
+} from "../api/SpotifyApiClientSide";
+import { pageHeight, pagePadding } from "../App";
 
 const GenreManager = () => {
   const context = useContext(StateContext);
   const [data, setData] = useState<TransferListData>([[], []]);
+  const [isLoading, setLoading] = useState(true);
+
   useEffect(() => {
-    if (token === null || userInfo === null) context.navigate.current("/");
-  }, [token, userInfo]);
+    if (context.token === null || context.userInfo === null)
+      context.navigate.current("/genres");
+  }, [context.token, context.userInfo]);
 
   useEffect(() => {
     if (context.playlistsQ.current === undefined)
-      context.navigate.current("/loading");
+      context.navigate.current("/genres");
   }, [context.playlistsQ.current]);
 
   useEffect(() => {
+    context.setShowHeader(!isLoading);
+  }, [isLoading]);
+
+  useEffect(() => {
+    context.setCurrentPage("genres");
+    setLoading(true);
     const whitelist: TransferListItem[] = getWhitelist();
     const blacklist: TransferListItem[] = getBlacklist();
     setData([whitelist, blacklist]);
+    setLoading(false);
   }, []);
 
   const searchFilter = (query: string, item: TransferListItem) =>
     item.label.includes(query.toLocaleLowerCase());
-  return (
-    <>
-      <Flex
-        gap="xl"
-        justify="center"
-        align="center"
-        direction="row"
-        w="100%"
-        wrap="wrap"
-        mt="xl"
-        mb="xl"
-      >
+  if (isLoading) {
+    return (
+      <Center h={pageHeight} pt={pagePadding} className="loading">
+        <Loader color="green" size="lg" variant="bars" />
+      </Center>
+    );
+  } else {
+    return (
+      <Stack align="center" justify="center">
         <TransferList
           value={data}
           onChange={(values: TransferListData) => {
+            updateWhitelist(data[0]);
+            setBlacklist(data[1]);
             setData(values);
           }}
           searchPlaceholder={"Search Genres"}
@@ -54,18 +70,18 @@ const GenreManager = () => {
           placeholder={["No Whitelisted Genres", "No Blacklisted Genres"]}
           titles={["Whitelist", "Blacklist"]}
           showTransferAll={false}
+          autoCorrect="off"
           filter={searchFilter}
-          limit={20}
-          w="80vw"
-          h="85vh"
-          breakpoint="sm"
+          breakpoint="md"
+          w="75vw"
+          miw="10rem"
+          listHeight={288}
           styles={(theme) => ({
             transferListTitle: {
               textAlign: "center",
               fontSize: "1.66rem",
             },
             transferListItems: {
-              minHeight: "calc(95% - 2rem)",
               marginTop: "1rem",
               marginRight: "1rem",
               padding: "0.66rem 0 0.99rem 0.66rem",
@@ -77,31 +93,32 @@ const GenreManager = () => {
             },
           })}
         />
-      </Flex>
-      <Center w="100%">
         <Button
           compact
           w="15%"
           h="2.6rem"
-          miw="min-content"
+          mih="2.6rem"
+          miw="9rem"
           variant="filled"
           color="green"
           radius="md"
           size="xl"
+          mt="xl"
           onClick={async () => {
-            updateWhitelist(data[0]);
-            setBlacklist(data[1]);
-            // Re-pull all genres
-            // await useLastfmQuery(getAllTrackGenres, 0);
-            await saveDataToFiles(context.playlistsQ);
+            setLoading(true);
+
+            await useLastfmQuery(resetGenres, 0);
+            await useLastfmQuery(getAllTrackGenres, 0);
+
             context.navigate.current("/dashboard");
+            setLoading(false);
           }}
         >
           Save
         </Button>
-      </Center>
-    </>
-  );
+      </Stack>
+    );
+  }
 };
 
 export default GenreManager;

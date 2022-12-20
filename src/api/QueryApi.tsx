@@ -15,13 +15,13 @@ export async function useSpotifyQuery(
   retryCounter: number,
   ...args: any[]
 ) {
-  console.log(func.name + " is running with args ", ...args);
+  //console.log(func.name + " is running with args ", ...args);
   if (retryCounter === undefined) retryCounter = 0;
   else if (retryCounter > 3) throw new Error("Retry limit hit");
   let data;
   try {
     data = await func(...args);
-    // On success goes here
+    // On success
     retryAfterSpotify = defaultWait;
   } catch (err) {
     console.error(func.name + " is running but failing\n", err);
@@ -38,18 +38,18 @@ export async function useLastfmQuery(
   retryCounter: number,
   ...args: any[]
 ) {
-  console.log(func.name + " is running with args ", ...args);
+  //console.log(func.name + " is running with args ", ...args);
   if (retryCounter === undefined) retryCounter = 0;
   else if (retryCounter > 3) throw new Error("Retry limit hit");
   let data;
   try {
     data = await func(...args);
-    // On success goes here
+    // On success
     retryAfterLastfm = defaultWait;
   } catch (err) {
     console.error(func.name + " is running but failing\n", err);
     setTimeout(
-      () => useSpotifyQuery(func, retryCounter + 1, ...args),
+      () => useLastfmQuery(func, retryCounter + 1, ...args),
       retryAfterLastfm
     );
   }

@@ -110,10 +110,13 @@ const getUser = (req, res) => {
         "country:",
         country,
         "premium:",
-        premium
+        premium,
+        "image:",
+        data.body.images[0].url
       );
       res.json({
         display_name: data.body.display_name,
+        display_image: data.body.images[0].url,
         premium: premium,
       });
     })

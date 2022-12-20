@@ -4,8 +4,9 @@ import { AUTH_URL } from "../api/SpotifyApiClientSide";
 const Login = () => {
   return (
     <Button
-      fullWidth
       variant="filled"
+      w="20%"
+      miw="9rem"
       color="green"
       radius="xl"
       size="md"

@@ -7,14 +7,9 @@ import {
   Loader,
   Text,
 } from "@mantine/core";
+import { useMediaQuery } from "@mantine/hooks";
 import { useState, useEffect, useRef, useContext } from "react";
-import {
-  setToken,
-  setUserInfo,
-  StateContext,
-  token,
-  userInfo,
-} from "../api/ContextProvider";
+import { StateContext } from "../api/ContextProvider";
 import { loadDataFromFiles } from "../api/misc/HelperFunctions";
 import { useLastfmQuery, useSpotifyQuery } from "../api/QueryApi";
 import {
@@ -23,62 +18,77 @@ import {
   getPlaylists,
   getAllTracks,
   getAllTrackGenres,
+  getTopPlaylistGenres,
 } from "../api/SpotifyApiClientSide";
 import {
   tokenType,
   userInfoType,
   playlistsType,
 } from "../api/SpotifyApiClientTypes";
+import { pageHeight, pagePadding } from "../App";
+import { breakpoints } from "../components/NavBar";
 
 const LoadingPage = () => {
   const context = useContext(StateContext);
   const [file, setFile] = useState<File | null>(null);
   const inputRef = useRef<HTMLButtonElement>(null);
   const [isLoading, setLoading] = useState(true);
+  const smMediaQuery = useMediaQuery(`(min-width: ${breakpoints.sm})`);
+  const xsMediaQuery = useMediaQuery(`(min-width: ${breakpoints.xs})`);
 
   useEffect(() => {
-    const start = async () => {
+    context.setCurrentPage("loading");
+    context.setShowHeader(false);
+    (async () => {
       setLoading(true);
-
       const tokenData = (await useSpotifyQuery(getToken, 0)) as
         | tokenType
         | undefined
         | null;
       if (tokenData !== undefined && tokenData !== null) {
-        setToken(tokenData);
+        context.setToken(tokenData);
         const userData = (await useSpotifyQuery(
           getAuthenticatedUserInfo,
           0
         )) as userInfoType | undefined | null;
         if (userData !== undefined && userData !== null) {
-          setUserInfo(userData);
+          context.setUserInfo(userData);
 
           context.playlistsQ.current = (await useSpotifyQuery(
             getPlaylists,
             0
           )) as playlistsType;
-        } else setUserInfo(null);
-      } else setToken(null);
-
+        } else context.setUserInfo(null);
+      } else context.setToken(null);
       setLoading(false);
-    };
-
-    start();
+    })();
   }, []);
 
   useEffect(() => {
-    if (token === null || userInfo === null) context.navigate.current("/");
-  }, [token, userInfo]);
+    if (context.token === null || context.userInfo === null)
+      context.navigate.current("/");
+  }, [context.token, context.userInfo]);
+
+  const getAll = async () => {
+    if (
+      context.userInfo?.display_name !== undefined &&
+      context.userInfo.display_name !== null
+    ) {
+      await useSpotifyQuery(getAllTracks, 0, context.userInfo.display_name);
+      await useLastfmQuery(getAllTrackGenres, 0);
+      await useLastfmQuery(getTopPlaylistGenres, 0);
+    } else console.error("Could not read display_name");
+  };
 
   if (isLoading) {
     return (
-      <div className="background center loading">
+      <Center h={pageHeight} pt={pagePadding} className="loading">
         <Loader color="green" size="lg" variant="bars" />
-      </div>
+      </Center>
     );
   } else {
     return (
-      <Center h="100vh">
+      <Center h={pageHeight} pt={pagePadding}>
         <Flex
           gap="md"
           justify="center"
@@ -89,14 +99,20 @@ const LoadingPage = () => {
           mb="xl"
           w="100%"
         >
-          <Group w="100%" spacing={0} position="center" align="end">
+          <Flex
+            w="100%"
+            direction={{ base: "column", sm: "row" }}
+            gap={0}
+            justify="center"
+            align="center"
+          >
             <FileInput
               ref={inputRef}
               placeholder="Upload your yspm.zip file"
               aria-label="Upload Select"
               size="md"
-              w="35%"
-              miw="min-content"
+              w={smMediaQuery ? "35%" : xsMediaQuery ? "max-content" : "9rem"}
+              miw="9rem"
               clearable
               accept="application/zip"
               value={file}
@@ -109,7 +125,9 @@ const LoadingPage = () => {
               }}
               styles={(theme) => ({
                 input: {
-                  borderRadius: "0.33rem 0 0 0.33rem",
+                  borderRadius: smMediaQuery
+                    ? "0.33rem 0 0 0.33rem"
+                    : "0.33rem",
                 },
                 placeholder: {
                   color: "mediumseagreen",
@@ -122,7 +140,7 @@ const LoadingPage = () => {
               compact
               w="15%"
               h="2.1em"
-              miw="min-content"
+              miw="9rem"
               variant="filled"
               color="green"
               size="xl"
@@ -130,22 +148,32 @@ const LoadingPage = () => {
               onClick={async () => {
                 if (file?.name === "yspm.zip") {
                   setLoading(true);
-
-                  await loadDataFromFiles(file, context.playlistsQ);
+                  if (
+                    context.userInfo?.display_name !== undefined &&
+                    context.userInfo.display_name !== null
+                  )
+                    await loadDataFromFiles(
+                      file,
+                      context.userInfo.display_name,
+                      context.playlistsQ
+                    );
+                  else console.error("Could not read display_name");
+                  await getAll();
                   context.navigate.current("/dashboard");
-
                   setLoading(false);
                 }
               }}
               styles={(theme) => ({
                 root: {
-                  borderRadius: "0 0.33rem 0.33rem 0",
+                  borderRadius: smMediaQuery
+                    ? "0 0.33rem 0.33rem 0"
+                    : "0.33rem",
                 },
               })}
             >
               Upload
             </Button>
-          </Group>
+          </Flex>
           <Text align="center" w="100%" size="xl" color="green" fw="bold">
             OR
           </Text>
@@ -153,7 +181,7 @@ const LoadingPage = () => {
             compact
             w="15%"
             h="2.6rem"
-            miw="min-content"
+            miw="9rem"
             variant="filled"
             color="green"
             radius="md"
@@ -162,11 +190,8 @@ const LoadingPage = () => {
             data-autofocus
             onClick={async () => {
               setLoading(true);
-
-              await useSpotifyQuery(getAllTracks, 0);
-              await useLastfmQuery(getAllTrackGenres, 0);
+              await getAll();
               context.navigate.current("/dashboard");
-
               setLoading(false);
             }}
           >

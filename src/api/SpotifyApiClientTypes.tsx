@@ -5,6 +5,7 @@ export type tokenType = {
 };
 export type userInfoType = {
   display_name: string | null;
+  display_image: string;
   premium: boolean;
 };
 export type optionsType = {
@@ -19,6 +20,7 @@ export type playlistType = {
   snapshot: string;
   total: number;
   tracks: tracksType[];
+  topGenres: string[];
   genres: Map<string, number>;
   genreSubscriptions: string[];
   playlistSubscriptions: Map<string, playlistType>;

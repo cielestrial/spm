@@ -1,8 +1,8 @@
 const LastFmNode = require("lastfm").LastFmNode;
-const CaN = require("./misc/countriesAndNationalities.cjs");
+const CaN = require("./misc/genreBlacklist.cjs");
 const Filter = require("bad-words");
 const { userId, rateLimit } = require("./spotifyApi.cjs");
-const artistGenreMasterList = new Map();
+const artistMasterList = new Map();
 
 const lastFm = new LastFmNode({
   api_key: "8439b97f6094e7c5bc2f90150fa9e090",
@@ -19,15 +19,15 @@ filter.addWords(...CaN.misc);
  * https://yarnpkg.com/package/lastfm
  */
 
-const lowerConfidenceBound = 50;
-const top_x = 3;
+const lowerConfidenceBound = 100;
+const top_x = 1;
 
 const getArtistGenres = (req, res) => {
   const artist = req.body.artist;
 
-  if (!artistGenreMasterList.has(artist)) {
-    artistGenreMasterList.set(artist, undefined);
-    filter.addWords(...req.body.genreBlackList);
+  if (!artistMasterList.has(artist)) {
+    artistMasterList.set(artist, undefined);
+    filter.addWords(...req.body.genreBlacklist);
 
     let confidenceResult = [{}];
     lastFm.request("artist.getTopTags", {
@@ -38,11 +38,11 @@ const getArtistGenres = (req, res) => {
             .filter(
               (toptags) =>
                 toptags.count >= lowerConfidenceBound &&
-                !filter.isProfane(toptags.name)
+                !filter.isProfane(toptags.name.toLowerCase())
             )
             .slice(0, top_x);
           console.log("Genre for", artist, "is ", confidenceResult);
-          artistGenreMasterList.set(artist, confidenceResult);
+          artistMasterList.set(artist, confidenceResult);
           res.json(confidenceResult);
         },
         error: (err) => {
@@ -52,11 +52,11 @@ const getArtistGenres = (req, res) => {
         },
       },
     });
-  } else res.json(artistGenreMasterList.get(artist));
+  } else res.json(artistMasterList.get(artist));
 };
 
 const resetArtistGenres = (req, res) => {
-  artistGenreMasterList.clear();
+  artistMasterList.clear();
   res.json("success");
 };
 

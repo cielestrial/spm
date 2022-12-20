@@ -12,11 +12,9 @@ type propsType = {
 };
 
 const CreatePlaylistButton = (props: propsType) => {
-  const context = useContext(StateContext);
   const [opened, { close, open }] = useDisclosure(false);
   const [name, setName] = useState("");
   const playlistName = useRef("");
-  const inputRef = useRef<HTMLInputElement>(null);
 
   const create = async () => {
     props.setLoading((prev) => prev + 1);
@@ -51,7 +49,6 @@ const CreatePlaylistButton = (props: propsType) => {
       >
         <Group position="center" w="60vw" spacing={0}>
           <TextInput
-            ref={inputRef}
             size="md"
             w="60%"
             miw="min-content"
@@ -60,6 +57,13 @@ const CreatePlaylistButton = (props: propsType) => {
             placeholder="Enter Playlist Name"
             variant="filled"
             data-autofocus
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                create();
+                setName("");
+                close();
+              }
+            }}
             value={name}
             onChange={(e) => {
               if (name.length > 100) {
@@ -69,7 +73,6 @@ const CreatePlaylistButton = (props: propsType) => {
                 setName(e.currentTarget.value);
                 playlistName.current = e.currentTarget.value;
               }
-              inputRef.current?.blur();
             }}
             styles={(theme) => ({
               input: {
@@ -81,7 +84,7 @@ const CreatePlaylistButton = (props: propsType) => {
             compact
             w="15%"
             h="2.6rem"
-            miw="min-content"
+            miw="7rem"
             variant="filled"
             color="green"
             size="xl"
@@ -103,7 +106,7 @@ const CreatePlaylistButton = (props: propsType) => {
 
       <Button
         w="35%"
-        miw="min-content"
+        miw="7rem"
         compact
         variant="outline"
         color="green"

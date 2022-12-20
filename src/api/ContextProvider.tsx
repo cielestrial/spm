@@ -1,24 +1,14 @@
 import { createContext, useCallback, useRef, useState } from "react";
 import { NavigateFunction, useNavigate } from "react-router-dom";
 import { generatePlaylistKey } from "./misc/HelperFunctions";
-import { useSpotifyQuery } from "./QueryApi";
-import { getTracks } from "./SpotifyApiClientSide";
 import {
   playlistsType,
   playlistType,
   tokenType,
-  tracksType,
   userInfoType,
 } from "./SpotifyApiClientTypes";
 
-export let token: tokenType | undefined | null;
-export const setToken = (tokenValue: tokenType | undefined | null) => {
-  token = tokenValue;
-};
-export let userInfo: userInfoType | undefined | null;
-export const setUserInfo = (userData: userInfoType | undefined | null) => {
-  userInfo = userData;
-};
+export type pagesType = "landing" | "loading" | "dashboard" | "genres";
 
 export const StateContext = createContext({} as stateContextType);
 
@@ -28,6 +18,16 @@ type stateContextType = {
   selectedPlaylist: React.MutableRefObject<playlistType | undefined>;
   isOwned: () => boolean;
   isFollowed: () => boolean;
+  showHeader: boolean;
+  setShowHeader: React.Dispatch<React.SetStateAction<boolean>>;
+  currentPage: pagesType;
+  setCurrentPage: React.Dispatch<React.SetStateAction<pagesType>>;
+  userInfo: userInfoType | undefined | null;
+  setUserInfo: React.Dispatch<
+    React.SetStateAction<userInfoType | null | undefined>
+  >;
+  token: tokenType | null | undefined;
+  setToken: React.Dispatch<React.SetStateAction<tokenType | null | undefined>>;
 };
 
 type StateProviderProps = {
@@ -38,6 +38,13 @@ export function StateProvider({ children }: StateProviderProps) {
   const navigate = useRef(useNavigate());
   const playlistsQ = useRef<playlistsType>(undefined);
   const selectedPlaylist = useRef<playlistType>();
+
+  const [showHeader, setShowHeader] = useState(false);
+  const [currentPage, setCurrentPage] = useState<pagesType>("landing");
+  const [userInfo, setUserInfo] = useState<userInfoType | undefined | null>(
+    undefined
+  );
+  const [token, setToken] = useState<tokenType | undefined | null>(undefined);
 
   const isFollowed = useCallback(() => {
     if (
@@ -65,6 +72,14 @@ export function StateProvider({ children }: StateProviderProps) {
     <StateContext.Provider
       value={{
         navigate,
+        token,
+        setToken,
+        userInfo,
+        setUserInfo,
+        showHeader,
+        setShowHeader,
+        currentPage,
+        setCurrentPage,
         playlistsQ,
         selectedPlaylist,
         isFollowed,

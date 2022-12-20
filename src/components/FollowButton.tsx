@@ -76,7 +76,7 @@ const FollowButton = (props: propsType) => {
 
       <Button
         w="35%"
-        miw="min-content"
+        miw="7rem"
         compact
         variant="outline"
         disabled={context.selectedPlaylist.current === undefined}
