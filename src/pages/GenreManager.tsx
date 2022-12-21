@@ -26,12 +26,11 @@ const GenreManager = () => {
 
   useEffect(() => {
     if (context.token === null || context.userInfo === null)
-      context.navigate.current("/genres");
+      context.navigate.current("/");
   }, [context.token, context.userInfo]);
 
   useEffect(() => {
-    if (context.playlistsQ.current === undefined)
-      context.navigate.current("/genres");
+    if (context.playlistsQ.current === undefined) context.navigate.current("/");
   }, [context.playlistsQ.current]);
 
   useEffect(() => {
@@ -52,7 +51,7 @@ const GenreManager = () => {
   if (isLoading) {
     return (
       <Center h={pageHeight} pt={pagePadding} className="loading">
-        <Loader color="green" size="lg" variant="bars" />
+        <Loader size="lg" />
       </Center>
     );
   } else {
@@ -80,6 +79,10 @@ const GenreManager = () => {
             transferListTitle: {
               textAlign: "center",
               fontSize: "1.66rem",
+              color:
+                theme.colorScheme === "dark"
+                  ? theme.colors.green[7]
+                  : theme.colors.blue[4],
             },
             transferListItems: {
               marginTop: "1rem",
@@ -100,16 +103,13 @@ const GenreManager = () => {
           mih="2.6rem"
           miw="9rem"
           variant="filled"
-          color="green"
           radius="md"
           size="xl"
           mt="xl"
           onClick={async () => {
             setLoading(true);
-
             await useLastfmQuery(resetGenres, 0);
             await useLastfmQuery(getAllTrackGenres, 0);
-
             context.navigate.current("/dashboard");
             setLoading(false);
           }}

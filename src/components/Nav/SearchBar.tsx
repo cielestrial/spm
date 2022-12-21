@@ -20,25 +20,25 @@ import {
   displayMap,
   generatePlaylistKey,
   inPlaylists,
-} from "../api/misc/HelperFunctions";
-import { dashboardRefType, loadingAllTracks } from "../pages/Dashboard";
+} from "../../api/misc/HelperFunctions";
+import { dashboardRefType, loadingAllTracks } from "../../pages/Dashboard";
 import {
   duplicateManager,
   generalPlaylistsSearch,
   generalTracksSearch,
-} from "../api/SpotifyApiClientSide";
+} from "../../api/SpotifyApiClientSide";
 import {
   occuranceType,
   playlistsType,
   playlistType,
   tracksType,
   uniqueType,
-} from "../api/SpotifyApiClientTypes";
-import Row from "./Row";
-import LoadMoreLibraryButton from "./LoadMoreLibraryButton";
-import LoadMoreGeneralButton from "./LoadMoreGeneralButton";
-import { useSpotifyQuery } from "../api/QueryApi";
-import { StateContext } from "../api/ContextProvider";
+} from "../../api/SpotifyApiClientTypes";
+import Row from "../Row";
+import LoadMoreLibraryButton from "../LoadMoreLibraryButton";
+import LoadMoreGeneralButton from "../LoadMoreGeneralButton";
+import { useSpotifyQuery } from "../../api/QueryApi";
+import { StateContext } from "../../api/ContextProvider";
 
 type propsType = {
   dashboardRef: React.RefObject<dashboardRefType>;
@@ -160,7 +160,7 @@ const SearchBar = (props: propsType) => {
   const displayLoader = () => {
     return [
       <Center key={"loader"} className="loading" h="100%">
-        <Loader color="green" size="md" variant="bars" />
+        <Loader size="md" />
       </Center>,
     ];
   };
@@ -228,16 +228,21 @@ const SearchBar = (props: propsType) => {
               <Row label={"Name:"} value={playlist.name} />
               <Space h={5} />
               <Row label={"Owned By:"} value={playlist.owner} />
-              <Space h={5} />
-              <Row
-                label={"Top Genres:"}
-                value={
-                  playlist.topGenres !== undefined &&
-                  playlist.topGenres.length > 0
-                    ? playlist.topGenres.join(", ")
-                    : null
-                }
-              />
+
+              {selectedArea.current === "Library" ? (
+                <>
+                  <Space h={5} />
+                  <Row
+                    label={"Top Genres:"}
+                    value={
+                      playlist.topGenres !== undefined &&
+                      playlist.topGenres.length > 0
+                        ? playlist.topGenres.join(", ")
+                        : null
+                    }
+                  />
+                </>
+              ) : null}
             </Box>
           );
         }
@@ -352,16 +357,20 @@ const SearchBar = (props: propsType) => {
               />
               <Space h={5} />
               <Row label={"Album:"} value={uniqueTrack.track.album} />
-              <Space h={5} />
-              <Row
-                label={"Genre:"}
-                value={
-                  uniqueTrack.track.genres !== undefined &&
-                  uniqueTrack.track.genres.size > 0
-                    ? Array.from(uniqueTrack.track.genres).join(", ")
-                    : null
-                }
-              />
+              {selectedArea.current === "Library" ? (
+                <>
+                  <Space h={5} />
+                  <Row
+                    label={"Genre:"}
+                    value={
+                      uniqueTrack.track.genres !== undefined &&
+                      uniqueTrack.track.genres.size > 0
+                        ? Array.from(uniqueTrack.track.genres).join(", ")
+                        : null
+                    }
+                  />{" "}
+                </>
+              ) : null}
               <Space h={5} />
               <Row
                 label={"Playlists:"}
@@ -582,7 +591,7 @@ const SearchBar = (props: propsType) => {
             miw="fit-content"
             radius="xl"
             placeholder="Search Playlists"
-            variant="filled"
+            variant="default"
             data-autofocus
             onChange={(event) => {
               setPlaylistValue(event.currentTarget.value);
@@ -601,7 +610,7 @@ const SearchBar = (props: propsType) => {
               radius="xl"
               mt="xs"
               placeholder="Search Top Genres"
-              variant="filled"
+              variant="default"
               onChange={(event) => {
                 setGenreValue(event.currentTarget.value);
                 setIsLoading(true);
@@ -631,7 +640,7 @@ const SearchBar = (props: propsType) => {
             miw="fit-content"
             radius="xl"
             placeholder="Search Songs"
-            variant="filled"
+            variant="default"
             data-autofocus
             onChange={(event) => {
               setSongValue(event.currentTarget.value);
@@ -648,7 +657,7 @@ const SearchBar = (props: propsType) => {
             miw="fit-content"
             radius="xl"
             placeholder="Search Artists"
-            variant="filled"
+            variant="default"
             onChange={(event) => {
               setArtistValue(event.currentTarget.value);
               setIsLoading(true);
@@ -665,7 +674,7 @@ const SearchBar = (props: propsType) => {
             radius="xl"
             mt="xs"
             placeholder="Search Albums"
-            variant="filled"
+            variant="default"
             onChange={(event) => {
               setAlbumValue(event.currentTarget.value);
               setIsLoading(true);
@@ -682,7 +691,7 @@ const SearchBar = (props: propsType) => {
               radius="xl"
               mt="xs"
               placeholder="Search Top Genres"
-              variant="filled"
+              variant="default"
               onChange={(event) => {
                 setGenreValue(event.currentTarget.value);
                 setIsLoading(true);
@@ -725,7 +734,7 @@ const SearchBar = (props: propsType) => {
             miw="fit-content"
             gap="xl"
             justify="center"
-            direction="row"
+            direction="row-reverse"
             wrap="wrap-reverse"
             mx="xl"
           >
@@ -733,7 +742,7 @@ const SearchBar = (props: propsType) => {
               id="category"
               label="Search Category"
               data={searchCategorySelect}
-              variant="filled"
+              variant="default"
               miw="fit-content"
               radius="xl"
               size="sm"
@@ -751,7 +760,7 @@ const SearchBar = (props: propsType) => {
               id="area"
               label="Search Area"
               data={searchAreaSelect}
-              variant="filled"
+              variant="default"
               radius="xl"
               miw="fit-content"
               size="sm"
@@ -777,17 +786,16 @@ const SearchBar = (props: propsType) => {
       </Modal>
 
       <TextInput
-        size="xs"
+        size="sm"
         w="80%"
         mt={6}
         autoComplete="off"
-        miw="7rem"
+        miw="5em"
         radius="xl"
         placeholder="Search"
-        variant="filled"
         onClick={open}
         readOnly
-        value={""}
+        defaultValue=""
       />
     </>
   );

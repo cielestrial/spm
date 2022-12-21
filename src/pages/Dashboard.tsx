@@ -37,7 +37,7 @@ import { StateContext } from "../api/ContextProvider";
 import { useSpotifyQuery } from "../api/QueryApi";
 import { getTracks } from "../api/SpotifyApiClientSide";
 import { GiPlainArrow } from "react-icons/gi";
-import { debounceWaitTime } from "../components/SearchBar";
+import { debounceWaitTime } from "../components/Nav/SearchBar";
 
 export let loadingAllTracks: boolean = false;
 
@@ -54,15 +54,18 @@ const Dashboard = forwardRef<dashboardRefType, propType>((props, ref) => {
   const [isLoadingP, setLoadingP] = useState(0);
   const [isLoadingT, setLoadingT] = useState(0);
   const tracksQ = useRef<playlistType | undefined>(undefined);
+  const color =
+    context.theme.colorScheme === "dark"
+      ? context.theme.colors.green[7]
+      : context.theme.colors.blue[4];
 
   useEffect(() => {
     if (context.token === null || context.userInfo === null)
-      context.navigate.current("/dashboard");
+      context.navigate.current("/");
   }, [context.token, context.userInfo]);
 
   useEffect(() => {
-    if (context.playlistsQ.current === undefined)
-      context.navigate.current("/dashboard");
+    if (context.playlistsQ.current === undefined) context.navigate.current("/");
   }, [context.playlistsQ.current]);
 
   useEffect(() => {
@@ -120,7 +123,7 @@ const Dashboard = forwardRef<dashboardRefType, propType>((props, ref) => {
     if (isLoadingP)
       return (
         <Center h="100%" className="loading">
-          <Loader color="green" size="sm" variant="bars" />
+          <Loader size="sm" />
         </Center>
       );
     if (context.playlistsQ.current !== undefined) {
@@ -134,9 +137,13 @@ const Dashboard = forwardRef<dashboardRefType, propType>((props, ref) => {
             key={index++}
             onClick={() => setSelectedP(playlist)}
           >
-            {index + 1}
-            {". "}
-            {playlist.name}
+            <Group>
+              <Text color={color}>
+                {index + 1}
+                {". "}
+              </Text>
+              <Text>{playlist.name}</Text>
+            </Group>
           </Box>
         );
       }
@@ -163,7 +170,7 @@ const Dashboard = forwardRef<dashboardRefType, propType>((props, ref) => {
     if (isLoadingT)
       return (
         <Center h="100%" className="loading">
-          <Loader color="green" size="sm" variant="bars" />
+          <Loader size="sm" />
         </Center>
       );
     if (infoIndex === 0 && context.selectedPlaylist.current !== undefined) {
@@ -198,13 +205,13 @@ const Dashboard = forwardRef<dashboardRefType, propType>((props, ref) => {
             <TopPlaylistGenres />
             <Space h="xs" />
             <Group spacing={0}>
-              <Row label={"Subscribed Genres:"} value={null} />
-              <GenreSubscriber />
+              <Row label={"Subscribed Playlists:"} value={null} />
+              <PlaylistSubscriber />
             </Group>
             <Space h="md" />
             <Group spacing={0}>
-              <Row label={"Subscribed Playlists:"} value={null} />
-              <PlaylistSubscriber />
+              <Row label={"Subscribed Genres:"} value={null} />
+              <GenreSubscriber />
             </Group>
           </Box>
         </SimpleGrid>
@@ -225,9 +232,13 @@ const Dashboard = forwardRef<dashboardRefType, propType>((props, ref) => {
               setSelectedT(track);
             }}
           >
-            {index + 1}
-            {". "}
-            {track.name}
+            <Group>
+              <Text color={color}>
+                {index + 1}
+                {". "}
+              </Text>
+              <Text>{track.name}</Text>
+            </Group>
           </Box>
         );
       }
@@ -270,7 +281,7 @@ const Dashboard = forwardRef<dashboardRefType, propType>((props, ref) => {
     const label =
       context.playlistsQ.current?.total === 1 ? "Playlist" : "Playlists";
     return (
-      <Text className="text">
+      <Text color={color} className="text">
         {"Your"} {number} {label}
       </Text>
     );
@@ -295,7 +306,7 @@ const Dashboard = forwardRef<dashboardRefType, propType>((props, ref) => {
     }
     const title = loading ? "Details" : label;
     return (
-      <Text w="100%" className="text">
+      <Text color={color} w="100%" className="text">
         {title}
       </Text>
     );
@@ -322,14 +333,13 @@ const Dashboard = forwardRef<dashboardRefType, propType>((props, ref) => {
       align="center"
       justify="center"
       gap={0}
-      direction={{ base: "column", xs: "row" }}
+      direction={{ base: "column", sm: "row" }}
     >
       <Stack miw="min-content" justify="center" align="center" spacing={0}>
         {displayPlaylistsLabel()}
         <ScrollArea.Autosize
           maxHeight={"60vh"}
-          type="auto"
-          offsetScrollbars
+          type="hover"
           scrollbarSize={8}
           scrollHideDelay={debounceWaitTime}
           styles={(theme) => ({
@@ -342,10 +352,22 @@ const Dashboard = forwardRef<dashboardRefType, propType>((props, ref) => {
             },
             scrollbar: {
               '&[data-orientation="vertical"] .mantine-ScrollArea-thumb': {
-                backgroundColor: "forestgreen",
+                backgroundColor:
+                  theme.colorScheme === "dark"
+                    ? theme.colors.green
+                    : theme.colors.blue[5],
               },
               '&[data-orientation="horizontal"] .mantine-ScrollArea-thumb': {
-                backgroundColor: "forestgreen",
+                backgroundColor:
+                  theme.colorScheme === "dark"
+                    ? theme.colors.green
+                    : theme.colors.blue[5],
+              },
+              "&, &:hover": {
+                background:
+                  theme.colorScheme === "dark"
+                    ? theme.colors.dark[6]
+                    : theme.colors.gray[1],
               },
             },
             corner: {
@@ -353,7 +375,7 @@ const Dashboard = forwardRef<dashboardRefType, propType>((props, ref) => {
               background:
                 theme.colorScheme === "dark"
                   ? theme.colors.dark[6]
-                  : theme.colors.gray[0],
+                  : theme.colors.gray[1],
             },
           })}
         >
@@ -382,6 +404,7 @@ const Dashboard = forwardRef<dashboardRefType, propType>((props, ref) => {
       <MediaQuery smallerThan="xs" styles={{ transform: "rotate(90deg)" }}>
         <Center mt="lg" mx="xl" h="100%">
           <GiPlainArrow
+            color={color}
             fontSize="5rem"
             style={{ transform: "rotate(-90deg)" }}
           />
@@ -392,8 +415,7 @@ const Dashboard = forwardRef<dashboardRefType, propType>((props, ref) => {
         {displayInfoLabel()}
         <ScrollArea.Autosize
           maxHeight={"60vh"}
-          type="always"
-          offsetScrollbars
+          type="hover"
           scrollbarSize={8}
           scrollHideDelay={debounceWaitTime}
           styles={(theme) => ({
@@ -406,10 +428,22 @@ const Dashboard = forwardRef<dashboardRefType, propType>((props, ref) => {
             },
             scrollbar: {
               '&[data-orientation="vertical"] .mantine-ScrollArea-thumb': {
-                backgroundColor: "forestgreen",
+                backgroundColor:
+                  theme.colorScheme === "dark"
+                    ? theme.colors.green
+                    : theme.colors.blue[5],
               },
               '&[data-orientation="horizontal"] .mantine-ScrollArea-thumb': {
-                backgroundColor: "forestgreen",
+                backgroundColor:
+                  theme.colorScheme === "dark"
+                    ? theme.colors.green
+                    : theme.colors.blue[5],
+              },
+              "&, &:hover": {
+                background:
+                  theme.colorScheme === "dark"
+                    ? theme.colors.dark[6]
+                    : theme.colors.gray[1],
               },
             },
             corner: {
@@ -417,7 +451,7 @@ const Dashboard = forwardRef<dashboardRefType, propType>((props, ref) => {
               background:
                 theme.colorScheme === "dark"
                   ? theme.colors.dark[6]
-                  : theme.colors.gray[0],
+                  : theme.colors.gray[1],
             },
           })}
         >

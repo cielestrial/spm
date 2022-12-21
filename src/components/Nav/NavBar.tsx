@@ -5,8 +5,8 @@ import DarkModeSwitch from "./DarkModeSwitch";
 import PageNavigatorButton from "./PageNavigatorButton";
 import NavLogo from "./NavLogo";
 import SearchBar from "./SearchBar";
-import { dashboardRefType } from "../pages/Dashboard";
 import { useMediaQuery } from "@mantine/hooks";
+import { dashboardRefType } from "../../pages/Dashboard";
 
 export const breakpoints = {
   xxs: "288px",
@@ -22,14 +22,14 @@ type propType = {
 };
 
 const NavBar = (props: propType) => {
-  const full = "100%";
+  const full = "95%";
   const smMediaQuery = useMediaQuery(`(min-width: ${breakpoints.sm})`);
   const xsMediaQuery = useMediaQuery(`(min-width: ${breakpoints.xs})`);
   const xxsMediaQuery = useMediaQuery(`(min-width: ${breakpoints.xxs})`);
 
   return (
-    <Group w={full} h={full} position="apart" noWrap py={0}>
-      <Group h={full} position="left" noWrap spacing={0}>
+    <Group w={full} h={full} position="apart" align="end" noWrap py={0}>
+      <Group h={full} position="left" align="end" noWrap spacing={0}>
         <NavLogo height={full} dashboardRef={props.dashboardRef} />
 
         {smMediaQuery ? (
@@ -41,14 +41,14 @@ const NavBar = (props: propType) => {
       </Group>
 
       {xsMediaQuery ? (
-        <Group w={full} h={full} position="center" noWrap spacing="xl">
+        <Group w={full} h={full} position="apart" noWrap spacing={0}>
           <SearchBar dashboardRef={props.dashboardRef} />
           <Logout height={full} />
         </Group>
       ) : null}
 
       {xxsMediaQuery ? (
-        <Group h={full} position="right" noWrap mx="xl">
+        <Group h={full} position="right" align="center" mr="xl" noWrap>
           <DarkModeSwitch />
         </Group>
       ) : null}

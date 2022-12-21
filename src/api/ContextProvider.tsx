@@ -1,3 +1,4 @@
+import { MantineTheme, useMantineTheme } from "@mantine/core";
 import { createContext, useCallback, useRef, useState } from "react";
 import { NavigateFunction, useNavigate } from "react-router-dom";
 import { generatePlaylistKey } from "./misc/HelperFunctions";
@@ -13,6 +14,7 @@ export type pagesType = "landing" | "loading" | "dashboard" | "genres";
 export const StateContext = createContext({} as stateContextType);
 
 type stateContextType = {
+  theme: MantineTheme;
   navigate: React.MutableRefObject<NavigateFunction>;
   playlistsQ: React.MutableRefObject<playlistsType>;
   selectedPlaylist: React.MutableRefObject<playlistType | undefined>;
@@ -35,6 +37,7 @@ type StateProviderProps = {
 };
 
 export function StateProvider({ children }: StateProviderProps) {
+  const theme = useMantineTheme();
   const navigate = useRef(useNavigate());
   const playlistsQ = useRef<playlistsType>(undefined);
   const selectedPlaylist = useRef<playlistType>();
@@ -71,6 +74,7 @@ export function StateProvider({ children }: StateProviderProps) {
   return (
     <StateContext.Provider
       value={{
+        theme,
         navigate,
         token,
         setToken,

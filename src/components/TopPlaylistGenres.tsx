@@ -5,6 +5,7 @@ import { StateContext } from "../api/ContextProvider";
 type proptype = {};
 const TopPlaylistGenres = (props: proptype) => {
   const context = useContext(StateContext);
+  const color = context.theme.colorScheme === "dark" ? "green.7" : "blue.5";
 
   const topGenres =
     context.isFollowed() &&
@@ -14,9 +15,9 @@ const TopPlaylistGenres = (props: proptype) => {
           <Badge
             key={value}
             miw="fit-content"
-            color="green"
             size="md"
             variant="outline"
+            color={color}
           >
             {value}
           </Badge>

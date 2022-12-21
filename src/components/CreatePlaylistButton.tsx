@@ -12,9 +12,11 @@ type propsType = {
 };
 
 const CreatePlaylistButton = (props: propsType) => {
+  const context = useContext(StateContext);
   const [opened, { close, open }] = useDisclosure(false);
   const [name, setName] = useState("");
   const playlistName = useRef("");
+  const color = context.theme.colorScheme === "dark" ? "green.7" : "blue.5";
 
   const create = async () => {
     props.setLoading((prev) => prev + 1);
@@ -86,7 +88,6 @@ const CreatePlaylistButton = (props: propsType) => {
             h="2.6rem"
             miw="7rem"
             variant="filled"
-            color="green"
             size="xl"
             onClick={() => {
               create();
@@ -106,10 +107,10 @@ const CreatePlaylistButton = (props: propsType) => {
 
       <Button
         w="35%"
-        miw="7rem"
+        miw="8rem"
         compact
+        color={color}
         variant="outline"
-        color="green"
         radius="xl"
         size="md"
         onClick={open}

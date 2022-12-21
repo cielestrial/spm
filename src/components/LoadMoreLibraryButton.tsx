@@ -21,7 +21,6 @@ const LoadMoreLibraryButton = (props: propType) => {
       my="xs"
       variant="filled"
       disabled={props.page.current >= props.totalPages}
-      color="green"
       radius="xl"
       size="md"
       onClick={loadMore}

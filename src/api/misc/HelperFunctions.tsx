@@ -1,6 +1,5 @@
 import saveAs from "file-saver";
 import JSZip from "jszip";
-import { userInfo } from "os";
 import {
   artistMasterList,
   duplicateManager,
@@ -15,7 +14,6 @@ import {
   playlistsType,
   playlistType,
   tracksType,
-  userInfoType,
 } from "../SpotifyApiClientTypes";
 import { genreBlacklist, loadBlacklistFromFile } from "./GenreBlacklist";
 

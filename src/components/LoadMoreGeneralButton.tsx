@@ -1,7 +1,7 @@
 import { Button, Loader } from "@mantine/core";
 import { useState } from "react";
 import { maxOffset } from "../api/SpotifyApiClientSide";
-import { resultLimit } from "./SearchBar";
+import { resultLimit } from "./Nav/SearchBar";
 
 type propType = {
   offset: React.MutableRefObject<number>;
@@ -25,8 +25,7 @@ const LoadMoreGeneralButton = (props: propType) => {
       setLoading(false);
     }
   };
-  if (isLoading)
-    return <Loader color="green" my="sm" size="md" variant="bars" />;
+  if (isLoading) return <Loader my="sm" size="md" />;
   else
     return (
       <Button
@@ -35,7 +34,6 @@ const LoadMoreGeneralButton = (props: propType) => {
         my="xs"
         variant="filled"
         disabled={props.offset.current + resultLimit > maxOffset}
-        color="green"
         radius="xl"
         size="md"
         onClick={async () => {

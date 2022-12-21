@@ -7,7 +7,6 @@ const Login = () => {
       variant="filled"
       w="20%"
       miw="9rem"
-      color="green"
       radius="xl"
       size="md"
       component="a"

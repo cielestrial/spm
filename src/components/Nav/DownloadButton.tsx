@@ -1,7 +1,7 @@
 import { Button } from "@mantine/core";
 import { useContext } from "react";
-import { StateContext } from "../api/ContextProvider";
-import { saveDataToFiles } from "../api/misc/HelperFunctions";
+import { StateContext } from "../../api/ContextProvider";
+import { saveDataToFiles } from "../../api/misc/HelperFunctions";
 
 type propType = {
   height: string | number | undefined;
@@ -11,11 +11,12 @@ const DownloadButton = (props: propType) => {
   const context = useContext(StateContext);
   return (
     <Button
+      color={context.theme.colorScheme === "dark" ? "green.7" : "blue.3"}
       miw="7rem"
       h={props.height}
       compact
       variant="subtle"
-      color="green"
+      radius={0}
       size="xl"
       onClick={async () => {
         if (

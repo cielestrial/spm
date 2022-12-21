@@ -13,6 +13,7 @@ type propsType = {
 const UnfollowButton = (props: propsType) => {
   const context = useContext(StateContext);
   const [opened, { close, open }] = useDisclosure(false);
+  const color = context.theme.colorScheme === "dark" ? "green.7" : "blue.5";
 
   const unfollow = async () => {
     props.setLoading((prev) => prev + 1);
@@ -36,6 +37,14 @@ const UnfollowButton = (props: propsType) => {
         onClose={close}
         withCloseButton={false}
         size="xs"
+        styles={(theme) => ({
+          modal: {
+            backgroundColor:
+              theme.colorScheme === "dark"
+                ? theme.colors.dark[6]
+                : theme.colors.gray[1],
+          },
+        })}
       >
         <Text fs="italic" ta="center">
           Are you sure you want to unfollow
@@ -47,7 +56,9 @@ const UnfollowButton = (props: propsType) => {
           <Button
             compact
             variant="filled"
-            color="yellow"
+            color={
+              context.theme.colorScheme === "dark" ? "yellow.6" : "yellow.5"
+            }
             radius="xl"
             size="sm"
             onClick={async () => {
@@ -62,7 +73,7 @@ const UnfollowButton = (props: propsType) => {
           <Button
             compact
             variant="filled"
-            color="red"
+            color="red.7"
             radius="xl"
             size="sm"
             data-autofocus
@@ -75,11 +86,11 @@ const UnfollowButton = (props: propsType) => {
 
       <Button
         w="35%"
-        miw="7rem"
+        miw="8rem"
         compact
+        color={color}
         variant="outline"
         disabled={context.selectedPlaylist.current === undefined}
-        color="green"
         radius="xl"
         size="md"
         onClick={open}

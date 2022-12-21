@@ -1,12 +1,20 @@
 import { useContext, useEffect, useState } from "react";
-import { Avatar, Burger, Drawer, Group, Stack, Text } from "@mantine/core";
+import {
+  Avatar,
+  Burger,
+  Drawer,
+  Group,
+  Stack,
+  Text,
+  Title,
+} from "@mantine/core";
 import DarkModeSwitch from "./DarkModeSwitch";
 import DownloadButton from "./DownloadButton";
 import Logout from "./Logout";
 import PageNavigatorButton from "./PageNavigatorButton";
 import SearchBar from "./SearchBar";
-import { dashboardRefType } from "../pages/Dashboard";
-import { StateContext } from "../api/ContextProvider";
+import { dashboardRefType } from "../../pages/Dashboard";
+import { StateContext } from "../../api/ContextProvider";
 import { useMediaQuery } from "@mantine/hooks";
 import { breakpoints } from "./NavBar";
 
@@ -18,11 +26,26 @@ type propType = {
 const NavLogo = (props: propType) => {
   const context = useContext(StateContext);
   const [opened, setOpened] = useState(false);
-  const navItemHeight = undefined;
-
   const smMediaQuery = useMediaQuery(`(min-width: ${breakpoints.sm})`);
   const xsMediaQuery = useMediaQuery(`(min-width: ${breakpoints.xs})`);
   const xxsMediaQuery = useMediaQuery(`(min-width: ${breakpoints.xxs})`);
+  const navItemHeight = undefined;
+  const color =
+    context.theme.colorScheme === "dark"
+      ? context.theme.colors.green[5]
+      : context.theme.colors.blue[5];
+  const gradientColor =
+    context.theme.colorScheme === "dark"
+      ? {
+          from: context.theme.colors.green[8],
+          to: context.theme.colors.dark[3],
+          deg: 30,
+        }
+      : {
+          from: context.theme.colors.blue[4],
+          to: context.theme.colors.gray[3],
+          deg: 30,
+        };
 
   useEffect(() => {
     hideSideNav();
@@ -40,20 +63,20 @@ const NavLogo = (props: propType) => {
           hideSideNav()
         ) : (
           <Burger
-            color="forestgreen"
             h={props.height}
             size="md"
             opened={opened}
             onClick={() => setOpened((prev) => !prev)}
           ></Burger>
         )}
-        <Text color="green" size={25} fw="bolder">
+        <Title variant="gradient" gradient={gradientColor} order={2}>
           {"YSPM"}
-        </Text>
+        </Title>
         <Avatar
+          variant="gradient" //light or gradient
+          gradient={gradientColor}
           radius="xl"
           size={45}
-          color="green"
           src={context.userInfo?.display_image}
           alt={
             context.userInfo?.display_name !== undefined &&
@@ -77,11 +100,19 @@ const NavLogo = (props: propType) => {
         onClose={() => setOpened(false)}
         position="left"
         padding={0}
+        shadow={"0.33rem 0 1rem 0" + context.theme.colors.gray[9]}
         size="sm"
         target=".App"
         styles={(theme) => ({
           closeButton: {
+            color: color,
             margin: "1.5rem 1.5rem 0 0",
+          },
+          drawer: {
+            backgroundColor:
+              theme.colorScheme === "dark"
+                ? theme.colors.dark[5]
+                : theme.colors.gray[0],
           },
         })}
       >
@@ -90,21 +121,21 @@ const NavLogo = (props: propType) => {
           h={props.height}
           justify="start"
           align="stretch"
-          spacing={0}
+          spacing={"sm"}
         >
           {xsMediaQuery ? null : (
             <Stack align="center" spacing="xs">
               <SearchBar dashboardRef={props.dashboardRef} />
             </Stack>
           )}
-          <DownloadButton height={navItemHeight} />
-          <PageNavigatorButton height={navItemHeight} />
-          {xsMediaQuery ? null : <Logout height={navItemHeight} />}
           {xxsMediaQuery ? null : (
             <Stack align="center" spacing="xs">
               <DarkModeSwitch />
             </Stack>
           )}
+          <PageNavigatorButton height={navItemHeight} />
+          <DownloadButton height={navItemHeight} />
+          {xsMediaQuery ? null : <Logout height={navItemHeight} />}
         </Stack>
       </Drawer>
     </>

@@ -1,9 +1,7 @@
 To Do:    
  
-  3) Liked Songs
-  4) Genre re-pull buggy
-
-  1) Visuals
+  4) Liked Songs
+  3) Bugs
   4) Hosting
 
 
@@ -17,11 +15,11 @@ Hosting:
   Collect User Feedback
 
 Bugs: 
+Client load then server load for no reason
+Genre re-pulling
 
-Visuals: 
-  Theme
+Dynamic Visuals:
   Animations
-  Fonts
 
 Extras:
   Multi-select tracks to remove or add to another playlist (change arrow direction)

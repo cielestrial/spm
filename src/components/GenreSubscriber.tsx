@@ -20,7 +20,7 @@ const GenreSubscriber = (props: proptype) => {
 
   return (
     <MultiSelect
-      variant="filled"
+      variant="default"
       aria-label="Genre Selector"
       data={data}
       value={genres}

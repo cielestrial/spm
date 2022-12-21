@@ -6,7 +6,7 @@ import { generatePlaylistKey } from "../api/misc/HelperFunctions";
 import { useSpotifyQuery } from "../api/QueryApi";
 import { generalPlaylistsSearch } from "../api/SpotifyApiClientSide";
 import { playlistsType, playlistType } from "../api/SpotifyApiClientTypes";
-import { debounceWaitTime, waitTime } from "./SearchBar";
+import { debounceWaitTime, waitTime } from "./Nav/SearchBar";
 
 type proptype = {};
 type dataArrayType = dataType[];
@@ -185,7 +185,7 @@ const PlaylistSubscriber = (props: proptype) => {
 
   return (
     <MultiSelect
-      variant="filled"
+      variant="default"
       aria-label="Playlist Selector"
       data={data}
       value={subscribedPlaylists}
@@ -207,7 +207,7 @@ const PlaylistSubscriber = (props: proptype) => {
       }
       nothingFound={isLoading ? "Searching..." : "Playlist not found"}
       filter={searchFilter}
-      maxDropdownHeight={288}
+      maxDropdownHeight={220}
       dropdownPosition="top"
       disabled={!context.isFollowed() || !context.isOwned()}
       size="sm"

@@ -19,7 +19,7 @@ import {
   setRetryAfterSpotify,
   useSpotifyQuery,
 } from "./QueryApi";
-import { resultLimit } from "../components/SearchBar";
+import { resultLimit } from "../components/Nav/SearchBar";
 const scope =
   "&scope=" +
   "playlist-read-private" +

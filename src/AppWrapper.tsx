@@ -7,7 +7,7 @@ import { useColorScheme, useLocalStorage } from "@mantine/hooks";
 import { BrowserRouter } from "react-router-dom";
 import { StateProvider } from "./api/ContextProvider";
 import App from "./App";
-import { myTheme } from "./css/Theme";
+import { myThemeWrapper } from "./css/Theme";
 
 const AppWrapper = () => {
   const preferredColorScheme = useColorScheme();
@@ -18,7 +18,6 @@ const AppWrapper = () => {
 
   const toggleColorScheme = (value?: ColorScheme) =>
     setColorScheme(value || (colorScheme === "dark" ? "light" : "dark"));
-  myTheme.colorScheme = colorScheme;
 
   return (
     <BrowserRouter>
@@ -27,10 +26,9 @@ const AppWrapper = () => {
         toggleColorScheme={toggleColorScheme}
       >
         <MantineProvider
-          theme={myTheme}
+          theme={myThemeWrapper(colorScheme)}
           withGlobalStyles
           withNormalizeCSS
-          withCSSVariables
         >
           <StateProvider>
             <App />

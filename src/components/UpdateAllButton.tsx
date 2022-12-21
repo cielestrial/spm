@@ -16,6 +16,8 @@ type proptype = {
 
 const UpdateAllButton = (props: proptype) => {
   const context = useContext(StateContext);
+  const color = context.theme.colorScheme === "dark" ? "green.7" : "blue.5";
+
   const addSubscriptions = async () => {
     props.setLoading((prev) => prev + 1);
     if (
@@ -51,11 +53,11 @@ const UpdateAllButton = (props: proptype) => {
   return (
     <Button
       w="35%"
-      miw="7rem"
+      miw="8rem"
       compact
       variant="outline"
       disabled={context.playlistsQ.current === undefined}
-      color="green"
+      color={color}
       radius="xl"
       size="md"
       onClick={updateHandler}
