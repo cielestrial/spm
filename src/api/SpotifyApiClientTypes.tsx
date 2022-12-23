@@ -59,3 +59,8 @@ export type genreMasterListType = {
   whitelist: Map<string, number>;
   blacklist: string[];
 };
+
+export type dashboardRefType = {
+  setSelectedP: (selected: playlistType | undefined) => Promise<void>;
+  setSelectedT: (track: tracksType) => void;
+};

@@ -1,7 +1,7 @@
 import { Button } from "@mantine/core";
 import { useContext } from "react";
 import { StateContext } from "../../api/ContextProvider";
-import { saveDataToFiles } from "../../api/misc/HelperFunctions";
+import { saveDataToFiles } from "../../api/functions/Save";
 
 type propType = {
   height: string | number | undefined;

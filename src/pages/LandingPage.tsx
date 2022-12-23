@@ -1,8 +1,32 @@
-import Login from "../components/Login";
 import { useContext, useEffect } from "react";
 import { getCode, pageHeight, pagePadding } from "../App";
 import { StateContext } from "../api/ContextProvider";
-import { Center, Loader, Stack, Title } from "@mantine/core";
+import { Button, Center, Loader, Stack, Title } from "@mantine/core";
+
+const scope =
+  "&scope=" +
+  "playlist-read-private" +
+  "%20" +
+  "playlist-modify-private" +
+  "%20" +
+  "playlist-modify-public" +
+  "%20" +
+  "playlist-read-collaborative" +
+  "%20" +
+  "user-library-modify" +
+  "%20" +
+  "user-library-read" +
+  "%20" +
+  "user-read-private";
+const AUTH_URL =
+  "https://accounts.spotify.com/authorize?" +
+  "client_id=d03dd28afb3f40d1aad5e6a45d9bff7f" +
+  "&response_type=code" +
+  scope +
+  "&redirect_uri=http://localhost:3000" +
+  "&state=" +
+  crypto.randomUUID() +
+  "&show_dialog=true";
 
 export let code: string | null;
 export const setCode = (newCode: string | null) => {
@@ -37,7 +61,17 @@ const LandingPage = () => {
         <Title ta="center" order={1}>
           Welcome to YSPM
         </Title>
-        <Login />
+        <Button
+          variant="filled"
+          w="20%"
+          miw="9rem"
+          radius="xl"
+          size="md"
+          component="a"
+          href={AUTH_URL}
+        >
+          Login
+        </Button>
       </Stack>
     );
   }

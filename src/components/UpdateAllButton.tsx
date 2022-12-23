@@ -1,7 +1,7 @@
 import { Button } from "@mantine/core";
 import { useContext } from "react";
 import { StateContext } from "../api/ContextProvider";
-import { generatePlaylistKey } from "../api/misc/HelperFunctions";
+import { generatePlaylistKey } from "../api/functions/HelperFunctions";
 import { useSpotifyQuery } from "../api/QueryApi";
 import {
   addGenreSubscriptions,

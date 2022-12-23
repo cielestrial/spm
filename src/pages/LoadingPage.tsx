@@ -1,7 +1,7 @@
 import { Button, Center, FileButton, Flex, Loader, Title } from "@mantine/core";
 import { useState, useEffect, useContext, useRef } from "react";
 import { StateContext } from "../api/ContextProvider";
-import { loadDataFromFiles } from "../api/misc/HelperFunctions";
+import { loadDataFromFiles } from "../api/functions/Load";
 import { useLastfmQuery, useSpotifyQuery } from "../api/QueryApi";
 import {
   getToken,
@@ -10,7 +10,7 @@ import {
   getAllTracks,
   getAllTrackGenres,
   getTopPlaylistGenres,
-} from "../api/SpotifyApiClientSide";
+} from "../api/SpotifyApiClientSide"; //?
 import { userInfoType, playlistsType } from "../api/SpotifyApiClientTypes";
 import { pageHeight, pagePadding } from "../App";
 import { custom_ease_out, shake } from "../css/Keyframes";

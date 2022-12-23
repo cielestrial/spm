@@ -6,7 +6,7 @@ import PageNavigatorButton from "./PageNavigatorButton";
 import NavLogo from "./NavLogo";
 import SearchBar from "./SearchBar";
 import { useMediaQuery } from "@mantine/hooks";
-import { dashboardRefType } from "../../pages/Dashboard";
+import { dashboardRefType } from "../../api/SpotifyApiClientTypes";
 
 export const breakpoints = {
   xxs: "288px",

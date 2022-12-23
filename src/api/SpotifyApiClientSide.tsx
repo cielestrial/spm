@@ -1,5 +1,8 @@
 import axios, { AxiosResponse } from "axios";
-import { generatePlaylistKey, generateTrackKey } from "./misc/HelperFunctions";
+import {
+  generatePlaylistKey,
+  generateTrackKey,
+} from "./functions/HelperFunctions";
 import { code } from "../pages/LandingPage";
 import {
   uniqueType,
@@ -11,92 +14,25 @@ import {
   duplicateType,
   occuranceType,
 } from "./SpotifyApiClientTypes";
-import { genreBlacklist } from "./misc/GenreBlacklist";
-import { TransferListItem } from "@mantine/core";
 import {
   setRetryAfterLastfm,
   setRetryAfterSpotify,
   useSpotifyQuery,
 } from "./QueryApi";
-import { resultLimit } from "../components/Nav/SearchBar";
-const scope =
-  "&scope=" +
-  "playlist-read-private" +
-  "%20" +
-  "playlist-modify-private" +
-  "%20" +
-  "playlist-modify-public" +
-  "%20" +
-  "playlist-read-collaborative" +
-  "%20" +
-  "user-library-modify" +
-  "%20" +
-  "user-library-read" +
-  "%20" +
-  "user-read-private";
-export const AUTH_URL =
-  "https://accounts.spotify.com/authorize?" +
-  "client_id=d03dd28afb3f40d1aad5e6a45d9bff7f" +
-  "&response_type=code" +
-  scope +
-  "&redirect_uri=http://localhost:3000" +
-  "&state=" +
-  crypto.randomUUID() +
-  "&show_dialog=true";
+import {
+  getLimit,
+  postLimit,
+  duplicateManager,
+  maxOffset,
+  genreWhitelist,
+  artistMasterList,
+} from "./SpotifyApiClientData";
 
 const server = "http://localhost:8080";
 
-export const duplicateManager = new Map<string, uniqueType>();
-
-export let genreWhitelist = new Map<string, number>();
-export const loadWhitelistFromFile = (
-  whitelist: Map<string, number>,
-  blacklist: string[]
-) => {
-  for (let i = 0; i < blacklist.length; i++) {
-    if (whitelist.has(blacklist[i])) whitelist.delete(blacklist[i]);
-  }
-  genreWhitelist = whitelist;
-};
-export const updateWhitelist = (genres: TransferListItem[]) => {
-  genreWhitelist = new Map<string, number>(
-    genres.map((item) => {
-      if (genreWhitelist.has(item.label)) {
-        const value = genreWhitelist.get(item.label);
-        if (value !== undefined) return [item.label, value];
-      }
-      return [item.label, 0];
-    })
-  );
-};
-export const getWhitelist = () => {
-  return Array.from(genreWhitelist.entries())
-    .sort(
-      (a, b) => b[1] - a[1]
-
-      /*
-      a[0].localeCompare(b[0], undefined, {
-        sensitivity: "accent",
-        ignorePunctuation: true,
-      })
-      */
-    )
-    .map((element) => ({
-      value: element[0],
-      label: element[0],
-    }));
-};
-
-export let artistMasterList = new Map<string, string[]>();
-export const loadArtistsFromFile = (artists: Map<string, string[]>) => {
-  artistMasterList = artists;
-};
-
 let playlists: playlistsType;
 const options: optionsType = { offset: 0, limit: 0 };
-const getLimit = 50;
-const postLimit = 100;
-export const maxOffset = 1000;
+
 /**
  * Handle Rate limit Spotify
  */
@@ -692,9 +628,7 @@ export const generalPlaylistsSearch = async (
   let queriedPlaylists: playlistsType = undefined;
   if (offset > maxOffset) return queriedPlaylists;
   options.offset = offset;
-  let limit = resultLimit;
-  if (limit === 0 || limit > getLimit) limit = getLimit;
-  options.limit = limit;
+  options.limit = getLimit;
 
   try {
     const res = await axios.post(server + "/search-playlists", {
@@ -734,9 +668,7 @@ export const generalTracksSearch = async (
   let queriedTracks = {} as playlistType;
   if (offset > maxOffset) return queriedTracks;
   options.offset = offset;
-  let limit = resultLimit;
-  if (limit === 0 || limit > getLimit) limit = getLimit;
-  options.limit = limit;
+  options.limit = getLimit;
   try {
     const res = await axios.post(server + "/search-tracks", {
       querySearch,
@@ -792,18 +724,17 @@ export const getAllTrackGenres = async () => {
  * @returns
  */
 export const getTrackGenres = async (uniqueTrack: uniqueType) => {
-  let status = true;
   let popularity: number;
 
   if (!uniqueTrack.track.is_playable) {
     uniqueTrack.track.genres.add("unplayable");
     if (!genreWhitelist.has("unplayable")) genreWhitelist.set("unplayable", 1);
-    return status;
+    return true;
   }
   if (uniqueTrack.track.is_local) {
     uniqueTrack.track.genres.add("local");
     if (!genreWhitelist.has("local")) genreWhitelist.set("local", 1);
-    return status;
+    return true;
   }
   let genreList: string[] | undefined = [];
   const artist = uniqueTrack.track.artists[0];
@@ -829,46 +760,50 @@ export const getTrackGenres = async (uniqueTrack: uniqueType) => {
       }
     }
     console.log("Genres retrieved from client");
-  }
-  try {
-    const res = await axios.post(server + "/genres", {
-      artist,
-      genreBlacklist,
-    });
-    await rateLimitLastfm(res);
-    // Keep track of genre popularity with count and genreWhitelist <genre, popularityCount>
-    // Also look into how count is calculated
-    if (res.data !== undefined) {
-      genreList = [];
-      for (const data of res.data) {
-        const genre = data.name.toLowerCase();
-        genreList.push(genre);
-        if (!uniqueTrack.track.genres.has(genre))
-          uniqueTrack.track.genres.add(genre);
-        for (const occurance of uniqueTrack.in_playlists.values()) {
-          if (!occurance.playlist.genres.has(genre))
-            occurance.playlist.genres.set(genre, 1);
+    return true;
+  } else {
+    try {
+      const genreBlacklist = (await import("./functions/GenreBlacklist"))
+        .genreBlacklist;
+      const res = await axios.post(server + "/genres", {
+        artist,
+        genreBlacklist,
+      });
+      await rateLimitLastfm(res);
+      // Keep track of genre popularity with count and genreWhitelist <genre, popularityCount>
+      // Also look into how count is calculated
+      if (res.data !== undefined) {
+        genreList = [];
+        for (const data of res.data) {
+          const genre = data.name.toLowerCase();
+          genreList.push(genre);
+          if (!uniqueTrack.track.genres.has(genre))
+            uniqueTrack.track.genres.add(genre);
+          for (const occurance of uniqueTrack.in_playlists.values()) {
+            if (!occurance.playlist.genres.has(genre))
+              occurance.playlist.genres.set(genre, 1);
+            else {
+              popularity = occurance.playlist.genres.get(genre) as number;
+              popularity++;
+              occurance.playlist.genres.set(genre, popularity);
+            }
+          }
+          if (!genreWhitelist.has(genre)) genreWhitelist.set(genre, 1);
           else {
-            popularity = occurance.playlist.genres.get(genre) as number;
+            popularity = genreWhitelist.get(genre) as number;
             popularity++;
-            occurance.playlist.genres.set(genre, popularity);
+            genreWhitelist.set(genre, popularity);
           }
         }
-        if (!genreWhitelist.has(genre)) genreWhitelist.set(genre, 1);
-        else {
-          popularity = genreWhitelist.get(genre) as number;
-          popularity++;
-          genreWhitelist.set(genre, popularity);
-        }
+        artistMasterList.set(artist, genreList);
+        console.log("Genres retrieved from server");
       }
-      artistMasterList.set(artist, genreList);
-      console.log("Genres retrieved from server");
+    } catch (err) {
+      console.error("Something went wrong with getTrackGenres()\n", err);
+      return false;
     }
-  } catch (err) {
-    console.error("Something went wrong with getTrackGenres()\n", err);
-    status = false;
+    return true;
   }
-  return status;
 };
 
 export const getTopPlaylistGenres = async () => {

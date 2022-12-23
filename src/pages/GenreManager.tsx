@@ -9,14 +9,10 @@ import {
 } from "@mantine/core";
 import { useContext, useEffect, useState } from "react";
 import { StateContext } from "../api/ContextProvider";
-import { getBlacklist, setBlacklist } from "../api/misc/GenreBlacklist";
+import { getBlacklist, setBlacklist } from "../api/functions/GenreBlacklist";
 import { useLastfmQuery } from "../api/QueryApi";
-import {
-  getAllTrackGenres,
-  getWhitelist,
-  resetGenres,
-  updateWhitelist,
-} from "../api/SpotifyApiClientSide";
+import { getWhitelist, updateWhitelist } from "../api/SpotifyApiClientData";
+import { getAllTrackGenres, resetGenres } from "../api/SpotifyApiClientSide";
 import { pageHeight, pagePadding } from "../App";
 
 const GenreManager = () => {

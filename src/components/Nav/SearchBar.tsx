@@ -20,34 +20,34 @@ import {
   displayMap,
   generatePlaylistKey,
   inPlaylists,
-} from "../../api/misc/HelperFunctions";
-import { dashboardRefType, loadingAllTracks } from "../../pages/Dashboard";
+} from "../../api/functions/HelperFunctions";
 import {
-  duplicateManager,
-  generalPlaylistsSearch,
-  generalTracksSearch,
-} from "../../api/SpotifyApiClientSide";
-import {
+  dashboardRefType,
   occuranceType,
   playlistsType,
   playlistType,
-  tracksType,
   uniqueType,
 } from "../../api/SpotifyApiClientTypes";
-import Row from "../Row";
-import LoadMoreLibraryButton from "../LoadMoreLibraryButton";
+
 import LoadMoreGeneralButton from "../LoadMoreGeneralButton";
+import LoadMoreLibraryButton from "../LoadMoreLibraryButton";
+import Row from "../Row";
+
 import { useSpotifyQuery } from "../../api/QueryApi";
 import { StateContext } from "../../api/ContextProvider";
+import {
+  debounceWaitTime,
+  waitTime,
+  getLimit,
+  duplicateManager,
+} from "../../api/SpotifyApiClientData";
+import MyScrollArea from "../MyScrollArea";
 
 type propsType = {
   dashboardRef: React.RefObject<dashboardRefType>;
 };
 export type searchCategoryType = "Playlists" | "Tracks";
 export type searchAreaType = "Library" | "General";
-export const resultLimit = 50;
-export const waitTime = 750;
-export const debounceWaitTime = Math.round(0.67 * waitTime);
 
 const SearchBar = (props: propsType) => {
   // UI stuff
@@ -92,6 +92,9 @@ const SearchBar = (props: propsType) => {
   // Query stuff
   const offsetRef = useRef(0);
   async function generalPlaylistsQ() {
+    const generalPlaylistsSearch = (
+      await import("../../api/SpotifyApiClientSide")
+    ).generalPlaylistsSearch;
     const results = (await useSpotifyQuery(
       generalPlaylistsSearch,
       0,
@@ -102,6 +105,8 @@ const SearchBar = (props: propsType) => {
   }
   const trackValueRef = useRef("");
   const generalTracksQ = async () => {
+    const generalTracksSearch = (await import("../../api/SpotifyApiClientSide"))
+      .generalTracksSearch;
     const results = (await useSpotifyQuery(
       generalTracksSearch,
       0,
@@ -302,7 +307,7 @@ const SearchBar = (props: propsType) => {
           );
           indexRef.current++;
           counterRef.current++;
-          if (indexRef.current % resultLimit === 0) {
+          if (indexRef.current % getLimit === 0) {
             totalPageRef.current++;
             indexRef.current = 0;
             playlistResults.current.push(new Map<string, playlistType>());
@@ -447,7 +452,7 @@ const SearchBar = (props: propsType) => {
           trackResults.current[totalPageRef.current].add(uniqueTrack);
           indexRef.current++;
           counterRef.current++;
-          if (indexRef.current % resultLimit === 0) {
+          if (indexRef.current % getLimit === 0) {
             totalPageRef.current++;
             indexRef.current = 0;
             trackResults.current.push(new Set<uniqueType>());
@@ -770,16 +775,29 @@ const SearchBar = (props: propsType) => {
             />
           </Flex>
         </Flex>
-        <div ref={scrollReset} className="searchlist">
-          {isLoading ||
-          (loadingAllTracks && selectedSearchCategory === "Tracks") ? (
+        <MyScrollArea
+          maxHeight={"60vh"}
+          type={"hover"}
+          styles={{
+            root: {
+              borderStyle: "inset outset outset inset",
+              borderColor: "rgba(255, 255, 255, 0.66)",
+              margin: "1rem",
+              minHeight: "min-content",
+              height: "calc(70vmin - 3rem)",
+              width: "calc(100% - 2rem)",
+              borderRadius: "0.33rem",
+            },
+          }}
+        >
+          {isLoading || selectedSearchCategory === "Tracks" ? (
             displayLoader()
           ) : (
             <SimpleGrid miw={"max-content"} cols={1} verticalSpacing={0}>
               {searchResults}
             </SimpleGrid>
           )}
-        </div>
+        </MyScrollArea>
       </Modal>
 
       <TextInput

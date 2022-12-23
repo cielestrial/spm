@@ -1,7 +1,7 @@
 import { Group, Text } from "@mantine/core";
 import { useContext } from "react";
 import { StateContext } from "../api/ContextProvider";
-import { span } from "../api/misc/HelperFunctions";
+import { span } from "../api/functions/HelperFunctions";
 
 type proptype = {
   label: string;

@@ -1,7 +1,7 @@
 import { MantineTheme, useMantineTheme } from "@mantine/core";
 import { createContext, useCallback, useRef, useState } from "react";
 import { NavigateFunction, useNavigate } from "react-router-dom";
-import { generatePlaylistKey } from "./misc/HelperFunctions";
+import { generatePlaylistKey } from "./functions/HelperFunctions";
 import {
   playlistsType,
   playlistType,

@@ -6,7 +6,6 @@ import {
   Group,
   Loader,
   MediaQuery,
-  ScrollArea,
   SimpleGrid,
   Space,
   Stack,
@@ -21,31 +20,31 @@ import {
   useRef,
   useState,
 } from "react";
-import UnfollowButton from "../components/UnfollowButton";
-import { playlistType, tracksType } from "../api/SpotifyApiClientTypes";
+
+import BackButton from "../components/BackButton";
 import CreatePlaylistButton from "../components/CreatePlaylistButton";
 import FollowButton from "../components/FollowButton";
-import { inPlaylists } from "../api/misc/HelperFunctions";
-import BackButton from "../components/BackButton";
+import GenreSubscriber from "../components/GenreSubscriber";
+import MyScrollArea from "../components/MyScrollArea";
+import PlaylistSubscriber from "../components/PlaylistSubscriber";
 import Row from "../components/Row";
 import ShowTracksButton from "../components/ShowTracksButton";
-import GenreSubscriber from "../components/GenreSubscriber";
-import PlaylistSubscriber from "../components/PlaylistSubscriber";
 import TopPlaylistGenres from "../components/TopPlaylistGenres";
+import UnfollowButton from "../components/UnfollowButton";
 import UpdateAllButton from "../components/UpdateAllButton";
+
+import { inPlaylists } from "../api/functions/HelperFunctions";
+import {
+  dashboardRefType,
+  playlistType,
+  tracksType,
+} from "../api/SpotifyApiClientTypes";
 import { StateContext } from "../api/ContextProvider";
 import { useSpotifyQuery } from "../api/QueryApi";
-import { getTracks } from "../api/SpotifyApiClientSide";
 import { GiPlainArrow } from "react-icons/gi";
-import { debounceWaitTime } from "../components/Nav/SearchBar";
-
-export let loadingAllTracks: boolean = false;
+import { getTracks } from "../api/SpotifyApiClientSide";
 
 type propType = {};
-export type dashboardRefType = {
-  setSelectedP: (selected: playlistType | undefined) => Promise<void>;
-  setSelectedT: (track: tracksType) => void;
-};
 
 const Dashboard = forwardRef<dashboardRefType, propType>((props, ref) => {
   const context = useContext(StateContext);
@@ -138,10 +137,7 @@ const Dashboard = forwardRef<dashboardRefType, propType>((props, ref) => {
             onClick={() => setSelectedP(playlist)}
           >
             <Group>
-              <Text color={color}>
-                {index + 1}
-                {". "}
-              </Text>
+              <Text color={color}>{`${index + 1}. `}</Text>
               <Text>{playlist.name}</Text>
             </Group>
           </Box>
@@ -175,46 +171,35 @@ const Dashboard = forwardRef<dashboardRefType, propType>((props, ref) => {
       );
     if (infoIndex === 0 && context.selectedPlaylist.current !== undefined) {
       return (
-        <SimpleGrid
-          h="100%"
-          mih="max-content"
-          miw="fit-content"
-          cols={1}
-          verticalSpacing={0}
-        >
-          <Box className="info-card">
+        <Box className="info-card">
+          <Row label={"Name:"} value={context.selectedPlaylist.current.name} />
+          <Space h="md" />
+          <Row
+            label={"Owned By:"}
+            value={context.selectedPlaylist.current.owner}
+          />
+          <Space h="md" />
+          <Flex wrap="wrap" gap="sm">
             <Row
-              label={"Name:"}
-              value={context.selectedPlaylist.current.name}
+              label={"Songs:"}
+              value={context.selectedPlaylist.current.total}
             />
-            <Space h="md" />
-            <Row
-              label={"Owned By:"}
-              value={context.selectedPlaylist.current.owner}
-            />
-            <Space h="md" />
-            <Flex wrap="wrap" gap="sm">
-              <Row
-                label={"Songs:"}
-                value={context.selectedPlaylist.current.total}
-              />
-              <ShowTracksButton setInfoIndex={setInfoIndex} />
-            </Flex>
-            <Space h="xs" />
-            <Row label={"Top Genres:"} value={null} />
-            <TopPlaylistGenres />
-            <Space h="xs" />
-            <Group spacing={0}>
-              <Row label={"Subscribed Playlists:"} value={null} />
-              <PlaylistSubscriber />
-            </Group>
-            <Space h="md" />
-            <Group spacing={0}>
-              <Row label={"Subscribed Genres:"} value={null} />
-              <GenreSubscriber />
-            </Group>
-          </Box>
-        </SimpleGrid>
+            <ShowTracksButton setInfoIndex={setInfoIndex} />
+          </Flex>
+          <Space h="xs" />
+          <Row label={"Top Genres:"} value={null} />
+          <TopPlaylistGenres />
+          <Space h="xs" />
+          <Group spacing={0}>
+            <Row label={"Subscribed Playlists:"} value={null} />
+            <PlaylistSubscriber />
+          </Group>
+          <Space h="md" />
+          <Group spacing={0}>
+            <Row label={"Subscribed Genres:"} value={null} />
+            <GenreSubscriber />
+          </Group>
+        </Box>
       );
     } else if (
       infoIndex === 1 &&
@@ -233,10 +218,7 @@ const Dashboard = forwardRef<dashboardRefType, propType>((props, ref) => {
             }}
           >
             <Group>
-              <Text color={color}>
-                {index + 1}
-                {". "}
-              </Text>
+              <Text color={color}>{`${index + 1}. `}</Text>
               <Text>{track.name}</Text>
             </Group>
           </Box>
@@ -337,12 +319,10 @@ const Dashboard = forwardRef<dashboardRefType, propType>((props, ref) => {
     >
       <Stack miw="min-content" justify="center" align="center" spacing={0}>
         {displayPlaylistsLabel()}
-        <ScrollArea.Autosize
+        <MyScrollArea
           maxHeight={"60vh"}
-          type="hover"
-          scrollbarSize={8}
-          scrollHideDelay={debounceWaitTime}
-          styles={(theme) => ({
+          type={"hover"}
+          styles={{
             root: {
               borderStyle: "inset outset outset inset",
               borderColor: "rgba(255, 255, 255, 0.66)",
@@ -350,37 +330,10 @@ const Dashboard = forwardRef<dashboardRefType, propType>((props, ref) => {
               width: "35vw",
               minWidth: "15rem",
             },
-            scrollbar: {
-              '&[data-orientation="vertical"] .mantine-ScrollArea-thumb': {
-                backgroundColor:
-                  theme.colorScheme === "dark"
-                    ? theme.colors.green
-                    : theme.colors.blue[5],
-              },
-              '&[data-orientation="horizontal"] .mantine-ScrollArea-thumb': {
-                backgroundColor:
-                  theme.colorScheme === "dark"
-                    ? theme.colors.green
-                    : theme.colors.blue[5],
-              },
-              "&, &:hover": {
-                background:
-                  theme.colorScheme === "dark"
-                    ? theme.colors.dark[6]
-                    : theme.colors.gray[1],
-              },
-            },
-            corner: {
-              opacity: 1,
-              background:
-                theme.colorScheme === "dark"
-                  ? theme.colors.dark[6]
-                  : theme.colors.gray[1],
-            },
-          })}
+          }}
         >
           {displayPlaylists()}
-        </ScrollArea.Autosize>
+        </MyScrollArea>
         <Flex
           align="center"
           justify="space-evenly"
@@ -413,12 +366,10 @@ const Dashboard = forwardRef<dashboardRefType, propType>((props, ref) => {
 
       <Stack miw="min-content" justify="center" align="center" spacing={0}>
         {displayInfoLabel()}
-        <ScrollArea.Autosize
+        <MyScrollArea
           maxHeight={"60vh"}
-          type="hover"
-          scrollbarSize={8}
-          scrollHideDelay={debounceWaitTime}
-          styles={(theme) => ({
+          type={"hover"}
+          styles={{
             root: {
               borderStyle: "inset outset outset inset",
               borderColor: "rgba(255, 255, 255, 0.66)",
@@ -426,37 +377,10 @@ const Dashboard = forwardRef<dashboardRefType, propType>((props, ref) => {
               width: "35vw",
               minWidth: "15rem",
             },
-            scrollbar: {
-              '&[data-orientation="vertical"] .mantine-ScrollArea-thumb': {
-                backgroundColor:
-                  theme.colorScheme === "dark"
-                    ? theme.colors.green
-                    : theme.colors.blue[5],
-              },
-              '&[data-orientation="horizontal"] .mantine-ScrollArea-thumb': {
-                backgroundColor:
-                  theme.colorScheme === "dark"
-                    ? theme.colors.green
-                    : theme.colors.blue[5],
-              },
-              "&, &:hover": {
-                background:
-                  theme.colorScheme === "dark"
-                    ? theme.colors.dark[6]
-                    : theme.colors.gray[1],
-              },
-            },
-            corner: {
-              opacity: 1,
-              background:
-                theme.colorScheme === "dark"
-                  ? theme.colors.dark[6]
-                  : theme.colors.gray[1],
-            },
-          })}
+          }}
         >
           {displayInfo()}
-        </ScrollArea.Autosize>
+        </MyScrollArea>
         <Flex
           align="center"
           justify="space-evenly"

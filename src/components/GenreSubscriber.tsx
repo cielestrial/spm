@@ -1,7 +1,7 @@
 import { MultiSelect, SelectItem } from "@mantine/core";
 import { useContext, useState } from "react";
 import { StateContext } from "../api/ContextProvider";
-import { getWhitelist } from "../api/SpotifyApiClientSide";
+import { getWhitelist } from "../api/SpotifyApiClientData";
 
 type proptype = {};
 const GenreSubscriber = (props: proptype) => {

@@ -1,24 +1,13 @@
 @import "./variables";
 
-.column-element {
+.text {
+  font-size: 1.25rem;
+  font-weight: bold;
+  text-align: center;
   place-self: center;
-  width: $column-width;
-  min-width: $min-column-width;
-}
-
-.list {
-  overflow: auto;
-  //align-content: start;
-  width: 35vw;
-  height: $max-list-height;
-  border-style: $border-style;
-  border-color: rgba(255, 255, 255, 0.66);
-}
-
-.button {
-  max-width: calc($max-column-width * 1.5);
-  margin: 0 calc($margin-bottom/4) $margin-bottom;
-  place-self: center;
+  min-width: 1rem;
+  margin: calc($margin-bottom/4) 0;
+  cursor: default;
 }
 
 .not-button {
@@ -37,29 +26,14 @@
   }
 }
 
-.searchlist {
-  overflow: auto;
-  width: calc(100% - 2rem);
-  min-height: min-content;
-  height: calc(70vmin - 3rem);
-  margin: 1rem;
-  border-radius: $border-radius 0 0 $border-radius;
-  border-style: $border-style;
-  border-color: rgba(255, 255, 255, 0.66);
-}
-
 .info-card {
   width: 100%;
-  height: calc(60vh - 5px);
+  min-height: calc(60vh - 5px);
+  height: max-content;
   min-width: min-content;
   font-weight: bold;
   text-align: left;
   padding: 1.33rem;
   border-style: $border-style;
   border-color: rgba(255, 255, 255, 0.66);
-}
-
-.icon {
-  font-size: 5rem;
-  transform: rotate(-90deg);
 }

@@ -5,7 +5,7 @@ To Do:
   
 
 Performance:    
-  React.Lazy && suspense 
+  Code-split spotify client & searchbar file
 
 Security:
   env file
@@ -17,8 +17,7 @@ Hosting:
   Collect User Feedback
 
 Bugs: 
-Client load then server load for no reason
-Genre re-pulling
+  Genre re-pulling
 
 Static Visuals:
 

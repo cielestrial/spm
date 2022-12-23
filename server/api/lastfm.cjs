@@ -19,6 +19,13 @@ filter.addWords(...CaN.misc);
  * https://yarnpkg.com/package/lastfm
  */
 
+/**
+ * List of endpoints:
+ *
+ * genres
+ * reset-genres
+ */
+
 const lowerConfidenceBound = 100;
 const top_x = 1;
 

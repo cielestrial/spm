@@ -13,10 +13,10 @@ import DownloadButton from "./DownloadButton";
 import Logout from "./Logout";
 import PageNavigatorButton from "./PageNavigatorButton";
 import SearchBar from "./SearchBar";
-import { dashboardRefType } from "../../pages/Dashboard";
 import { StateContext } from "../../api/ContextProvider";
 import { useMediaQuery } from "@mantine/hooks";
 import { breakpoints } from "./NavBar";
+import { dashboardRefType } from "../../api/SpotifyApiClientTypes";
 
 type propType = {
   height: string | number;
@@ -102,7 +102,6 @@ const NavLogo = (props: propType) => {
         padding={0}
         shadow={"0.33rem 0 1rem 0" + context.theme.colors.gray[9]}
         size="sm"
-        target=".App"
         styles={(theme) => ({
           closeButton: {
             color: color,

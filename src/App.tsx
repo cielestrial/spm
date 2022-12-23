@@ -1,15 +1,19 @@
 import "./css/main.scss";
-import Dashboard, { dashboardRefType } from "./pages/Dashboard";
+import { lazy, Suspense, useContext, useRef } from "react";
 import { Routes, Route } from "react-router-dom";
-import LandingPage from "./pages/LandingPage";
-import GenreManager from "./pages/GenreManager";
-import LoadingPage from "./pages/LoadingPage";
-import { AppShell, Header, ScrollArea } from "@mantine/core";
-import { useContext, useRef } from "react";
+import { AppShell, Center, Header, Loader } from "@mantine/core";
 import { StateContext } from "./api/ContextProvider";
-import NavBar from "./components/Nav/NavBar";
-import { debounceWaitTime } from "./components/Nav/SearchBar";
+
+import LandingPage from "./pages/LandingPage";
+import MyScrollArea from "./components/MyScrollArea";
+
+const LoadingPage = lazy(() => import("./pages/LoadingPage"));
+const NavBar = lazy(() => import("./components/Nav/NavBar"));
+const Dashboard = lazy(() => import("./pages/Dashboard"));
+const GenreManager = lazy(() => import("./pages/GenreManager"));
+
 import { fadeIn, slideDown } from "./css/Keyframes";
+import { dashboardRefType } from "./api/SpotifyApiClientTypes";
 
 export const getCode = () =>
   new URLSearchParams(window.location.search).get("code");
@@ -60,50 +64,25 @@ function App() {
         },
       })}
     >
-      <ScrollArea.Autosize
-        className="App"
-        maxHeight={"80vh"}
-        type="auto"
-        offsetScrollbars
-        scrollbarSize={8}
-        scrollHideDelay={debounceWaitTime}
-        styles={(theme) => ({
-          scrollbar: {
-            '&[data-orientation="vertical"] .mantine-ScrollArea-thumb': {
-              backgroundColor:
-                theme.colorScheme === "dark"
-                  ? theme.colors.green
-                  : theme.colors.blue[5],
-            },
-            '&[data-orientation="horizontal"] .mantine-ScrollArea-thumb': {
-              backgroundColor:
-                theme.colorScheme === "dark"
-                  ? theme.colors.green
-                  : theme.colors.blue[5],
-            },
-            "&, &:hover": {
-              background:
-                theme.colorScheme === "dark"
-                  ? theme.colors.dark[6]
-                  : theme.colors.gray[1],
-            },
-          },
-          corner: {
-            opacity: 1,
-            background:
-              theme.colorScheme === "dark"
-                ? theme.colors.dark[6]
-                : theme.colors.gray[1],
-          },
-        })}
-      >
-        <Routes>
-          <Route path="/" element={<LandingPage />} />
-          <Route path="loading" element={<LoadingPage />} />
-          <Route path="dashboard" element={<Dashboard ref={dashboardRef} />} />
-          <Route path="genres" element={<GenreManager />} />
-        </Routes>
-      </ScrollArea.Autosize>
+      <MyScrollArea maxHeight={"80vh"} type={"auto"}>
+        <Suspense
+          fallback={
+            <Center h={pageHeight} pt={pagePadding} className="loading">
+              <Loader size="lg" />
+            </Center>
+          }
+        >
+          <Routes>
+            <Route path="/" element={<LandingPage />} />
+            <Route path="loading" element={<LoadingPage />} />
+            <Route
+              path="dashboard"
+              element={<Dashboard ref={dashboardRef} />}
+            />
+            <Route path="genres" element={<GenreManager />} />
+          </Routes>
+        </Suspense>
+      </MyScrollArea>
     </AppShell>
   );
 }

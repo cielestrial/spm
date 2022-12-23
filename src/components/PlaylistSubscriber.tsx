@@ -2,11 +2,11 @@ import { SelectItem, MultiSelect } from "@mantine/core";
 import { useDebouncedValue, useForceUpdate } from "@mantine/hooks";
 import { useContext, useEffect, useRef, useState } from "react";
 import { StateContext } from "../api/ContextProvider";
-import { generatePlaylistKey } from "../api/misc/HelperFunctions";
+import { generatePlaylistKey } from "../api/functions/HelperFunctions";
 import { useSpotifyQuery } from "../api/QueryApi";
+import { debounceWaitTime, waitTime } from "../api/SpotifyApiClientData";
 import { generalPlaylistsSearch } from "../api/SpotifyApiClientSide";
 import { playlistsType, playlistType } from "../api/SpotifyApiClientTypes";
-import { debounceWaitTime, waitTime } from "./Nav/SearchBar";
 
 type proptype = {};
 type dataArrayType = dataType[];
