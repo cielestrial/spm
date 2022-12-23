@@ -41,7 +41,7 @@ const NavBar = (props: propType) => {
       </Group>
 
       {xsMediaQuery ? (
-        <Group w={full} h={full} position="apart" noWrap spacing={0}>
+        <Group w={full} h={full} position="apart" noWrap spacing={"md"}>
           <SearchBar dashboardRef={props.dashboardRef} />
           <Logout height={full} />
         </Group>

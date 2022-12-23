@@ -5,7 +5,6 @@ import { generatePlaylistKey } from "./misc/HelperFunctions";
 import {
   playlistsType,
   playlistType,
-  tokenType,
   userInfoType,
 } from "./SpotifyApiClientTypes";
 
@@ -28,8 +27,8 @@ type stateContextType = {
   setUserInfo: React.Dispatch<
     React.SetStateAction<userInfoType | null | undefined>
   >;
-  token: tokenType | null | undefined;
-  setToken: React.Dispatch<React.SetStateAction<tokenType | null | undefined>>;
+  token: boolean | undefined;
+  setToken: React.Dispatch<React.SetStateAction<boolean | undefined>>;
 };
 
 type StateProviderProps = {
@@ -41,13 +40,12 @@ export function StateProvider({ children }: StateProviderProps) {
   const navigate = useRef(useNavigate());
   const playlistsQ = useRef<playlistsType>(undefined);
   const selectedPlaylist = useRef<playlistType>();
-
   const [showHeader, setShowHeader] = useState(false);
   const [currentPage, setCurrentPage] = useState<pagesType>("landing");
   const [userInfo, setUserInfo] = useState<userInfoType | undefined | null>(
     undefined
   );
-  const [token, setToken] = useState<tokenType | undefined | null>(undefined);
+  const [token, setToken] = useState<boolean | undefined>(undefined);
 
   const isFollowed = useCallback(() => {
     if (

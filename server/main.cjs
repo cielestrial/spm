@@ -1,3 +1,4 @@
+require("dotenv").config();
 const path = require("path");
 const express = require("express");
 const cors = require("cors");
@@ -20,6 +21,7 @@ app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "views/page.html"));
 });
 
+console.log(process.env.NODE_ENV);
 // Get Access Token
 app.post("/login", spotifyApi.login);
 

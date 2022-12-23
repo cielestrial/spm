@@ -29,7 +29,7 @@ const LandingPage = () => {
   } else {
     return (
       <Stack
-        mt="calc(50vh - 60px - 2rem)"
+        mt="calc(50vh - 60px - 1em)"
         align="center"
         justify="center"
         spacing="lg"

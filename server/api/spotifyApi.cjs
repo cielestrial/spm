@@ -1,9 +1,8 @@
-const { json } = require("body-parser");
 const SpotifyWebApi = require("spotify-web-api-node");
 const spotifyApi = new SpotifyWebApi({
   redirectUri: "http://localhost:3000",
-  clientId: "d03dd28afb3f40d1aad5e6a45d9bff7f",
-  clientSecret: "e75eb0904b534609ac65376077d10329",
+  clientId: process.env.SPOTIFY_API_CLIENT,
+  clientSecret: process.env.SPOTIFY_API_SECRET,
 });
 
 /**
@@ -49,11 +48,7 @@ const rateLimit = (err, res) => {
         accessToken = data.body.access_token;
         expriresIn = data.body.expires_in;
         spotifyApi.setAccessToken(accessToken);
-        res.json({
-          accessToken: accessToken,
-          refreshToken: refreshToken,
-          expriresIn: expriresIn,
-        });
+        res.json(true);
       })
       .catch((err) => {
         console.error(
@@ -80,11 +75,7 @@ const login = (req, res) => {
       expriresIn = data.body.expires_in;
       spotifyApi.setAccessToken(accessToken);
       spotifyApi.setRefreshToken(refreshToken);
-      res.json({
-        accessToken: accessToken,
-        refreshToken: refreshToken,
-        expriresIn: expriresIn,
-      });
+      res.json(true);
     })
     .catch((err) => {
       rateLimit(err, res);
@@ -271,7 +262,7 @@ const unfollow = (req, res) => {
     .unfollowPlaylist(playlistId)
     .then((data) => {
       console.log("Successfully unfollowed playlist");
-      res.json("success");
+      res.json(true);
     })
     .catch((err) => {
       console.error(
@@ -291,7 +282,7 @@ const follow = (req, res) => {
     .followPlaylist(playlistId)
     .then((data) => {
       console.log("Successfully followed playlist");
-      res.json("success");
+      res.json(true);
     })
     .catch((err) => {
       console.error("Something went wrong with following the playlist\n", err);

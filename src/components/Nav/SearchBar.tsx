@@ -83,9 +83,6 @@ const SearchBar = (props: propsType) => {
   const [selectedSearchArea, setSelectedSearchArea] =
     useState<searchAreaType>("Library");
   const scrollReset = useRef<HTMLDivElement>(null);
-  //const nameSearchBar = useRef<HTMLInputElement>(null);
-  //const artistSearchBar = useRef<HTMLInputElement>(null);
-  //const albumSearchBar = useRef<HTMLInputElement>(null);
 
   const mutationObserver = new MutationObserver(() => {
     if (scrollReset.current !== null) scrollReset.current.scrollTop = 0;

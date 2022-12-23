@@ -60,7 +60,7 @@ const Dashboard = forwardRef<dashboardRefType, propType>((props, ref) => {
       : context.theme.colors.blue[4];
 
   useEffect(() => {
-    if (context.token === null || context.userInfo === null)
+    if (context.token === false || context.userInfo === null)
       context.navigate.current("/");
   }, [context.token, context.userInfo]);
 

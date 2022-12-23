@@ -5,8 +5,8 @@ const { userId, rateLimit } = require("./spotifyApi.cjs");
 const artistMasterList = new Map();
 
 const lastFm = new LastFmNode({
-  api_key: "8439b97f6094e7c5bc2f90150fa9e090",
-  secret: "2b124e2c7dd8dc3fa7496ef1574d9030",
+  api_key: process.env.LASTFM_API_CLIENT,
+  secret: process.env.LASTFM_API_CLIENT,
   useragent: "YSPM/" + userId,
 });
 

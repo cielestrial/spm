@@ -1,5 +1,5 @@
 import { Button, Center, FileButton, Flex, Loader, Title } from "@mantine/core";
-import { useState, useEffect, useContext } from "react";
+import { useState, useEffect, useContext, useRef } from "react";
 import { StateContext } from "../api/ContextProvider";
 import { loadDataFromFiles } from "../api/misc/HelperFunctions";
 import { useLastfmQuery, useSpotifyQuery } from "../api/QueryApi";
@@ -11,17 +11,18 @@ import {
   getAllTrackGenres,
   getTopPlaylistGenres,
 } from "../api/SpotifyApiClientSide";
-import {
-  tokenType,
-  userInfoType,
-  playlistsType,
-} from "../api/SpotifyApiClientTypes";
+import { userInfoType, playlistsType } from "../api/SpotifyApiClientTypes";
 import { pageHeight, pagePadding } from "../App";
+import { custom_ease_out, shake } from "../css/Keyframes";
 
 const LoadingPage = () => {
   const context = useContext(StateContext);
   const [file, setFile] = useState<File | null>(null);
   const [isLoading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
+  const resetRef = useRef<() => void>(null);
+  const timer = useRef<NodeJS.Timeout>();
+  const animationDuration = 0.25;
 
   useEffect(() => {
     context.setCurrentPage("loading");
@@ -29,10 +30,9 @@ const LoadingPage = () => {
     (async () => {
       setLoading(true);
       const tokenData = (await useSpotifyQuery(getToken, 0)) as
-        | tokenType
-        | undefined
-        | null;
-      if (tokenData !== undefined && tokenData !== null) {
+        | boolean
+        | undefined;
+      if (tokenData !== undefined && tokenData !== false) {
         context.setToken(tokenData);
         const userData = (await useSpotifyQuery(
           getAuthenticatedUserInfo,
@@ -46,13 +46,13 @@ const LoadingPage = () => {
             0
           )) as playlistsType;
         } else context.setUserInfo(null);
-      } else context.setToken(null);
+      } else context.setToken(false);
       setLoading(false);
     })();
   }, []);
 
   useEffect(() => {
-    if (context.token === null || context.userInfo === null)
+    if (context.token === false || context.userInfo === null)
       context.navigate.current("/");
   }, [context.token, context.userInfo]);
 
@@ -65,6 +65,11 @@ const LoadingPage = () => {
       await useLastfmQuery(getAllTrackGenres, 0);
       await useLastfmQuery(getTopPlaylistGenres, 0);
     } else console.error("Could not read display_name");
+  };
+
+  const playErrorAnimation = () => {
+    setError(true);
+    timer.current = setTimeout(() => setError(false), animationDuration * 1000);
   };
 
   if (isLoading) {
@@ -97,6 +102,7 @@ const LoadingPage = () => {
             setLoading(true);
             await getAll();
             context.navigate.current("/dashboard");
+            context.setShowHeader(true);
             setLoading(false);
           }}
         >
@@ -108,11 +114,14 @@ const LoadingPage = () => {
         </Title>
 
         <FileButton
+          resetRef={resetRef}
           accept="application/zip"
           onChange={async (e) => {
             if (e !== null && e.name !== "yspm.zip") {
+              playErrorAnimation();
               console.error("Invalid file:", e.name);
               setFile(null);
+              resetRef.current?.();
             } else if (e !== null) {
               setFile(e);
               setLoading(true);
@@ -128,6 +137,7 @@ const LoadingPage = () => {
               else console.error("Could not read display_name");
               await getAll();
               context.navigate.current("/dashboard");
+              context.setShowHeader(true);
               setLoading(false);
             }
           }}
@@ -142,6 +152,13 @@ const LoadingPage = () => {
               variant="filled"
               radius="md"
               size="xl"
+              styles={{
+                root: {
+                  animation: error
+                    ? `${shake(10)} ${animationDuration}s ${custom_ease_out}`
+                    : undefined,
+                },
+              }}
             >
               Upload yspm.zip
             </Button>

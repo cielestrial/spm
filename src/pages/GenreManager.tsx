@@ -22,10 +22,10 @@ import { pageHeight, pagePadding } from "../App";
 const GenreManager = () => {
   const context = useContext(StateContext);
   const [data, setData] = useState<TransferListData>([[], []]);
-  const [isLoading, setLoading] = useState(true);
+  const [isLoading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (context.token === null || context.userInfo === null)
+    if (context.token === false || context.userInfo === null)
       context.navigate.current("/");
   }, [context.token, context.userInfo]);
 
@@ -48,6 +48,7 @@ const GenreManager = () => {
 
   const searchFilter = (query: string, item: TransferListItem) =>
     item.label.includes(query.toLocaleLowerCase());
+
   if (isLoading) {
     return (
       <Center h={pageHeight} pt={pagePadding} className="loading">

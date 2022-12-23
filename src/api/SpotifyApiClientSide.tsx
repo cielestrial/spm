@@ -6,7 +6,6 @@ import {
   optionsType,
   playlistsType,
   playlistType,
-  tokenType,
   tracksType,
   userInfoType,
   duplicateType,
@@ -135,19 +134,14 @@ const rateLimitLastfm = async (res: AxiosResponse<any, any>) => {
  */
 export const getToken = async () => {
   if (code === null) throw new Error();
-  let tokenTemp = {} as tokenType;
   try {
     const res = await axios.post(server + "/login", { code });
-    if (res.data === undefined || res.data.accessToken === undefined)
-      return null;
-    tokenTemp.accessToken = res.data.accessToken;
-    tokenTemp.refreshToken = res.data.refreshToken;
-    tokenTemp.expiresIn = res.data.expriresIn;
+    if (res.data !== true) return false;
   } catch (err) {
     console.error("Something went wrong with getToken()\n", err);
-    return null;
+    return false;
   }
-  return tokenTemp;
+  return true;
 };
 
 /**

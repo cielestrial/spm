@@ -1,27 +1,31 @@
 To Do:    
- 
-  4) Liked Songs
-  3) Bugs
-  4) Hosting
-
+  3) Liked Songs
+  2) Hosting
+  1) Performance & Bugs
+  
 
 Performance:    
   React.Lazy && suspense 
 
+Security:
+  env file
+  remove token value from client if not used there
+
 Hosting: 
   Comply with licensing (lastfm and spotify ToS)  
-  Comment Code
-  Host on Netify / AWS
+  Host on Netify
   Collect User Feedback
 
 Bugs: 
 Client load then server load for no reason
 Genre re-pulling
 
+Static Visuals:
+
 Dynamic Visuals:
-  Animations
 
 Extras:
+  Comment Code
   Multi-select tracks to remove or add to another playlist (change arrow direction)
   Track player capabilities (will only work for premium though....).
   Proper shuffle

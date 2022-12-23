@@ -1,8 +1,3 @@
-export type tokenType = {
-  accessToken: string | undefined;
-  refreshToken: string | undefined;
-  expiresIn: string | undefined;
-};
 export type userInfoType = {
   display_name: string | null;
   display_image: string;

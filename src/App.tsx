@@ -9,12 +9,13 @@ import { useContext, useRef } from "react";
 import { StateContext } from "./api/ContextProvider";
 import NavBar from "./components/Nav/NavBar";
 import { debounceWaitTime } from "./components/Nav/SearchBar";
+import { fadeIn, slideDown } from "./css/Keyframes";
 
 export const getCode = () =>
   new URLSearchParams(window.location.search).get("code");
 
 export const pageHeight = "calc(85vh - 60px)";
-export const pagePadding = "60px";
+export const pagePadding = "calc(60px + 2em)";
 
 function App() {
   const context = useContext(StateContext);
@@ -24,7 +25,6 @@ function App() {
     <AppShell
       padding="md"
       header={
-        // Add transition
         context.showHeader ? (
           <Header
             fixed
@@ -33,6 +33,8 @@ function App() {
             p={0}
             styles={(theme) => ({
               root: {
+                "> *": { animation: `${fadeIn} 1s 0.5s ease-in-out backwards` },
+                animation: `${slideDown} 1s ease-in-out forwards`,
                 backgroundColor:
                   theme.colorScheme === "dark"
                     ? theme.colors.dark[5]
@@ -61,7 +63,7 @@ function App() {
       <ScrollArea.Autosize
         className="App"
         maxHeight={"80vh"}
-        type="always"
+        type="auto"
         offsetScrollbars
         scrollbarSize={8}
         scrollHideDelay={debounceWaitTime}

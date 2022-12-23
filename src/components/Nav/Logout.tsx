@@ -23,7 +23,7 @@ const Logout = (props: propType) => {
       onClick={async () => {
         setCode(null);
         context.setUserInfo(null);
-        context.setToken(null);
+        context.setToken(false);
         context.navigate.current("/");
       }}
     >

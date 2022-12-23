@@ -10,7 +10,9 @@ const BackButton = (props: proptype) => {
   const context = useContext(StateContext);
   const color = context.theme.colorScheme === "dark" ? "green.7" : "blue.5";
   const backHandler = () => {
-    if (props.infoIndex > 0) props.setInfoIndex(props.infoIndex - 1);
+    if (props.infoIndex > 0) {
+      props.setInfoIndex(props.infoIndex - 1);
+    }
   };
   return (
     <Button
