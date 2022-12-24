@@ -1,28 +1,27 @@
 import { SelectItem, MultiSelect } from "@mantine/core";
 import { useDebouncedValue, useForceUpdate } from "@mantine/hooks";
-import { useEffect, useRef, useState } from "react";
-import { generatePlaylistKey } from "../api/misc/HelperFunctions";
+import { useContext, useEffect, useRef, useState } from "react";
+import { StateContext } from "../api/ContextProvider";
+import { generatePlaylistKey } from "../api/functions/HelperFunctions";
 import { useSpotifyQuery } from "../api/QueryApi";
-import { generalPlaylistsSearch } from "../api/SpotifyApiClientSide";
+import { debounceWaitTime, waitTime } from "../api/ApiClientData";
 import { playlistsType, playlistType } from "../api/SpotifyApiClientTypes";
-import { debounceWaitTime, waitTime } from "./SearchBar";
+import { generalPlaylistsSearch } from "../api/SpotifyApiClientSearch";
 
-type proptype = {
-  playlists: React.MutableRefObject<playlistsType>;
-  selectedPlaylist: React.MutableRefObject<playlistType | undefined>;
-  isFollowed: () => boolean;
-  isOwned: () => boolean;
-};
+type proptype = {};
 type dataArrayType = dataType[];
 type dataType = {
   value: string;
   label: string;
 };
 const PlaylistSubscriber = (props: proptype) => {
+  const context = useContext(StateContext);
   const [isLoading, setLoading] = useState(false);
   const [subscribedPlaylists, setSubscribedPlaylists] = useState<string[]>(
-    props.selectedPlaylist.current !== undefined
-      ? Array.from(props.selectedPlaylist.current.playlistSubscriptions.keys())
+    context.selectedPlaylist.current !== undefined
+      ? Array.from(
+          context.selectedPlaylist.current.playlistSubscriptions.keys()
+        )
       : []
   );
 
@@ -54,27 +53,27 @@ const PlaylistSubscriber = (props: proptype) => {
     return generalPlaylistsQ;
   };
 
-  const key = generatePlaylistKey(props.selectedPlaylist.current);
-  let data1 = props.playlists.current?.list
-    ? Array.from(props.playlists.current.list.entries()).map(value => ({
+  const key = generatePlaylistKey(context.selectedPlaylist.current);
+  let data1 = context.playlistsQ.current?.list
+    ? Array.from(context.playlistsQ.current.list.entries()).map((value) => ({
         value: value[0],
-        label: value[1].name
+        label: value[1].name,
       }))
     : [];
   data1 = data1.concat(
-    props.selectedPlaylist.current
+    context.selectedPlaylist.current
       ? Array.from(
-          props.selectedPlaylist.current.playlistSubscriptions.entries()
-        ).map(value => ({
+          context.selectedPlaylist.current.playlistSubscriptions.entries()
+        ).map((value) => ({
           value: value[0],
-          label: value[1].name
+          label: value[1].name,
         }))
       : []
   );
 
   data1.splice(
     data1.findIndex(
-      value => value.label === props.selectedPlaylist.current?.name
+      (value) => value.label === context.selectedPlaylist.current?.name
     ),
     1
   );
@@ -95,9 +94,9 @@ const PlaylistSubscriber = (props: proptype) => {
         for (const item of data1)
           if (tempData.list.has(item.value)) tempData.list.delete(item.value);
         queryHolder.current = tempData;
-        data2 = Array.from(tempData.list.entries()).map(value => ({
+        data2 = Array.from(tempData.list.entries()).map((value) => ({
           value: value[0],
-          label: value[1].name
+          label: value[1].name,
         }));
       }
       setData(data1.concat(data2));
@@ -131,36 +130,36 @@ const PlaylistSubscriber = (props: proptype) => {
 
   const resetData = () => {
     const tempData = data.filter(
-      item => inFollowedPlaylists(item) || inSubscribedPlaylists(item)
+      (item) => inFollowedPlaylists(item) || inSubscribedPlaylists(item)
     );
     setData(tempData);
   };
 
   const updateSubscriptionList = (subbedPlaylistKeys: string[]) => {
     const updatedSubscriptionList: [string, playlistType][] = [];
-    if (props.selectedPlaylist.current !== undefined) {
+    if (context.selectedPlaylist.current !== undefined) {
       for (const subbedPlaylistKey of subbedPlaylistKeys) {
         if (
-          props.selectedPlaylist.current.playlistSubscriptions.has(
+          context.selectedPlaylist.current.playlistSubscriptions.has(
             subbedPlaylistKey
           )
         )
           updatedSubscriptionList.push([
             subbedPlaylistKey,
-            props.selectedPlaylist.current.playlistSubscriptions.get(
+            context.selectedPlaylist.current.playlistSubscriptions.get(
               subbedPlaylistKey
-            ) as playlistType
+            ) as playlistType,
           ]);
         else {
           if (
-            props.playlists.current !== undefined &&
-            props.playlists.current.list.has(subbedPlaylistKey)
+            context.playlistsQ.current !== undefined &&
+            context.playlistsQ.current.list.has(subbedPlaylistKey)
           )
             updatedSubscriptionList.push([
               subbedPlaylistKey,
-              props.playlists.current.list.get(
+              context.playlistsQ.current.list.get(
                 subbedPlaylistKey
-              ) as playlistType
+              ) as playlistType,
             ]);
           else if (
             queryHolder.current !== undefined &&
@@ -168,11 +167,11 @@ const PlaylistSubscriber = (props: proptype) => {
           )
             updatedSubscriptionList.push([
               subbedPlaylistKey,
-              queryHolder.current.list.get(subbedPlaylistKey) as playlistType
+              queryHolder.current.list.get(subbedPlaylistKey) as playlistType,
             ]);
         }
       }
-      props.selectedPlaylist.current.playlistSubscriptions = new Map<
+      context.selectedPlaylist.current.playlistSubscriptions = new Map<
         string,
         playlistType
       >(updatedSubscriptionList);
@@ -186,41 +185,41 @@ const PlaylistSubscriber = (props: proptype) => {
 
   return (
     <MultiSelect
-      variant="filled"
+      variant="default"
       aria-label="Playlist Selector"
       data={data}
       value={subscribedPlaylists}
-      onChange={e => {
+      onChange={(e) => {
         setSubscribedPlaylists(e);
         updateSubscriptionList(e);
       }}
       clearSearchOnChange
       searchable
       searchValue={searchValue}
-      onSearchChange={e => {
+      onSearchChange={(e) => {
         onSearchChange(e);
         if (e !== "") setLoading(true);
       }}
       autoComplete="off"
       autoCorrect="false"
       placeholder={
-        props.isFollowed() && props.isOwned() ? "Select playlists" : ""
+        context.isFollowed() && context.isOwned() ? "Select playlists" : ""
       }
       nothingFound={isLoading ? "Searching..." : "Playlist not found"}
       filter={searchFilter}
-      maxDropdownHeight={288}
+      maxDropdownHeight={192}
       dropdownPosition="top"
-      disabled={!props.isFollowed() || !props.isOwned()}
+      disabled={!context.isFollowed() || !context.isOwned()}
       size="sm"
       w="100%"
-      styles={theme => ({
+      styles={(theme) => ({
         value: {
-          fontWeight: "bold"
+          fontWeight: "bold",
         },
         item: {
           borderStyle: "inset outset outset inset",
-          borderColor: "rgba(255, 255, 255, 0.66)"
-        }
+          borderColor: "rgba(255, 255, 255, 0.66)",
+        },
       })}
     />
   );

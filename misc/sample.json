@@ -1,1122 +1,437 @@
 {
-  "tracks": {
-    "href": "https://api.spotify.com/v1/search?query=Like+Toy+Soldiers&type=track&include_external=audio&market=CA&locale=en-US%2Cen%3Bq%3D0.9&offset=0&limit=2",
-    "items": [
-      {
-        "album": {
-          "album_type": "album",
-          "artists": [
-            {
-              "external_urls": {
-                "spotify": "https://open.spotify.com/artist/7dGJo4pcD2V6oG8kP0tJRR"
-              },
-              "href": "https://api.spotify.com/v1/artists/7dGJo4pcD2V6oG8kP0tJRR",
-              "id": "7dGJo4pcD2V6oG8kP0tJRR",
-              "name": "Eminem",
-              "type": "artist",
-              "uri": "spotify:artist:7dGJo4pcD2V6oG8kP0tJRR"
-            }
-          ],
-          "external_urls": {
-            "spotify": "https://open.spotify.com/album/1kTlYbs28MXw7hwO0NLYif"
+  "total": 35,
+  "list": {
+    "dataType": "Map",
+    "value": [
+      [
+        "Bob7cielestrial1e7jOZFgZxMHWq6j2NqYpZ",
+        {
+          "id": "1e7jOZFgZxMHWq6j2NqYpZ",
+          "name": "Bob7",
+          "owner": "cielestrial",
+          "uri": "spotify:playlist:1e7jOZFgZxMHWq6j2NqYpZ",
+          "snapshot": "MixjNjk1ZWNkMmQ4NWE5Nzc1MTAzMjVmY2E2YWJmZWJjYzJjOTYxNzZm",
+          "total": 0,
+          "tracks": []
+        }
+      ],
+      [
+        "SubscriptionTestercielestrial3447H1W5UIldWebAT5r0r6",
+        {
+          "id": "3447H1W5UIldWebAT5r0r6",
+          "name": "Subscription Tester",
+          "owner": "cielestrial",
+          "uri": "spotify:playlist:3447H1W5UIldWebAT5r0r6",
+          "snapshot": "Miw0OWE0YzQzYjM3NDhmYWZhYjQ3ZGI5M2I4YTE5NTM1MWVhNWJkZjM1",
+          "total": 0,
+          "tracks": []
+        }
+      ],
+      [
+        "unplayablecielestrial6qdeHj5acAeG4K1vkSZdtK",
+        {
+          "id": "6qdeHj5acAeG4K1vkSZdtK",
+          "name": "unplayable",
+          "owner": "cielestrial",
+          "uri": "spotify:playlist:6qdeHj5acAeG4K1vkSZdtK",
+          "snapshot": "NCw4MDQyZDMwYThmY2ZiOWY5YzBlMDM5ZjI2ZTQyZjlmYWFmMjY0MTg3",
+          "total": 0,
+          "tracks": []
+        }
+      ],
+      [
+        "YourTopSongs2022Spotify37i9dQZF1F0sijgNaJdgit",
+        {
+          "id": "37i9dQZF1F0sijgNaJdgit",
+          "name": "Your Top Songs 2022",
+          "owner": "Spotify",
+          "uri": "spotify:playlist:37i9dQZF1F0sijgNaJdgit",
+          "snapshot": "MTY2OTkwODk2MiwwMDAwMDAwMDBiNjFiY2QxNTNkMTdkZjM2MDAwYmUyNjE3M2RmODE5",
+          "total": 101,
+          "genres": {
+            "dataType": "Map",
+            "value": []
           },
-          "href": "https://api.spotify.com/v1/albums/1kTlYbs28MXw7hwO0NLYif",
-          "id": "1kTlYbs28MXw7hwO0NLYif",
-          "images": [
-            {
-              "height": 640,
-              "url": "https://i.scdn.co/image/ab67616d0000b273726d48d93d02e1271774f023",
-              "width": 640
-            },
-            {
-              "height": 300,
-              "url": "https://i.scdn.co/image/ab67616d00001e02726d48d93d02e1271774f023",
-              "width": 300
-            },
-            {
-              "height": 64,
-              "url": "https://i.scdn.co/image/ab67616d00004851726d48d93d02e1271774f023",
-              "width": 64
-            }
-          ],
-          "name": "Encore (Deluxe Version)",
-          "release_date": "2004-11-12",
-          "release_date_precision": "day",
-          "total_tracks": 23,
-          "type": "album",
-          "uri": "spotify:album:1kTlYbs28MXw7hwO0NLYif"
-        },
-        "artists": [
-          {
-            "external_urls": {
-              "spotify": "https://open.spotify.com/artist/7dGJo4pcD2V6oG8kP0tJRR"
-            },
-            "href": "https://api.spotify.com/v1/artists/7dGJo4pcD2V6oG8kP0tJRR",
-            "id": "7dGJo4pcD2V6oG8kP0tJRR",
-            "name": "Eminem",
-            "type": "artist",
-            "uri": "spotify:artist:7dGJo4pcD2V6oG8kP0tJRR"
-          }
-        ],
-        "disc_number": 1,
-        "duration_ms": 296880,
-        "explicit": true,
-        "external_ids": {
-          "isrc": "USIR10400812"
-        },
-        "external_urls": {
-          "spotify": "https://open.spotify.com/track/6CN3e26iQSj1N5lomh0mfO"
-        },
-        "href": "https://api.spotify.com/v1/tracks/6CN3e26iQSj1N5lomh0mfO",
-        "id": "6CN3e26iQSj1N5lomh0mfO",
-        "is_local": false,
-        "is_playable": true,
-        "name": "Like Toy Soldiers",
-        "popularity": 69,
-        "preview_url": "https://p.scdn.co/mp3-preview/9ba3a76fd9cf5abaaeee784c9b2b1ee866ebf363?cid=774b29d4f13844c495f206cafdad9c86",
-        "track_number": 5,
-        "type": "track",
-        "uri": "spotify:track:6CN3e26iQSj1N5lomh0mfO"
-      },
-      {
-        "album": {
-          "album_type": "album",
-          "artists": [
-            {
-              "external_urls": {
-                "spotify": "https://open.spotify.com/artist/68EB3QvNdVLkC7SAgDbHIR"
-              },
-              "href": "https://api.spotify.com/v1/artists/68EB3QvNdVLkC7SAgDbHIR",
-              "id": "68EB3QvNdVLkC7SAgDbHIR",
-              "name": "Marianas Trench",
-              "type": "artist",
-              "uri": "spotify:artist:68EB3QvNdVLkC7SAgDbHIR"
-            }
-          ],
-          "external_urls": {
-            "spotify": "https://open.spotify.com/album/737av5XsHhJigOC64BV6IY"
+          "genreSubscriptions": [],
+          "playlistSubscriptions": {
+            "dataType": "Map",
+            "value": []
           },
-          "href": "https://api.spotify.com/v1/albums/737av5XsHhJigOC64BV6IY",
-          "id": "737av5XsHhJigOC64BV6IY",
-          "images": [
-            {
-              "height": 640,
-              "url": "https://i.scdn.co/image/ab67616d0000b273222615f0da1d91df294824cc",
-              "width": 640
-            },
-            {
-              "height": 300,
-              "url": "https://i.scdn.co/image/ab67616d00001e02222615f0da1d91df294824cc",
-              "width": 300
-            },
-            {
-              "height": 64,
-              "url": "https://i.scdn.co/image/ab67616d00004851222615f0da1d91df294824cc",
-              "width": 64
-            }
-          ],
-          "name": "Ever After",
-          "release_date": "2011-11-21",
-          "release_date_precision": "day",
-          "total_tracks": 12,
-          "type": "album",
-          "uri": "spotify:album:737av5XsHhJigOC64BV6IY"
-        },
-        "artists": [
-          {
-            "external_urls": {
-              "spotify": "https://open.spotify.com/artist/68EB3QvNdVLkC7SAgDbHIR"
-            },
-            "href": "https://api.spotify.com/v1/artists/68EB3QvNdVLkC7SAgDbHIR",
-            "id": "68EB3QvNdVLkC7SAgDbHIR",
-            "name": "Marianas Trench",
-            "type": "artist",
-            "uri": "spotify:artist:68EB3QvNdVLkC7SAgDbHIR"
-          }
-        ],
-        "disc_number": 1,
-        "duration_ms": 394120,
-        "explicit": true,
-        "external_ids": {
-          "isrc": "CAB391100628"
-        },
-        "external_urls": {
-          "spotify": "https://open.spotify.com/track/5GJWdBG4jJmmJzKmDxOwGC"
-        },
-        "href": "https://api.spotify.com/v1/tracks/5GJWdBG4jJmmJzKmDxOwGC",
-        "id": "5GJWdBG4jJmmJzKmDxOwGC",
-        "is_local": false,
-        "is_playable": true,
-        "name": "Ever After",
-        "popularity": 46,
-        "preview_url": "https://p.scdn.co/mp3-preview/9f876aabaefde954af327bbfda26351f94756d17?cid=774b29d4f13844c495f206cafdad9c86",
-        "track_number": 1,
-        "type": "track",
-        "uri": "spotify:track:5GJWdBG4jJmmJzKmDxOwGC"
-      }
-    ],
-    "limit": 2,
-    "next": "https://api.spotify.com/v1/search?query=Like+Toy+Soldiers&type=track&include_external=audio&market=CA&locale=en-US%2Cen%3Bq%3D0.9&offset=2&limit=2",
-    "offset": 0,
-    "previous": null,
-    "total": 543
+          "tracks": []
+        }
+      ],
+      [
+        "BlazblueCentralfictionevnalol5dbDBYMBttm7FDdxAYz0k8",
+        {
+          "id": "5dbDBYMBttm7FDdxAYz0k8",
+          "name": "Blazblue: Centralfiction",
+          "owner": "evnalol",
+          "uri": "spotify:playlist:5dbDBYMBttm7FDdxAYz0k8",
+          "snapshot": "OTksMTNlN2I3ZGVmYTM3NGQ5MTc1NGUyMGY5MDUxYjZjZTdjM2I4NmZiMA==",
+          "total": 61,
+          "tracks": []
+        }
+      ],
+      [
+        "YourTopSongs2021Spotify37i9dQZF1EUMDoJuT8yJsl",
+        {
+          "id": "37i9dQZF1EUMDoJuT8yJsl",
+          "name": "Your Top Songs 2021",
+          "owner": "Spotify",
+          "uri": "spotify:playlist:37i9dQZF1EUMDoJuT8yJsl",
+          "snapshot": "MCwwMDAwMDAwMDNjYmJlNWVhYzhkZTFlZjBkMjI1MTY3ZTAxMjAxYzQ4",
+          "total": 100,
+          "tracks": []
+        }
+      ],
+      [
+        "ReleaseRadarSpotify37i9dQZEVXbogNUZvTGKKL",
+        {
+          "id": "37i9dQZEVXbogNUZvTGKKL",
+          "name": "Release Radar",
+          "owner": "Spotify",
+          "uri": "spotify:playlist:37i9dQZEVXbogNUZvTGKKL",
+          "snapshot": "MCwwMDAwMDAwMDcxNmM3ODRhMTQ4Y2M1ZWM5NTBlMzc4NDY3MWZmODAx",
+          "total": 30,
+          "tracks": []
+        }
+      ],
+      [
+        "DiscoverWeeklySpotify37i9dQZEVXcCitGc2gZXX4",
+        {
+          "id": "37i9dQZEVXcCitGc2gZXX4",
+          "name": "Discover Weekly",
+          "owner": "Spotify",
+          "uri": "spotify:playlist:37i9dQZEVXcCitGc2gZXX4",
+          "snapshot": "MCwwMDAwMDAwMGQwNTBhN2FhNWQ5MDE1YTI2N2NkNjNlMmQ2ODBlODgx",
+          "total": 30,
+          "tracks": []
+        }
+      ],
+      [
+        "EDMcielestrial5rnwzYyOnL6vkzNbrDWIYT",
+        {
+          "id": "5rnwzYyOnL6vkzNbrDWIYT",
+          "name": "EDM",
+          "owner": "cielestrial",
+          "uri": "spotify:playlist:5rnwzYyOnL6vkzNbrDWIYT",
+          "snapshot": "MTE5LGQ4MDUyZjVjMDViZTJlYWEyMzNkMmY4YmNkYWIxN2VmYWU0MWM5Yjg=",
+          "total": 0,
+          "tracks": []
+        }
+      ],
+      [
+        "HipHopRapcielestrial4sG4KtiJX78W3YUcwPx0yh",
+        {
+          "id": "4sG4KtiJX78W3YUcwPx0yh",
+          "name": "Hip Hop & Rap",
+          "owner": "cielestrial",
+          "uri": "spotify:playlist:4sG4KtiJX78W3YUcwPx0yh",
+          "snapshot": "OTgsNGFmNmIyNjE5NzIwMTZiYmNhNzYwYmYxNGI3NzhmOTllMzAxMjFkMA==",
+          "total": 0,
+          "tracks": []
+        }
+      ],
+      [
+        "ChillLoFicielestrial4V9P3Iwg0mJuUiJLYMkuus",
+        {
+          "id": "4V9P3Iwg0mJuUiJLYMkuus",
+          "name": "Chill & Lo-Fi",
+          "owner": "cielestrial",
+          "uri": "spotify:playlist:4V9P3Iwg0mJuUiJLYMkuus",
+          "snapshot": "NDksZTRhMzZlMzU0NjEyODA2ZmQ0N2E2ZjYyOTAwZGI0NDgyNzlhNjk4Nw==",
+          "total": 0,
+          "tracks": []
+        }
+      ],
+      [
+        "OrchestralClassicalcielestrial2NwQCQPrZThzTGXt5jHAZd",
+        {
+          "id": "2NwQCQPrZThzTGXt5jHAZd",
+          "name": "Orchestral & Classical",
+          "owner": "cielestrial",
+          "uri": "spotify:playlist:2NwQCQPrZThzTGXt5jHAZd",
+          "snapshot": "MzIsYzQzZDBiZDY5M2VhMmViNjczNmI3ZmUyZDUwNDNmZWE4NjUyNzg5Zg==",
+          "total": 0,
+          "tracks": []
+        }
+      ],
+      [
+        "RockMetalAlternativecielestrial6o3Kp4VTN2EApWa1dSA79z",
+        {
+          "id": "6o3Kp4VTN2EApWa1dSA79z",
+          "name": "Rock & Metal & Alternative",
+          "owner": "cielestrial",
+          "uri": "spotify:playlist:6o3Kp4VTN2EApWa1dSA79z",
+          "snapshot": "NTIsNjhjMmUwOTJjY2UxMWM4YmU0OTY0NzdhODhlMzgxNjI0YjFhODQyNA==",
+          "total": 307,
+          "tracks": []
+        }
+      ],
+      [
+        "RBcielestrial5M05IzHxGcRZFAzFDqG8Hs",
+        {
+          "id": "5M05IzHxGcRZFAzFDqG8Hs",
+          "name": "R&B",
+          "owner": "cielestrial",
+          "uri": "spotify:playlist:5M05IzHxGcRZFAzFDqG8Hs",
+          "snapshot": "MTAsNTk2NTM4MjI0ZGE2MmEzMTAxYTE3NjcyMTg4M2JhZWU3ZDY1MzA3NQ==",
+          "total": 0,
+          "tracks": []
+        }
+      ],
+      [
+        "GlitchGamingSpeedruncielestrial3brY74zs2Mxb8KRN2mxYvF",
+        {
+          "id": "3brY74zs2Mxb8KRN2mxYvF",
+          "name": "Glitch & Gaming/Speedrun",
+          "owner": "cielestrial",
+          "uri": "spotify:playlist:3brY74zs2Mxb8KRN2mxYvF",
+          "snapshot": "MjEsZGRhMGU3MTdkYzE0N2Y3YTQzZDkzZGFmMTM2MzBmMGUwMGMxOWUyOA==",
+          "total": 0,
+          "tracks": []
+        }
+      ],
+      [
+        "Indiecielestrial0NvIbGrxR7jE5TJqQXIWPM",
+        {
+          "id": "0NvIbGrxR7jE5TJqQXIWPM",
+          "name": "Indie",
+          "owner": "cielestrial",
+          "uri": "spotify:playlist:0NvIbGrxR7jE5TJqQXIWPM",
+          "snapshot": "MzAsY2U2YzE0YzIxMmUxZDU3ZGVlMWM4NzY2NjdiM2YyMmI0MzliYjMwYQ==",
+          "total": 0,
+          "tracks": []
+        }
+      ],
+      [
+        "Popcielestrial0W4FwPbvPYZ3XTx6zhkndB",
+        {
+          "id": "0W4FwPbvPYZ3XTx6zhkndB",
+          "name": "Pop",
+          "owner": "cielestrial",
+          "uri": "spotify:playlist:0W4FwPbvPYZ3XTx6zhkndB",
+          "snapshot": "MTM3LDI4MzdkNDRiNzUyMzAzNGI4ODIyMmQ0YjM1NGRkMGQ0Mzk1YzJkMTg=",
+          "total": 0,
+          "tracks": []
+        }
+      ],
+      [
+        "Wavecielestrial3W16erJDWBKSQlPJi73AIt",
+        {
+          "id": "3W16erJDWBKSQlPJi73AIt",
+          "name": "Wave",
+          "owner": "cielestrial",
+          "uri": "spotify:playlist:3W16erJDWBKSQlPJi73AIt",
+          "snapshot": "MzksNjk4MDNkYmI0MTk5YzQ1NzhjZDEzZDMzNWFhZmExNTMzMTExZGIwOA==",
+          "total": 0,
+          "tracks": []
+        }
+      ],
+      [
+        "stepcielestrial1ZJDCrCm00YgSJ6KIrbl9A",
+        {
+          "id": "1ZJDCrCm00YgSJ6KIrbl9A",
+          "name": "___step",
+          "owner": "cielestrial",
+          "uri": "spotify:playlist:1ZJDCrCm00YgSJ6KIrbl9A",
+          "snapshot": "MTMwLGRiYWRlNWY5Mzc3YmNiODNjZDY3ZGMzMDhhM2VlYWRjN2RjYWQ4ODk=",
+          "total": 0,
+          "tracks": []
+        }
+      ],
+      [
+        "Futurecielestrial7d7bMrPXCYwzBDw0RMSaVZ",
+        {
+          "id": "7d7bMrPXCYwzBDw0RMSaVZ",
+          "name": "Future",
+          "owner": "cielestrial",
+          "uri": "spotify:playlist:7d7bMrPXCYwzBDw0RMSaVZ",
+          "snapshot": "Mjk3LDZhNGNkMTJmNTA2M2YxOTBjZDBiZWFmMGQ5OWQyNzlmYThlYzAyZWE=",
+          "total": 0,
+          "tracks": []
+        }
+      ],
+      [
+        "Electroniccielestrial4zB0bk7THQumaMaJ7ljFkb",
+        {
+          "id": "4zB0bk7THQumaMaJ7ljFkb",
+          "name": "Electronic",
+          "owner": "cielestrial",
+          "uri": "spotify:playlist:4zB0bk7THQumaMaJ7ljFkb",
+          "snapshot": "MTI5LDk3M2NmNTgwNGE2YzI2MWI1YWE5NzdlYTQ4MmNhY2E2ODE2YmY4Yzk=",
+          "total": 0,
+          "tracks": []
+        }
+      ],
+      [
+        "Housecielestrial0tu9HkieoHTJrAAT9AXzK2",
+        {
+          "id": "0tu9HkieoHTJrAAT9AXzK2",
+          "name": "House",
+          "owner": "cielestrial",
+          "uri": "spotify:playlist:0tu9HkieoHTJrAAT9AXzK2",
+          "snapshot": "MTU0LDJlMjA2ODAzMzcxNmZjM2Q0OWIxMGQ2ZGZhMmEzY2NjYjA4YWM2ZjE=",
+          "total": 0,
+          "tracks": []
+        }
+      ],
+      [
+        "Trapcielestrial0k39IvI6hiVKphfOue02R5",
+        {
+          "id": "0k39IvI6hiVKphfOue02R5",
+          "name": "Trap",
+          "owner": "cielestrial",
+          "uri": "spotify:playlist:0k39IvI6hiVKphfOue02R5",
+          "snapshot": "MzM1LDUyMWQ1Njc0YjEwOTViMjFjZDUxZWI0NzI1NDdhODdiNjk3YzgyMzc=",
+          "total": 333,
+          "tracks": []
+        }
+      ],
+      [
+        "YourTopSongs2020Spotify37i9dQZF1EM8RcmXDH4DOs",
+        {
+          "id": "37i9dQZF1EM8RcmXDH4DOs",
+          "name": "Your Top Songs 2020",
+          "owner": "Spotify",
+          "uri": "spotify:playlist:37i9dQZF1EM8RcmXDH4DOs",
+          "snapshot": "MjY3NzQ2MDUsMDAwMDAwMDA0NWRlOTRhM2E2ODRiZTdkZDg3M2I5MDAwZWQ2ZDc5Mw==",
+          "total": 100,
+          "tracks": []
+        }
+      ],
+      [
+        "MyShazamTrackscielestrial7IRnKuhU2ip0aJ0eMIQKBp",
+        {
+          "id": "7IRnKuhU2ip0aJ0eMIQKBp",
+          "name": "My Shazam Tracks",
+          "owner": "cielestrial",
+          "uri": "spotify:playlist:7IRnKuhU2ip0aJ0eMIQKBp",
+          "snapshot": "NjMsZDJkNDc3ODkzZDBlN2I1OWMwMWFjN2UyOTI4MWYwOTE0MDMyOGJhYQ==",
+          "total": 0,
+          "tracks": []
+        }
+      ],
+      [
+        "VGMcielestrial6X4LSirvG76Xetf8lrBSue",
+        {
+          "id": "6X4LSirvG76Xetf8lrBSue",
+          "name": "VGM",
+          "owner": "cielestrial",
+          "uri": "spotify:playlist:6X4LSirvG76Xetf8lrBSue",
+          "snapshot": "MTc4LDAzM2E2YjJlZjQ0ZWFhNDg4NDhkMzBiZGM4MDlkMGIzMzc3OWUyMDg=",
+          "total": 95,
+          "tracks": []
+        }
+      ],
+      [
+        "ThisIsASMRZeitgeistSpotify37i9dQZF1DZ06evO2Cowtq",
+        {
+          "id": "37i9dQZF1DZ06evO2Cowtq",
+          "name": "This Is ASMR Zeitgeist",
+          "owner": "Spotify",
+          "uri": "spotify:playlist:37i9dQZF1DZ06evO2Cowtq",
+          "snapshot": "Mjc4NTQ3MzYsMDAwMDAwMDA4NWM0YzkxMzIxN2EwODAzMzk0NTc2ZmQ4MjgzNzYxMA==",
+          "total": 50,
+          "tracks": []
+        }
+      ],
+      [
+        "ThisisNatassanatassatsns00Lgi5Pd1op61KUvzq4tP6",
+        {
+          "id": "00Lgi5Pd1op61KUvzq4tP6",
+          "name": "This is Natassa",
+          "owner": "natassa.tsns",
+          "uri": "spotify:playlist:00Lgi5Pd1op61KUvzq4tP6",
+          "snapshot": "MTUsYmY3NzAzOGNjZTI4ZmIxMDNhNjhiNDMwYjIyMDMzOTIxYWU3YzRlOQ==",
+          "total": 12,
+          "tracks": []
+        }
+      ],
+      [
+        "Asmrcielestrial2su6iNVLsafbYIuFhRy9dU",
+        {
+          "id": "2su6iNVLsafbYIuFhRy9dU",
+          "name": "Asmr",
+          "owner": "cielestrial",
+          "uri": "spotify:playlist:2su6iNVLsafbYIuFhRy9dU",
+          "snapshot": "MTEsZTQwMmE1MGU3ZjM5Nzg0YjZiYjFmMzViZWU5ZDM0MTEzYzQ5OWU4MQ==",
+          "total": 0,
+          "tracks": []
+        }
+      ],
+      [
+        "YourTopSongs2019Spotify37i9dQZF1Eth7bZH0VHqsU",
+        {
+          "id": "37i9dQZF1Eth7bZH0VHqsU",
+          "name": "Your Top Songs 2019",
+          "owner": "Spotify",
+          "uri": "spotify:playlist:37i9dQZF1Eth7bZH0VHqsU",
+          "snapshot": "MjYyNjk3NjIsMDAwMDAwMDA1MmM2YjdmYzAwMGViNWEzNjRhMjE5NDEwNDJhNzg3Yg==",
+          "total": 100,
+          "tracks": []
+        }
+      ],
+      [
+        "RepeatRewindSpotify37i9dQZF1EpBE86xIGXF1V",
+        {
+          "id": "37i9dQZF1EpBE86xIGXF1V",
+          "name": "Repeat Rewind",
+          "owner": "Spotify",
+          "uri": "spotify:playlist:37i9dQZF1EpBE86xIGXF1V",
+          "snapshot": "MTY3MTA5MDI3OCwwMDAwMDAwMDQxYTAyMTdjMzM0MTE5NzA0NjhkNzNjOWQ1OGY5Nzk0",
+          "total": 30,
+          "tracks": []
+        }
+      ],
+      [
+        "OnRepeatSpotify37i9dQZF1EppwGiY5PC7Ko",
+        {
+          "id": "37i9dQZF1EppwGiY5PC7Ko",
+          "name": "On Repeat",
+          "owner": "Spotify",
+          "uri": "spotify:playlist:37i9dQZF1EppwGiY5PC7Ko",
+          "snapshot": "MTY3MTA5MDI3OCwwMDAwMDAwMDQxYTAyMTdjMzM0MTE5NzA0NjhkNzNjOWQ1OGY5Nzk0",
+          "total": 30,
+          "tracks": []
+        }
+      ],
+      [
+        "YourTopSongs2018Spotify37i9dQZF1EjpWMXPhcpHov",
+        {
+          "id": "37i9dQZF1EjpWMXPhcpHov",
+          "name": "Your Top Songs 2018",
+          "owner": "Spotify",
+          "uri": "spotify:playlist:37i9dQZF1EjpWMXPhcpHov",
+          "snapshot": "MjU3NjA5MzYsMDAwMDAwMDA2M2RjMjg0ZjcwYjcwMWQ5Mjg4Y2Q5NGYzOGRkODU3Mw==",
+          "total": 100,
+          "tracks": []
+        }
+      ],
+      [
+        "NewMusicWeeklyMonstercatMonstercat4kw9kdjzx1UmyWvpysl0y2",
+        {
+          "id": "4kw9kdjzx1UmyWvpysl0y2",
+          "name": "New Music Weekly | Monstercat",
+          "owner": "Monstercat",
+          "uri": "spotify:playlist:4kw9kdjzx1UmyWvpysl0y2",
+          "snapshot": "Mzg4Miw2ZTUxYzVmYmVlYjU3OGUzN2FjYzdjNjU2NTk4Yzk1MDZjMTI2Nzc4",
+          "total": 60,
+          "tracks": []
+        }
+      ],
+      [
+        "lostautumnJohnDeer1si1AYksViJcMoEiICnG4j",
+        {
+          "id": "1si1AYksViJcMoEiICnG4j",
+          "name": "lost autumn",
+          "owner": "John Deer",
+          "uri": "spotify:playlist:1si1AYksViJcMoEiICnG4j",
+          "snapshot": "Niw4MTU3ZjAwMWEwNGMyZjhiYTUwMTQ2ZDM0ODk1ZGEwMzM4ZjBmMjc2",
+          "total": 22,
+          "tracks": []
+        }
+      ]
+    ]
   }
 }
-"
-Genre for Deftones is  [
-  {
-    count: 100,
-    name: 'Nu Metal',
-    url: 'https://www.last.fm/tag/Nu+Metal'
-  },
-  { count: 95, name: 'metal', url: 'https://www.last.fm/tag/metal' },
-  {
-    count: 90,
-    name: 'alternative',
-    url: 'https://www.last.fm/tag/alternative'
-  }
-]
-Genre for D4M $loan is  []
-Genre for Kanye West is  [
-  {
-    count: 100,
-    name: 'Hip-Hop',
-    url: 'https://www.last.fm/tag/Hip-Hop'
-  },
-  { count: 69, name: 'rap', url: 'https://www.last.fm/tag/rap' }
-]
-Genre for Cardo Grandz is  []
-Genre for arai tasuku is  [
-  {
-    count: 100,
-    name: 'ambient',
-    url: 'https://www.last.fm/tag/ambient'
-  },
-  {
-    count: 100,
-    name: 'post-rock',
-    url: 'https://www.last.fm/tag/post-rock'
-  },
-  {
-    count: 67,
-    name: 'electronic',
-    url: 'https://www.last.fm/tag/electronic'
-  }
-]
-Genre for Kevin Penkin is  [
-  {
-    count: 100,
-    name: 'Soundtrack',
-    url: 'https://www.last.fm/tag/Soundtrack'
-  },
-  {
-    count: 72,
-    name: 'composer',
-    url: 'https://www.last.fm/tag/composer'
-  },
-  { count: 72, name: 'anime', url: 'https://www.last.fm/tag/anime' }
-]
-Genre for Neovaii is  [
-  {
-    count: 100,
-    name: 'electronic',
-    url: 'https://www.last.fm/tag/electronic'
-  },
-  {
-    count: 50,
-    name: 'alternative',
-    url: 'https://www.last.fm/tag/alternative'
-  },
-  { count: 50, name: 'dance', url: 'https://www.last.fm/tag/dance' }
-]
-Genre for Ghen is  []
-Genre for One Hope is  [
-  {
-    count: 100,
-    name: 'hardcore',
-    url: 'https://www.last.fm/tag/hardcore'
-  },
-  { count: 58, name: 'antifa', url: 'https://www.last.fm/tag/antifa' }
-]
-Genre for Skypierr is  [
-  {
-    count: 100,
-    name: 'Hip-Hop',
-    url: 'https://www.last.fm/tag/Hip-Hop'
-  },
-  {
-    count: 100,
-    name: 'hip hop',
-    url: 'https://www.last.fm/tag/hip+hop'
-  },
-  { count: 100, name: 'rap', url: 'https://www.last.fm/tag/rap' }
-]
-Genre for Three Days Grace is  [
-  {
-    count: 100,
-    name: 'alternative rock',
-    url: 'https://www.last.fm/tag/alternative+rock'
-  },
-  { count: 86, name: 'rock', url: 'https://www.last.fm/tag/rock' },
-  {
-    count: 61,
-    name: 'alternative',
-    url: 'https://www.last.fm/tag/alternative'
-  }
-]
-Genre for RADIXNCE is  []
-Genre for Silent Boy is  []
-Genre for ACER SPADE is  []
-Genre for Benn is  [
-  {
-    count: 100,
-    name: 'metalcore',
-    url: 'https://www.last.fm/tag/metalcore'
-  },
-  {
-    count: 100,
-    name: 'alternative metal',
-    url: 'https://www.last.fm/tag/alternative+metal'
-  },
-  { count: 50, name: 'metal', url: 'https://www.last.fm/tag/metal' }
-]
-Genre for Hellhills is  [
-  {
-    count: 100,
-    name: 'electronic',
-    url: 'https://www.last.fm/tag/electronic'
-  },
-  {
-    count: 100,
-    name: 'alternative rock',
-    url: 'https://www.last.fm/tag/alternative+rock'
-  },
-  {
-    count: 100,
-    name: 'Progressive',
-    url: 'https://www.last.fm/tag/Progressive'
-  }
-]
-Genre for ANAIT is  []
-Genre for アトラスサウンドチーム is  [
-  {
-    count: 100,
-    name: 'Soundtrack',
-    url: 'https://www.last.fm/tag/Soundtrack'
-  },
-  { count: 100, name: 'jazz', url: 'https://www.last.fm/tag/jazz' },
-  { count: 100, name: 'rock', url: 'https://www.last.fm/tag/rock' }
-]
-Genre for Hamish Balfour is  []
-Genre for 石元 丈晴 is  [
-  {
-    count: 100,
-    name: 'Soundtrack',
-    url: 'https://www.last.fm/tag/Soundtrack'
-  },
-  {
-    count: 94,
-    name: 'video game music',
-    url: 'https://www.last.fm/tag/video+game+music'
-  },
-  {
-    count: 67,
-    name: 'instrumental',
-    url: 'https://www.last.fm/tag/instrumental'
-  }
-]
-Genre for Gus McArthur is  []
-Genre for MEJKO is  [
-  {
-    count: 100,
-    name: 'electronic',
-    url: 'https://www.last.fm/tag/electronic'
-  },
-  {
-    count: 100,
-    name: 'Drum and bass',
-    url: 'https://www.last.fm/tag/Drum+and+bass'
-  },
-  { count: 100, name: 'trap', url: 'https://www.last.fm/tag/trap' }
-]
-Genre for Arrested Youth is  [
-  {
-    count: 100,
-    name: 'electronic',
-    url: 'https://www.last.fm/tag/electronic'
-  },
-  { count: 100, name: 'indie', url: 'https://www.last.fm/tag/indie' },
-  {
-    count: 50,
-    name: 'alternative',
-    url: 'https://www.last.fm/tag/alternative'
-  }
-]
-Genre for Dead Robot is  [
-  {
-    count: 100,
-    name: 'electronic',
-    url: 'https://www.last.fm/tag/electronic'
-  },
-  {
-    count: 100,
-    name: 'electronica',
-    url: 'https://www.last.fm/tag/electronica'
-  },
-  {
-    count: 100,
-    name: 'dubstep',
-    url: 'https://www.last.fm/tag/dubstep'
-  }
-]
-Genre for Fifty Grand is  [
-  {
-    count: 100,
-    name: 'electronic',
-    url: 'https://www.last.fm/tag/electronic'
-  },
-  {
-    count: 67,
-    name: 'ambient',
-    url: 'https://www.last.fm/tag/ambient'
-  },
-  {
-    count: 50,
-    name: 'experimental',
-    url: 'https://www.last.fm/tag/experimental'
-  }
-]
-Genre for Kuoga. is  [
-  {
-    count: 50,
-    name: 'electronic',
-    url: 'https://www.last.fm/tag/electronic'
-  },
-  {
-    count: 50,
-    name: 'experimental',
-    url: 'https://www.last.fm/tag/experimental'
-  }
-]
-Genre for GillStudio is  []
-Genre for Steve Aoki is  [
-  {
-    count: 100,
-    name: 'electronic',
-    url: 'https://www.last.fm/tag/electronic'
-  },
-  {
-    count: 70,
-    name: 'electro',
-    url: 'https://www.last.fm/tag/electro'
-  },
-  { count: 58, name: 'dance', url: 'https://www.last.fm/tag/dance' }
-]
-Genre for screwyounick is  [
-  {
-    count: 100,
-    name: 'emo rap',
-    url: 'https://www.last.fm/tag/emo+rap'
-  }
-]
-Genre for Mystery Skulls is  [
-  {
-    count: 100,
-    name: 'synthpop',
-    url: 'https://www.last.fm/tag/synthpop'
-  },
-  {
-    count: 91,
-    name: 'electronic',
-    url: 'https://www.last.fm/tag/electronic'
-  },
-  {
-    count: 81,
-    name: 'electropop',
-    url: 'https://www.last.fm/tag/electropop'
-  }
-]
-Genre for Wizard is  [
-  {
-    count: 100,
-    name: 'Power metal',
-    url: 'https://www.last.fm/tag/Power+metal'
-  },
-  {
-    count: 61,
-    name: 'heavy metal',
-    url: 'https://www.last.fm/tag/heavy+metal'
-  }
-]
-Genre for Oddscure is  [
-  {
-    count: 100,
-    name: 'electronica',
-    url: 'https://www.last.fm/tag/electronica'
-  },
-  { count: 100, name: 'dark', url: 'https://www.last.fm/tag/dark' },
-  { count: 100, name: 'techno', url: 'https://www.last.fm/tag/techno' }
-]
-Genre for Thybxlle is  []
-Genre for Cepheid is  [
-  {
-    count: 100,
-    name: 'metalcore',
-    url: 'https://www.last.fm/tag/metalcore'
-  },
-  {
-    count: 50,
-    name: 'alternative metal',
-    url: 'https://www.last.fm/tag/alternative+metal'
-  },
-  {
-    count: 50,
-    name: 'post-hardcore',
-    url: 'https://www.last.fm/tag/post-hardcore'
-  }
-]
-Genre for Arvid Häggström is  []
-Genre for Oshi is  [
-  { count: 100, name: 'soul', url: 'https://www.last.fm/tag/soul' },
-  { count: 100, name: 'beats', url: 'https://www.last.fm/tag/beats' },
-  {
-    count: 100,
-    name: 'future bass',
-    url: 'https://www.last.fm/tag/future+bass'
-  }
-]
-Genre for Mr.Kitty is  [
-  {
-    count: 100,
-    name: 'synthpop',
-    url: 'https://www.last.fm/tag/synthpop'
-  },
-  {
-    count: 78,
-    name: 'electronic',
-    url: 'https://www.last.fm/tag/electronic'
-  },
-  { count: 62, name: '8-bit', url: 'https://www.last.fm/tag/8-bit' }
-]
-Genre for Besomorph is  [
-  {
-    count: 100,
-    name: 'electronic',
-    url: 'https://www.last.fm/tag/electronic'
-  }
-]
-Genre for grandson is  [
-  {
-    count: 100,
-    name: 'indie rock',
-    url: 'https://www.last.fm/tag/indie+rock'
-  },
-  {
-    count: 90,
-    name: 'alternative',
-    url: 'https://www.last.fm/tag/alternative'
-  },
-  {
-    count: 80,
-    name: 'alternative rock',
-    url: 'https://www.last.fm/tag/alternative+rock'
-  }
-]
-Genre for Linkin Park is  [
-  { count: 100, name: 'rock', url: 'https://www.last.fm/tag/rock' },
-  {
-    count: 92,
-    name: 'Nu Metal',
-    url: 'https://www.last.fm/tag/Nu+Metal'
-  },
-  {
-    count: 74,
-    name: 'alternative rock',
-    url: 'https://www.last.fm/tag/alternative+rock'
-  }
-]
-Genre for CloudNone is  [
-  {
-    count: 100,
-    name: 'chillout',
-    url: 'https://www.last.fm/tag/chillout'
-  },
-  {
-    count: 100,
-    name: 'future garage',
-    url: 'https://www.last.fm/tag/future+garage'
-  },
-  {
-    count: 50,
-    name: 'electronic',
-    url: 'https://www.last.fm/tag/electronic'
-  }
-]
-Genre for Faux Tales is  [
-  {
-    count: 100,
-    name: 'dubstep',
-    url: 'https://www.last.fm/tag/dubstep'
-  },
-  {
-    count: 84,
-    name: 'chillstep',
-    url: 'https://www.last.fm/tag/chillstep'
-  },
-  {
-    count: 67,
-    name: 'melodic dubstep',
-    url: 'https://www.last.fm/tag/melodic+dubstep'
-  }
-]
-Genre for ... Bender is  [
-  {
-    count: 100,
-    name: 'brooding',
-    url: 'https://www.last.fm/tag/brooding'
-  },
-  { count: 67, name: 'Lo-Fi', url: 'https://www.last.fm/tag/Lo-Fi' },
-  {
-    count: 67,
-    name: 'melancholy',
-    url: 'https://www.last.fm/tag/melancholy'
-  }
-]
-Genre for Animadrop is  [
-  {
-    count: 100,
-    name: 'melodic dubstep',
-    url: 'https://www.last.fm/tag/melodic+dubstep'
-  },
-  {
-    count: 50,
-    name: 'dubstep',
-    url: 'https://www.last.fm/tag/dubstep'
-  },
-  {
-    count: 50,
-    name: 'Drum and bass',
-    url: 'https://www.last.fm/tag/Drum+and+bass'
-  }
-]
-Genre for Shiro Sagisu is  [
-  {
-    count: 100,
-    name: 'Soundtrack',
-    url: 'https://www.last.fm/tag/Soundtrack'
-  },
-  { count: 84, name: 'anime', url: 'https://www.last.fm/tag/anime' },
-  {
-    count: 62,
-    name: 'instrumental',
-    url: 'https://www.last.fm/tag/instrumental'
-  }
-]
-Genre for Dove Cameron is  [
-  { count: 100, name: 'pop', url: 'https://www.last.fm/tag/pop' },
-  { count: 100, name: 'Disney', url: 'https://www.last.fm/tag/Disney' },
-  {
-    count: 54,
-    name: 'better than selena gomez',
-    url: 'https://www.last.fm/tag/better+than+selena+gomez'
-  }
-]
-Genre for The Glitch Mob is  [
-  { count: 100, name: 'glitch', url: 'https://www.last.fm/tag/glitch' },
-  {
-    count: 89,
-    name: 'electronic',
-    url: 'https://www.last.fm/tag/electronic'
-  },
-  {
-    count: 68,
-    name: 'glitch-hop',
-    url: 'https://www.last.fm/tag/glitch-hop'
-  }
-]
-Genre for Rifti Beats is  [
-  { count: 100, name: 'chill', url: 'https://www.last.fm/tag/chill' },
-  { count: 100, name: 'Lo-Fi', url: 'https://www.last.fm/tag/Lo-Fi' },
-  {
-    count: 50,
-    name: 'electronic',
-    url: 'https://www.last.fm/tag/electronic'
-  }
-]
-Genre for Punishing Gray Raven is  []
-Genre for BEATSMASH is  [
-  {
-    count: 100,
-    name: 'electronic',
-    url: 'https://www.last.fm/tag/electronic'
-  }
-]
-Genre for JKuch is  [
-  {
-    count: 100,
-    name: 'electronic',
-    url: 'https://www.last.fm/tag/electronic'
-  },
-  {
-    count: 100,
-    name: 'future bass',
-    url: 'https://www.last.fm/tag/future+bass'
-  },
-  {
-    count: 67,
-    name: 'indie pop',
-    url: 'https://www.last.fm/tag/indie+pop'
-  }
-]
-Genre for Inova is  []
-Genre for Casey Edwards is  [
-  {
-    count: 100,
-    name: 'Soundtrack',
-    url: 'https://www.last.fm/tag/Soundtrack'
-  },
-  {
-    count: 50,
-    name: 'electronic',
-    url: 'https://www.last.fm/tag/electronic'
-  },
-  {
-    count: 50,
-    name: 'bang bang bang',
-    url: 'https://www.last.fm/tag/bang+bang+bang'
-  }
-]
-Genre for Thousand Foot Krutch is  [
-  {
-    count: 100,
-    name: 'alternative rock',
-    url: 'https://www.last.fm/tag/alternative+rock'
-  },
-  {
-    count: 96,
-    name: 'christian rock',
-    url: 'https://www.last.fm/tag/christian+rock'
-  },
-  { count: 88, name: 'rock', url: 'https://www.last.fm/tag/rock' }
-]
-Genre for Avril Lavigne is  [
-  { count: 100, name: 'pop', url: 'https://www.last.fm/tag/pop' },
-  {
-    count: 99,
-    name: 'pop rock',
-    url: 'https://www.last.fm/tag/pop+rock'
-  },
-  { count: 93, name: 'rock', url: 'https://www.last.fm/tag/rock' }
-]
-Genre for Rok Nardin is  [
-  {
-    count: 100,
-    name: 'Soundtrack',
-    url: 'https://www.last.fm/tag/Soundtrack'
-  },
-  {
-    count: 100,
-    name: 'cinematic',
-    url: 'https://www.last.fm/tag/cinematic'
-  },
-  {
-    count: 100,
-    name: 'epic pop',
-    url: 'https://www.last.fm/tag/epic+pop'
-  }
-]
-Genre for Mr FijiWiji is  [
-  {
-    count: 100,
-    name: 'chillstep',
-    url: 'https://www.last.fm/tag/chillstep'
-  },
-  {
-    count: 82,
-    name: 'electronic',
-    url: 'https://www.last.fm/tag/electronic'
-  },
-  {
-    count: 82,
-    name: 'dubstep',
-    url: 'https://www.last.fm/tag/dubstep'
-  }
-]
-Genre for Mitchel Dae is  []
-Genre for Magnetude is  [
-  {
-    count: 100,
-    name: 'Drum and bass',
-    url: 'https://www.last.fm/tag/Drum+and+bass'
-  },
-  {
-    count: 100,
-    name: 'neurofunk',
-    url: 'https://www.last.fm/tag/neurofunk'
-  }
-]
-Genre for Season of Ghosts is  [
-  {
-    count: 100,
-    name: 'trance metal',
-    url: 'https://www.last.fm/tag/trance+metal'
-  },
-  {
-    count: 70,
-    name: 'modern metal',
-    url: 'https://www.last.fm/tag/modern+metal'
-  }
-]
-Genre for Logic is  [
-  {
-    count: 100,
-    name: 'Hip-Hop',
-    url: 'https://www.last.fm/tag/Hip-Hop'
-  },
-  { count: 80, name: 'rap', url: 'https://www.last.fm/tag/rap' }
-]
-Genre for iamjakehill is  [
-  { count: 100, name: 'rap', url: 'https://www.last.fm/tag/rap' },
-  {
-    count: 80,
-    name: 'Hip-Hop',
-    url: 'https://www.last.fm/tag/Hip-Hop'
-  },
-  {
-    count: 60,
-    name: 'underground rap',
-    url: 'https://www.last.fm/tag/underground+rap'
-  }
-]
-Genre for Dear Agony is  [
-  {
-    count: 100,
-    name: 'modern rock',
-    url: 'https://www.last.fm/tag/modern+rock'
-  },
-  {
-    count: 50,
-    name: 'alt. metal',
-    url: 'https://www.last.fm/tag/alt.+metal'
-  },
-  {
-    count: 50,
-    name: 'alt. rock',
-    url: 'https://www.last.fm/tag/alt.+rock'
-  }
-]
-Genre for Sanixels is  [
-  {
-    count: 100,
-    name: 'Drum and bass',
-    url: 'https://www.last.fm/tag/Drum+and+bass'
-  },
-  { count: 100, name: 'dnb', url: 'https://www.last.fm/tag/dnb' },
-  {
-    count: 100,
-    name: 'melodic drum and bass',
-    url: 'https://www.last.fm/tag/melodic+drum+and+bass'
-  }
-]
-Genre for Yeeaah Boii is  []
-Genre for Arctic Monkeys is  [
-  {
-    count: 100,
-    name: 'indie rock',
-    url: 'https://www.last.fm/tag/indie+rock'
-  },
-  { count: 98, name: 'indie', url: 'https://www.last.fm/tag/indie' },
-  { count: 63, name: 'rock', url: 'https://www.last.fm/tag/rock' }
-]
-Genre for Unlike Pluto is  [
-  {
-    count: 100,
-    name: 'electronic',
-    url: 'https://www.last.fm/tag/electronic'
-  },
-  {
-    count: 84,
-    name: 'dubstep',
-    url: 'https://www.last.fm/tag/dubstep'
-  },
-  { count: 50, name: 'House', url: 'https://www.last.fm/tag/House' }
-]
-Genre for Whales is  [
-  {
-    count: 100,
-    name: 'dubstep',
-    url: 'https://www.last.fm/tag/dubstep'
-  }
-]
-Genre for Duke Deuce is  [
-  { count: 100, name: 'Crunk', url: 'https://www.last.fm/tag/Crunk' },
-  { count: 84, name: 'rap', url: 'https://www.last.fm/tag/rap' },
-  {
-    count: 50,
-    name: 'hip hop',
-    url: 'https://www.last.fm/tag/hip+hop'
-  }
-]
-Genre for AREZRA is  []
-Genre for VGM Muzo is  []
-Genre for stxrm808 is  []
-Genre for Lukas Rossi is  [
-  { count: 100, name: 'rock', url: 'https://www.last.fm/tag/rock' },
-  {
-    count: 78,
-    name: 'lukas rossi',
-    url: 'https://www.last.fm/tag/lukas+rossi'
-  },
-  {
-    count: 56,
-    name: 'acoustic',
-    url: 'https://www.last.fm/tag/acoustic'
-  }
-]
-Genre for COSMIC is  [
-  { count: 100, name: 'trance', url: 'https://www.last.fm/tag/trance' },
-  {
-    count: 100,
-    name: 'Hip-Hop',
-    url: 'https://www.last.fm/tag/Hip-Hop'
-  },
-  { count: 100, name: 'vocal', url: 'https://www.last.fm/tag/vocal' }
-]
-Genre for Erik Rico is  [
-  { count: 100, name: 'soul', url: 'https://www.last.fm/tag/soul' },
-  { count: 100, name: 'funk', url: 'https://www.last.fm/tag/funk' },
-  { count: 72, name: 'jazz', url: 'https://www.last.fm/tag/jazz' }
-]
-Genre for Sace is  []
-Genre for Lana Del Rey is  [
-  { count: 94, name: 'indie', url: 'https://www.last.fm/tag/indie' },
-  {
-    count: 89,
-    name: 'indie pop',
-    url: 'https://www.last.fm/tag/indie+pop'
-  },
-  { count: 81, name: 'pop', url: 'https://www.last.fm/tag/pop' }
-]
-Genre for hatis noit is  [
-  {
-    count: 100,
-    name: 'experimental',
-    url: 'https://www.last.fm/tag/experimental'
-  },
-  {
-    count: 75,
-    name: 'contemporary classical',
-    url: 'https://www.last.fm/tag/contemporary+classical'
-  }
-]
-Genre for Saphir is  [
-  { count: 100, name: 'rock', url: 'https://www.last.fm/tag/rock' },
-  { count: 72, name: 'Disco', url: 'https://www.last.fm/tag/Disco' },
-  { count: 72, name: 'Hi-NRG', url: 'https://www.last.fm/tag/Hi-NRG' }
-]
-Genre for Good Bear is  [
-  { count: 100, name: 'chill', url: 'https://www.last.fm/tag/chill' },
-  { count: 100, name: 'idm', url: 'https://www.last.fm/tag/idm' },
-  { count: 100, name: 'drums', url: 'https://www.last.fm/tag/drums' }
-]
-Genre for Synktra is  [
-  {
-    count: 100,
-    name: 'electronic',
-    url: 'https://www.last.fm/tag/electronic'
-  },
-  {
-    count: 100,
-    name: 'instrumental',
-    url: 'https://www.last.fm/tag/instrumental'
-  }
-]
-Genre for Ivy is  [
-  { count: 100, name: 'indie', url: 'https://www.last.fm/tag/indie' },
-  {
-    count: 74,
-    name: 'indie pop',
-    url: 'https://www.last.fm/tag/indie+pop'
-  },
-  {
-    count: 64,
-    name: 'chillout',
-    url: 'https://www.last.fm/tag/chillout'
-  }
-]
-Genre for okjett is  []
-Genre for Nonon is  [
-  { count: 100, name: 'trance', url: 'https://www.last.fm/tag/trance' },
-  {
-    count: 100,
-    name: 'chillout',
-    url: 'https://www.last.fm/tag/chillout'
-  },
-  {
-    count: 100,
-    name: 'Progressive',
-    url: 'https://www.last.fm/tag/Progressive'
-  }
-]
-Genre for RIELL is  []
-Genre for Avonlea is  [
-  { count: 100, name: 'pop', url: 'https://www.last.fm/tag/pop' },
-  { count: 50, name: 'rnb', url: 'https://www.last.fm/tag/rnb' }
-]
-Genre for Jessie Reyez is  [
-  { count: 100, name: 'pop', url: 'https://www.last.fm/tag/pop' },
-  { count: 60, name: 'rnb', url: 'https://www.last.fm/tag/rnb' },
-  { count: 50, name: 'soul', url: 'https://www.last.fm/tag/soul' }
-]
-Genre for STUPIDBEATS is  [
-  { count: 100, name: 'trap', url: 'https://www.last.fm/tag/trap' },
-  { count: 100, name: 'phonk', url: 'https://www.last.fm/tag/phonk' }
-]
-Genre for Swan is  [
-  {
-    count: 100,
-    name: 'Italo Disco',
-    url: 'https://www.last.fm/tag/Italo+Disco'
-  }
-]
-Genre for Dubskie is  []
-Genre for Trap Music Now is  []
-Genre for Victor Borba is  []
-Genre for Scizzahz is  [
-  {
-    count: 100,
-    name: 'Hip-Hop',
-    url: 'https://www.last.fm/tag/Hip-Hop'
-  },
-  {
-    count: 50,
-    name: 'UK hip hop',
-    url: 'https://www.last.fm/tag/UK+hip+hop'
-  },
-  {
-    count: 50,
-    name: 'under 2000 listeners',
-    url: 'https://www.last.fm/tag/under+2000+listeners'
-  }
-]
-Genre for Adam Tell is  [
-  { count: 100, name: 'piano', url: 'https://www.last.fm/tag/piano' },
-  {
-    count: 50,
-    name: 'electronic',
-    url: 'https://www.last.fm/tag/electronic'
-  },
-  {
-    count: 50,
-    name: 'synth pop',
-    url: 'https://www.last.fm/tag/synth+pop'
-  }
-]
-Genre for Fatal FE is  [
-  {
-    count: 100,
-    name: 'trancecore',
-    url: 'https://www.last.fm/tag/trancecore'
-  }
-]
-Genre for Endlesssssleep is  []
-Genre for Machine Gun Kelly is  [
-  {
-    count: 100,
-    name: 'Hip-Hop',
-    url: 'https://www.last.fm/tag/Hip-Hop'
-  },
-  { count: 84, name: 'rap', url: 'https://www.last.fm/tag/rap' }
-]
-Genre for Eminem is  [
-  { count: 100, name: 'rap', url: 'https://www.last.fm/tag/rap' },
-  {
-    count: 78,
-    name: 'Hip-Hop',
-    url: 'https://www.last.fm/tag/Hip-Hop'
-  }
-]
-Genre for Coma is  [ { count: 100, name: 'rock', url: 'https://www.last.fm/tag/rock' } ]
-Genre for Luna Goami is  []
-Genre for Tommy Ludgate is  [
-  {
-    count: 50,
-    name: 'the bedford',
-    url: 'https://www.last.fm/tag/the+bedford'
-  },
-  {
-    count: 50,
-    name: 'virally female',
-    url: 'https://www.last.fm/tag/virally+female'
-  }
-]
-Genre for Jasiah is  [
-  { count: 100, name: 'rap', url: 'https://www.last.fm/tag/rap' },
-  {
-    count: 100,
-    name: 'Trap Metal',
-    url: 'https://www.last.fm/tag/Trap+Metal'
-  },
-  {
-    count: 50,
-    name: 'Hip-Hop',
-    url: 'https://www.last.fm/tag/Hip-Hop'
-  }
-]
-Genre for Dutch Melrose is  [
-  { count: 100, name: 'pop', url: 'https://www.last.fm/tag/pop' },
-  { count: 100, name: 'rock', url: 'https://www.last.fm/tag/rock' },
-  {
-    count: 100,
-    name: 'alternative',
-    url: 'https://www.last.fm/tag/alternative'
-  }
-]
-Genre for Flowersie is  []
-Genre for Ashley Apollodor is  []
-Genre for Nito is  [
-  {
-    count: 100,
-    name: 'instrumental',
-    url: 'https://www.last.fm/tag/instrumental'
-  },
-  { count: 100, name: 'guitar', url: 'https://www.last.fm/tag/guitar' },
-  {
-    count: 67,
-    name: 'math rock',
-    url: 'https://www.last.fm/tag/math+rock'
-  }
-]
-Genre for Idris Elba is  [
-  { count: 100, name: 'rnb', url: 'https://www.last.fm/tag/rnb' },
-  { count: 80, name: 'soul', url: 'https://www.last.fm/tag/soul' }
-]
-Genre for Dutchy is  [
-  {
-    count: 100,
-    name: 'hip hop',
-    url: 'https://www.last.fm/tag/hip+hop'
-  },
-  {
-    count: 100,
-    name: 'instrumental',
-    url: 'https://www.last.fm/tag/instrumental'
-  },
-  { count: 100, name: 'beats', url: 'https://www.last.fm/tag/beats' }
-]
-Genre for sowre is  []
-Something went wrong with getting genres for track {
-  error: 6,
-  message: 'The artist you supplied could not be found',
-  links: []
-}
-Something went wrong with getting genres for track {
-  error: 6,
-  message: 'The artist you supplied could not be found',
-  links: []
-}
-Genre for Kurt Zed is  []
-Genre for Brandon Lim is  []
-Genre for CVSTILLX is  []
-Genre for prodzephyr is  []
-"

@@ -1,10 +1,6 @@
-export type tokenType = {
-  accessToken: string | undefined;
-  refreshToken: string | undefined;
-  expiresIn: string | undefined;
-};
 export type userInfoType = {
   display_name: string | null;
+  display_image: string;
   premium: boolean;
 };
 export type optionsType = {
@@ -19,6 +15,7 @@ export type playlistType = {
   snapshot: string;
   total: number;
   tracks: tracksType[];
+  topGenres: string[];
   genres: Map<string, number>;
   genreSubscriptions: string[];
   playlistSubscriptions: Map<string, playlistType>;
@@ -29,21 +26,22 @@ export type definedPlaylistsType = {
   list: Map<string, playlistType>;
 };
 export type tracksType = {
-  is_local: boolean;
+  isLocal: boolean;
   id: string;
   name: string;
   uri: string;
-  is_playable: boolean;
-  linked_from: {
+  isPlayable: boolean;
+  linkedFrom?: {
     id: string;
     uri: string;
   };
   duration: number;
   album: string;
-  album_artists: string[];
-  artists: string[];
+  album_artists: artistInfoType[];
+  artists: artistInfoType[];
   genres: Set<string>;
 };
+
 export type uniqueType = {
   track: tracksType;
   total_occurances: number;
@@ -56,4 +54,12 @@ export type occuranceType = {
   playlist: playlistType;
   occurances: number;
   duplicate_uris: Map<string, duplicateType>;
+};
+
+export type artistMasterListType = Map<string, artistInfoType>;
+
+export type artistInfoType = {
+  name: string;
+  id: string;
+  genres: string[];
 };

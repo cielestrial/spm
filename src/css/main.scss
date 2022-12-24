@@ -1,44 +1,5 @@
 @import "./variables";
 
-.background {
-  width: 100vw;
-  height: 100vh;
-  display: grid;
-  grid-template-columns: fit-content($full-width);
-  &.center {
-    place-content: center center;
-  }
-  &.start {
-    place-content: start center;
-  }
-}
-
-.text {
-  font-size: 1.25rem;
-  font-weight: bold;
-  text-align: center;
-  place-self: center;
-  min-width: 1rem;
-  margin: calc($margin-bottom/4) 0;
-  cursor: default;
-}
-
-.title {
-  font-size: 2rem;
-  max-width: calc(2 * $max-column-width);
-  font-weight: bold;
-  text-align: center;
-  place-self: center;
-  min-width: fit-content;
-  cursor: default;
-  &.center {
-    margin: 0 0 $margin-bottom;
-  }
-  &.start {
-    margin: $margin-bottom 0 0;
-  }
-}
-
 .loading {
   cursor: progress;
   &.text {

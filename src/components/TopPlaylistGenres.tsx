@@ -1,33 +1,31 @@
 import { Badge, Flex } from "@mantine/core";
-import { playlistType } from "../api/SpotifyApiClientTypes";
+import { useContext } from "react";
+import { StateContext } from "../api/ContextProvider";
 
-type proptype = {
-  selectedPlaylist: React.MutableRefObject<playlistType | undefined>;
-  isFollowed: () => boolean;
-};
+type proptype = {};
 const TopPlaylistGenres = (props: proptype) => {
-  const minOccurance =
-    props.selectedPlaylist.current !== undefined
-      ? // 1/3 of 50% of the total number of songs is the minimum cutoff
-        Math.round(props.selectedPlaylist.current.total * (0.5 / 3))
-      : 2;
-  const top_x = 3;
+  const context = useContext(StateContext);
+  const color = context.theme.colorScheme === "dark" ? "green.7" : "blue.5";
 
   const topGenres =
-    props.selectedPlaylist.current?.genres !== undefined && props.isFollowed()
-      ? Array.from(props.selectedPlaylist.current.genres.entries())
-          .filter(value => value[1] >= minOccurance)
-          .sort((a, b) => b[1] - a[1])
-          .slice(0, top_x)
-          .map(value => (
-            <Badge key={value[0]} color="green" size="md" variant="outline">
-              {value[0]}
-            </Badge>
-          ))
+    context.isFollowed() &&
+    context.selectedPlaylist.current?.topGenres !== undefined &&
+    context.selectedPlaylist.current.topGenres.length > 0
+      ? context.selectedPlaylist.current.topGenres.map((value) => (
+          <Badge
+            key={value}
+            miw="fit-content"
+            size="md"
+            variant="outline"
+            color={color}
+          >
+            {value}
+          </Badge>
+        ))
       : [];
 
   return (
-    <Flex wrap="wrap" gap="xs" mt={props.isFollowed() ? "xs" : 0}>
+    <Flex wrap="wrap" gap="xs" mt={context.isFollowed() ? "xs" : 0}>
       {topGenres}
     </Flex>
   );

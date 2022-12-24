@@ -1,8 +1,9 @@
-import { duplicateManager } from "../SpotifyApiClientSide";
+import { duplicateManager } from "../ApiClientData";
 import {
+  artistInfoType,
   occuranceType,
   playlistType,
-  tracksType
+  tracksType,
 } from "../SpotifyApiClientTypes";
 
 export const span = "7rem";
@@ -32,8 +33,8 @@ export const inPlaylists = (track: tracksType | undefined) => {
 export const generateTrackKey = (track: tracksType) => {
   let uniqueId = "";
   uniqueId += track.name;
-  for (const artist of track.artists) uniqueId += artist;
-  uniqueId = uniqueId.replaceAll(" ", "");
+  for (const artist of track.artists) uniqueId += artist.name;
+  uniqueId = uniqueId.replace(/[^a-zA-Z0-9]+/g, "");
   return uniqueId;
 };
 
@@ -43,6 +44,14 @@ export const generatePlaylistKey = (playlist: playlistType | undefined) => {
   uniqueId += playlist.name;
   uniqueId += playlist.owner;
   uniqueId += playlist.id;
-  uniqueId = uniqueId.replaceAll(" ", "");
+  uniqueId = uniqueId.replace(/[^a-zA-Z0-9]+/g, "");
+  return uniqueId;
+};
+
+export const generateArtistKey = (artist: artistInfoType) => {
+  let uniqueId = "";
+  uniqueId += artist.name;
+  uniqueId += artist.id;
+  uniqueId = uniqueId.replace(/[^a-zA-Z0-9]+/g, "");
   return uniqueId;
 };

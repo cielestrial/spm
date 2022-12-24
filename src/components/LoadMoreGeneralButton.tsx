@@ -1,7 +1,6 @@
 import { Button, Loader } from "@mantine/core";
 import { useState } from "react";
-import { maxOffset } from "../api/SpotifyApiClientSide";
-import { resultLimit } from "./SearchBar";
+import { maxOffset, getLimit } from "../api/ApiClientData";
 
 type propType = {
   offset: React.MutableRefObject<number>;
@@ -19,14 +18,13 @@ const LoadMoreGeneralButton = (props: propType) => {
     ) {
       setLoading(true);
       props.page.current++;
-      props.offset.current += resultLimit;
+      props.offset.current += getLimit;
       await props.getResults();
       console.log("offset", props.offset.current, "total", props.total.current);
       setLoading(false);
     }
   };
-  if (isLoading)
-    return <Loader color="green" my="sm" size="md" variant="bars" />;
+  if (isLoading) return <Loader my="sm" size="md" />;
   else
     return (
       <Button
@@ -34,21 +32,20 @@ const LoadMoreGeneralButton = (props: propType) => {
         miw="min-content"
         my="xs"
         variant="filled"
-        disabled={props.offset.current + resultLimit > maxOffset}
-        color="green"
+        disabled={props.offset.current + getLimit > maxOffset}
         radius="xl"
         size="md"
         onClick={async () => {
           await loadMore();
         }}
-        styles={theme => ({
+        styles={(theme) => ({
           root: {
             display:
-              props.offset.current + resultLimit > maxOffset ||
-              props.offset.current + resultLimit >= props.total.current
+              props.offset.current + getLimit > maxOffset ||
+              props.offset.current + getLimit >= props.total.current
                 ? "none"
-                : "initial"
-          }
+                : "initial",
+          },
         })}
       >
         Load More

@@ -1,31 +1,34 @@
 import { Modal, Group, Button, Text } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
+import { useContext } from "react";
+import { StateContext } from "../api/ContextProvider";
 import { useSpotifyQuery } from "../api/QueryApi";
-import { followPlaylist } from "../api/SpotifyApiClientSide";
-import { playlistsType, playlistType } from "../api/SpotifyApiClientTypes";
+import { followPlaylist } from "../api/SpotifyApiClientPlaylist";
+import { playlistType } from "../api/SpotifyApiClientTypes";
 
 type propsType = {
-  playlists: React.MutableRefObject<playlistsType>;
-  playlist: React.MutableRefObject<playlistType | undefined>;
   setSelected: (selected: playlistType | undefined) => Promise<void>;
   setLoading: React.Dispatch<React.SetStateAction<number>>;
 };
 
 const FollowButton = (props: propsType) => {
+  const context = useContext(StateContext);
   const [opened, { close, open }] = useDisclosure(false);
+  const color = context.theme.colorScheme === "dark" ? "green.7" : "blue.5";
 
   const follow = async () => {
-    props.setLoading(prev => prev + 1);
+    props.setLoading((prev) => prev + 1);
 
     const followQ = await useSpotifyQuery(
       followPlaylist,
       0,
-      props.playlist.current
+      context.playlistsQ,
+      context.selectedPlaylist.current
     );
     props.setSelected(undefined);
-    props.setSelected(props.playlist.current);
+    props.setSelected(context.selectedPlaylist.current);
 
-    props.setLoading(prev => prev - 1);
+    props.setLoading((prev) => prev - 1);
     return followQ;
   };
 
@@ -37,18 +40,26 @@ const FollowButton = (props: propsType) => {
         onClose={close}
         withCloseButton={false}
         size="xs"
+        styles={(theme) => ({
+          modal: {
+            backgroundColor:
+              theme.colorScheme === "dark"
+                ? theme.colors.dark[6]
+                : theme.colors.gray[1],
+          },
+        })}
       >
         <Text fs="italic" ta="center">
           Would you like to follow
         </Text>
         <Text fs="italic" fw="bold" ta="center">
-          {props.playlist.current?.name}&#63;
+          {context.selectedPlaylist.current?.name}&#63;
         </Text>
         <Group grow spacing="md" mt="md">
           <Button
             compact
             variant="filled"
-            color="green"
+            color={context.theme.primaryColor}
             radius="xl"
             size="sm"
             onClick={() => {
@@ -62,7 +73,7 @@ const FollowButton = (props: propsType) => {
           <Button
             compact
             variant="filled"
-            color="red"
+            color="red.7"
             radius="xl"
             size="sm"
             data-autofocus
@@ -75,11 +86,11 @@ const FollowButton = (props: propsType) => {
 
       <Button
         w="35%"
-        miw="min-content"
+        miw="8rem"
         compact
+        color={color}
         variant="outline"
-        disabled={props.playlist === undefined}
-        color="green"
+        disabled={context.selectedPlaylist.current === undefined}
         radius="xl"
         size="md"
         onClick={open}

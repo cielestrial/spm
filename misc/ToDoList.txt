@@ -1,27 +1,27 @@
 To Do:    
-  1) Save and Load from csv files 
+  1) Host on Netify
   2) Liked Songs
-  
-  3) Visuals
-  4) Hosting
-
 
 Performance:    
-  React.Lazy && suspense 
+
+Security:
+  env file
+  remove token value from client if not used there
 
 Hosting: 
   Comply with licensing (lastfm and spotify ToS)  
-  Comment Code
-  Host on Netify / AWS
+  Host on Netify
   Collect User Feedback
 
 Bugs: 
+  
 
-Visuals: 
-  Navbar
-  Theme
-  Fonts
-  Visual Overhaul
+Static Visuals:
+
+Dynamic Visuals:
 
 Extras:
-  Track player capabilities (will only work for premium though....).
+  Comment Code
+  Multi-select tracks to remove or add to another playlist (change arrow direction)
+  Track player capabilities (will only work for premium though....)(Streaming SDAs cant be commercial?).
+  Proper shuffle

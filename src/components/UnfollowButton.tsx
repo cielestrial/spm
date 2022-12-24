@@ -1,29 +1,30 @@
 import { Button, Group, Modal, Text } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
+import { useContext } from "react";
+import { StateContext } from "../api/ContextProvider";
 import { useSpotifyQuery } from "../api/QueryApi";
-import { unfollowPlaylist } from "../api/SpotifyApiClientSide";
-import { playlistsType, playlistType } from "../api/SpotifyApiClientTypes";
+import { unfollowPlaylist } from "../api/SpotifyApiClientPlaylist";
+import { playlistType } from "../api/SpotifyApiClientTypes";
 
 type propsType = {
-  playlists: React.MutableRefObject<playlistsType>;
-  playlist: React.MutableRefObject<playlistType | undefined>;
   setSelected: (selected: playlistType | undefined) => Promise<void>;
   setLoading: React.Dispatch<React.SetStateAction<number>>;
 };
 const UnfollowButton = (props: propsType) => {
+  const context = useContext(StateContext);
   const [opened, { close, open }] = useDisclosure(false);
+  const color = context.theme.colorScheme === "dark" ? "green.7" : "blue.5";
 
   const unfollow = async () => {
-    props.setLoading(prev => prev + 1);
-
+    props.setLoading((prev) => prev + 1);
     const unfollowQ = await useSpotifyQuery(
       unfollowPlaylist,
       0,
-      props.playlist.current
+      context.playlistsQ,
+      context.selectedPlaylist.current
     );
     props.setSelected(undefined);
-
-    props.setLoading(prev => prev - 1);
+    props.setLoading((prev) => prev - 1);
     return unfollowQ;
   };
 
@@ -35,22 +36,32 @@ const UnfollowButton = (props: propsType) => {
         onClose={close}
         withCloseButton={false}
         size="xs"
+        styles={(theme) => ({
+          modal: {
+            backgroundColor:
+              theme.colorScheme === "dark"
+                ? theme.colors.dark[6]
+                : theme.colors.gray[1],
+          },
+        })}
       >
         <Text fs="italic" ta="center">
           Are you sure you want to unfollow
         </Text>
         <Text fs="italic" fw="bold" ta="center">
-          {props.playlist.current?.name}&#63;
+          {context.selectedPlaylist.current?.name}&#63;
         </Text>
         <Group grow spacing="md" mt="md">
           <Button
             compact
             variant="filled"
-            color="yellow"
+            color={
+              context.theme.colorScheme === "dark" ? "yellow.6" : "yellow.5"
+            }
             radius="xl"
             size="sm"
             onClick={async () => {
-              console.log(props.playlist);
+              console.log(context.selectedPlaylist.current);
               unfollow();
               close();
             }}
@@ -61,7 +72,7 @@ const UnfollowButton = (props: propsType) => {
           <Button
             compact
             variant="filled"
-            color="red"
+            color="red.7"
             radius="xl"
             size="sm"
             data-autofocus
@@ -74,11 +85,11 @@ const UnfollowButton = (props: propsType) => {
 
       <Button
         w="35%"
-        miw="min-content"
+        miw="8rem"
         compact
+        color={color}
         variant="outline"
-        disabled={props.playlist === undefined}
-        color="green"
+        disabled={context.selectedPlaylist.current === undefined}
         radius="xl"
         size="md"
         onClick={open}

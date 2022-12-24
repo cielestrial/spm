@@ -1,51 +1,59 @@
 import { Button } from "@mantine/core";
-import { generatePlaylistKey } from "../api/misc/HelperFunctions";
+import { useContext } from "react";
+import { StateContext } from "../api/ContextProvider";
+import { generatePlaylistKey } from "../api/functions/HelperFunctions";
 import { useSpotifyQuery } from "../api/QueryApi";
 import {
   addGenreSubscriptions,
-  addPlaylistSubscriptions
-} from "../api/SpotifyApiClientSide";
-import { playlistsType, playlistType } from "../api/SpotifyApiClientTypes";
+  addPlaylistSubscriptions,
+} from "../api/SpotifyApiClientPlaylist";
+import { playlistType } from "../api/SpotifyApiClientTypes";
 
 type proptype = {
-  selectedPlaylist: React.MutableRefObject<playlistType | undefined>;
-  playlists: React.MutableRefObject<playlistsType>;
   setSelected: (selected: playlistType | undefined) => Promise<void>;
   setLoading: React.Dispatch<React.SetStateAction<number>>;
 };
 
 const UpdateAllButton = (props: proptype) => {
-  const addSubscriptions = async () => {
-    props.setLoading(prev => prev + 1);
+  const context = useContext(StateContext);
+  const color = context.theme.colorScheme === "dark" ? "green.7" : "blue.5";
 
+  const addSubscriptions = async () => {
+    props.setLoading((prev) => prev + 1);
+    if (
+      context.userInfo?.display_name === undefined ||
+      context.userInfo.display_name === null
+    ) {
+      console.error("Could not read display_name");
+      return;
+    }
     const resAll = await Promise.allSettled([
-      useSpotifyQuery(addPlaylistSubscriptions, 0),
-      useSpotifyQuery(addGenreSubscriptions, 0)
+      useSpotifyQuery(addPlaylistSubscriptions, 0, context.playlistsQ),
+      useSpotifyQuery(addGenreSubscriptions, 0, context.playlistsQ),
     ]);
     props.setSelected(undefined);
-
-    props.setLoading(prev => prev - 1);
+    props.setLoading((prev) => prev - 1);
     return resAll;
   };
 
   const updateHandler = async () => {
     if (
-      props.playlists.current === undefined ||
-      props.selectedPlaylist.current === undefined
+      context.playlistsQ.current === undefined ||
+      context.selectedPlaylist.current === undefined
     )
       return;
-    console.log(generatePlaylistKey(props.selectedPlaylist.current));
+    console.log(generatePlaylistKey(context.selectedPlaylist.current));
     await addSubscriptions();
   };
 
   return (
     <Button
       w="35%"
-      miw="min-content"
+      miw="8rem"
       compact
       variant="outline"
-      disabled={props.playlists === undefined}
-      color="green"
+      disabled={context.playlistsQ.current === undefined}
+      color={color}
       radius="xl"
       size="md"
       onClick={updateHandler}

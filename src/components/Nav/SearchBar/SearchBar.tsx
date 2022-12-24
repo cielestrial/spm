@@ -8,47 +8,46 @@ import {
   SimpleGrid,
   Space,
   Text,
-  TextInput
+  TextInput,
 } from "@mantine/core";
 import {
   useDebouncedValue,
   useDisclosure,
-  useForceUpdate
+  useForceUpdate,
 } from "@mantine/hooks";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useContext, useEffect, useRef, useState } from "react";
 import {
   displayMap,
   generatePlaylistKey,
-  inPlaylists
-} from "../api/misc/HelperFunctions";
-import { loadingAllTracks } from "../pages/Dashboard";
-import {
-  duplicateManager,
-  generalPlaylistsSearch,
-  generalTracksSearch,
-  getPlaylists
-} from "../api/SpotifyApiClientSide";
+  inPlaylists,
+} from "../../../api/functions/HelperFunctions";
 import {
   occuranceType,
   playlistsType,
   playlistType,
-  tracksType,
-  uniqueType
-} from "../api/SpotifyApiClientTypes";
-import Row from "./Row";
-import LoadMoreLibraryButton from "./LoadMoreLibraryButton";
-import LoadMoreGeneralButton from "./LoadMoreGeneralButton";
-import { useSpotifyQuery } from "../api/QueryApi";
+  uniqueType,
+} from "../../../api/SpotifyApiClientTypes";
+
+import LoadMoreGeneralButton from "../../LoadMoreGeneralButton";
+import LoadMoreLibraryButton from "../../LoadMoreLibraryButton";
+import Row from "../../Row";
+
+import { useSpotifyQuery } from "../../../api/QueryApi";
+import { StateContext } from "../../../api/ContextProvider";
+import {
+  debounceWaitTime,
+  waitTime,
+  getLimit,
+  duplicateManager,
+} from "../../../api/ApiClientData";
+import MyScrollArea from "../../MyScrollArea";
+import { dashboardRefType } from "./SearchBarTypes";
 
 type propsType = {
-  setSelectedP: (selected: playlistType | undefined) => void;
-  setSelectedT: (track: tracksType) => void;
+  dashboardRef: React.RefObject<dashboardRefType>;
 };
 export type searchCategoryType = "Playlists" | "Tracks";
 export type searchAreaType = "Library" | "General";
-export const resultLimit = 50;
-export const waitTime = 750;
-export const debounceWaitTime = Math.round(0.67 * waitTime);
 
 const SearchBar = (props: propsType) => {
   // UI stuff
@@ -72,6 +71,9 @@ const SearchBar = (props: propsType) => {
   const [debouncedAlbumValue] = useDebouncedValue(albumValue, debounceWaitTime);
   const albumValueRef = useRef("");
 
+  const [genreValue, setGenreValue] = useState("");
+  const [debouncedGenreValue] = useDebouncedValue(genreValue, debounceWaitTime);
+
   const selectedCategory = useRef<searchCategoryType>("Playlists");
   const searchCategorySelect: searchCategoryType[] = ["Playlists", "Tracks"];
   const [selectedSearchCategory, setSelectedSearchCategory] =
@@ -81,9 +83,6 @@ const SearchBar = (props: propsType) => {
   const [selectedSearchArea, setSelectedSearchArea] =
     useState<searchAreaType>("Library");
   const scrollReset = useRef<HTMLDivElement>(null);
-  const nameSearchBar = useRef<HTMLInputElement>(null);
-  const artistSearchBar = useRef<HTMLInputElement>(null);
-  const albumSearchBar = useRef<HTMLInputElement>(null);
 
   const mutationObserver = new MutationObserver(() => {
     if (scrollReset.current !== null) scrollReset.current.scrollTop = 0;
@@ -93,6 +92,9 @@ const SearchBar = (props: propsType) => {
   // Query stuff
   const offsetRef = useRef(0);
   async function generalPlaylistsQ() {
+    const generalPlaylistsSearch = (
+      await import("../../../api/SpotifyApiClientSearch")
+    ).generalPlaylistsSearch;
     const results = (await useSpotifyQuery(
       generalPlaylistsSearch,
       0,
@@ -103,6 +105,9 @@ const SearchBar = (props: propsType) => {
   }
   const trackValueRef = useRef("");
   const generalTracksQ = async () => {
+    const generalTracksSearch = (
+      await import("../../../api/SpotifyApiClientSearch")
+    ).generalTracksSearch;
     const results = (await useSpotifyQuery(
       generalTracksSearch,
       0,
@@ -136,6 +141,7 @@ const SearchBar = (props: propsType) => {
   const forceUpdate = useForceUpdate();
 
   // Misc
+  const context = useContext(StateContext);
   const indexRef = useRef(0);
   const pageRef = useRef(0);
   const totalPageRef = useRef(0);
@@ -150,20 +156,21 @@ const SearchBar = (props: propsType) => {
     debouncedPlaylistValue,
     debouncedSongValue,
     debouncedArtistValue,
-    debouncedAlbumValue
+    debouncedAlbumValue,
+    debouncedGenreValue,
   ]);
 
   const displayLoader = () => {
     return [
-      <Center key={"loader"} className="loading" h="100%">
-        <Loader color="green" size="md" variant="bars" />
-      </Center>
+      <Center key={"loader"} className="loading" h="calc(60vmin - 3rem)">
+        <Loader size="md" />
+      </Center>,
     ];
   };
 
   const search = () => {
     asyncSearch()
-      .then(res => {
+      .then((res) => {
         setSearchResults(res);
       })
       .finally(() => setIsLoading(false));
@@ -171,16 +178,17 @@ const SearchBar = (props: propsType) => {
 
   const asyncSearch = async () => {
     if (
-      debouncedPlaylistValue !== "" ||
+      !(debouncedPlaylistValue === "" && debouncedGenreValue === "") ||
       !(
         debouncedSongValue === "" &&
         debouncedArtistValue === "" &&
-        debouncedAlbumValue === ""
+        debouncedAlbumValue === "" &&
+        debouncedGenreValue === ""
       )
     ) {
       if (scrollReset.current !== null)
         mutationObserver.observe(scrollReset.current, {
-          childList: true
+          childList: true,
         });
       if (selectedSearchCategory === "Playlists") {
         if (selectedSearchArea === "Library")
@@ -215,23 +223,29 @@ const SearchBar = (props: propsType) => {
               id={playlist.id}
               key={indexRef.current++}
               onClick={() => {
-                props.setSelectedP(playlist);
+                if (props.dashboardRef.current !== null)
+                  props.dashboardRef.current.setSelectedP(playlist);
                 closeHandler();
               }}
             >
               <Row label={"Name:"} value={playlist.name} />
               <Space h={5} />
               <Row label={"Owned By:"} value={playlist.owner} />
-              <Space h={5} />
-              <Row
-                label={"Log:"}
-                value={
-                  "index " +
-                  (indexRef.current + 1) +
-                  " of " +
-                  counterRef.current
-                }
-              />
+
+              {selectedArea.current === "Library" ? (
+                <>
+                  <Space h={5} />
+                  <Row
+                    label={"Top Genres:"}
+                    value={
+                      playlist.topGenres !== undefined &&
+                      playlist.topGenres.length > 0
+                        ? playlist.topGenres.join(", ")
+                        : null
+                    }
+                  />
+                </>
+              ) : null}
             </Box>
           );
         }
@@ -264,7 +278,7 @@ const SearchBar = (props: propsType) => {
     dynamicList.current,
     indexRef.current,
     pageRef.current,
-    offsetRef.current
+    offsetRef.current,
   ]);
 
   const searchLibraryPlaylists = async () => {
@@ -275,18 +289,18 @@ const SearchBar = (props: propsType) => {
     totalPageRef.current = 0;
     counterRef.current = 0;
 
-    const libraryPlaylistsQ = (await useSpotifyQuery(
-      getPlaylists,
-      0
-    )) as playlistsType;
-
-    if (libraryPlaylistsQ !== undefined) {
+    if (context.playlistsQ.current !== undefined) {
       playlistResults.current.push(new Map<string, playlistType>());
-      for (const pl of libraryPlaylistsQ.list.values()) {
+      for (const pl of context.playlistsQ.current.list.values()) {
         if (
           pl.name
             .toLocaleLowerCase()
-            .includes(debouncedPlaylistValue.toLocaleLowerCase())
+            .includes(debouncedPlaylistValue.toLocaleLowerCase()) &&
+          pl.topGenres?.some((genre) =>
+            genre
+              .toLocaleLowerCase()
+              .includes(debouncedGenreValue.toLocaleLowerCase())
+          )
         ) {
           playlistResults.current[totalPageRef.current].set(
             generatePlaylistKey(pl),
@@ -294,7 +308,7 @@ const SearchBar = (props: propsType) => {
           );
           indexRef.current++;
           counterRef.current++;
-          if (indexRef.current % resultLimit === 0) {
+          if (indexRef.current % getLimit === 0) {
             totalPageRef.current++;
             indexRef.current = 0;
             playlistResults.current.push(new Map<string, playlistType>());
@@ -311,7 +325,7 @@ const SearchBar = (props: propsType) => {
           <Text fw="bold" color="crimson">
             No Playlists Found
           </Text>
-        </Center>
+        </Center>,
       ];
     } else return dynamicList.current;
   };
@@ -333,7 +347,8 @@ const SearchBar = (props: propsType) => {
               id={uniqueTrack.track.id}
               key={indexRef.current++}
               onClick={() => {
-                props.setSelectedT(uniqueTrack.track);
+                if (props.dashboardRef.current !== null)
+                  props.dashboardRef.current.setSelectedT(uniqueTrack.track);
                 closeHandler();
               }}
             >
@@ -341,10 +356,26 @@ const SearchBar = (props: propsType) => {
               <Space h={5} />
               <Row
                 label={"Artists:"}
-                value={uniqueTrack.track.artists.join(", ")}
+                value={uniqueTrack.track.artists
+                  .map((artist) => artist.name)
+                  .join(", ")}
               />
               <Space h={5} />
               <Row label={"Album:"} value={uniqueTrack.track.album} />
+              {selectedArea.current === "Library" ? (
+                <>
+                  <Space h={5} />
+                  <Row
+                    label={"Genre:"}
+                    value={
+                      uniqueTrack.track.genres !== undefined &&
+                      uniqueTrack.track.genres.size > 0
+                        ? Array.from(uniqueTrack.track.genres).join(", ")
+                        : null
+                    }
+                  />{" "}
+                </>
+              ) : null}
               <Space h={5} />
               <Row
                 label={"Playlists:"}
@@ -352,16 +383,6 @@ const SearchBar = (props: propsType) => {
                   uniqueTrack.in_playlists.size > 0
                     ? displayMap(uniqueTrack.in_playlists)
                     : inPlaylists(uniqueTrack.track)
-                }
-              />
-              <Space h={5} />
-              <Row
-                label={"Log:"}
-                value={
-                  "index " +
-                  (indexRef.current + 1) +
-                  " of " +
-                  counterRef.current
                 }
               />
             </Box>
@@ -397,7 +418,7 @@ const SearchBar = (props: propsType) => {
     dynamicList.current,
     indexRef.current,
     pageRef.current,
-    offsetRef.current
+    offsetRef.current,
   ]);
 
   const searchLibraryTracks = async () => {
@@ -411,24 +432,29 @@ const SearchBar = (props: propsType) => {
       trackResults.current.push(new Set<uniqueType>());
       for (const uniqueTrack of duplicateManager.values()) {
         if (
-          !uniqueTrack.track.is_local &&
-          uniqueTrack.track.is_playable &&
+          !uniqueTrack.track.isLocal &&
+          uniqueTrack.track.isPlayable &&
           uniqueTrack.track.name
             .toLocaleLowerCase()
             .includes(debouncedSongValue.toLocaleLowerCase()) &&
           uniqueTrack.track.album
             .toLocaleLowerCase()
             .includes(debouncedAlbumValue.toLocaleLowerCase()) &&
-          uniqueTrack.track.artists.some(artist =>
-            artist
+          uniqueTrack.track.artists.some((artist) =>
+            artist.name
               .toLocaleLowerCase()
               .includes(debouncedArtistValue.toLocaleLowerCase())
+          ) &&
+          Array.from(uniqueTrack.track.genres).some((genre) =>
+            genre
+              .toLocaleLowerCase()
+              .includes(debouncedGenreValue.toLocaleLowerCase())
           )
         ) {
           trackResults.current[totalPageRef.current].add(uniqueTrack);
           indexRef.current++;
           counterRef.current++;
-          if (indexRef.current % resultLimit === 0) {
+          if (indexRef.current % getLimit === 0) {
             totalPageRef.current++;
             indexRef.current = 0;
             trackResults.current.push(new Set<uniqueType>());
@@ -445,7 +471,7 @@ const SearchBar = (props: propsType) => {
           <Text fw="bold" color="crimson">
             No Tracks Found
           </Text>
-        </Center>
+        </Center>,
       ];
     } else return dynamicList.current;
   };
@@ -462,7 +488,7 @@ const SearchBar = (props: propsType) => {
     playlistResults.current,
     pageRef.current,
     playlistValueRef.current,
-    offsetRef.current
+    offsetRef.current,
   ]);
 
   const searchGeneralPlaylists = async () => {
@@ -483,7 +509,7 @@ const SearchBar = (props: propsType) => {
           <Text fw="bold" color="crimson">
             No Playlists Found
           </Text>
-        </Center>
+        </Center>,
       ];
     } else return dynamicList.current;
   };
@@ -492,10 +518,10 @@ const SearchBar = (props: propsType) => {
     const data = await generalTracksQ();
     if (data !== undefined && trackResults.current !== undefined) {
       trackResults.current[pageRef.current] = new Set<uniqueType>(
-        data.tracks.map(track => ({
+        data.tracks.map((track) => ({
           track: track,
           total_occurances: 1,
-          in_playlists: new Map<string, occuranceType>()
+          in_playlists: new Map<string, occuranceType>(),
         }))
       );
       totalPageRef.current = data.total;
@@ -506,7 +532,7 @@ const SearchBar = (props: propsType) => {
     trackValueRef.current,
     trackResults.current,
     pageRef.current,
-    offsetRef.current
+    offsetRef.current,
   ]);
 
   const searchGeneralTracks = async () => {
@@ -526,7 +552,7 @@ const SearchBar = (props: propsType) => {
           <Text fw="bold" color="crimson">
             No Tracks Found
           </Text>
-        </Center>
+        </Center>,
       ];
     } else return dynamicList.current;
   };
@@ -536,6 +562,7 @@ const SearchBar = (props: propsType) => {
     setSongValue("");
     setArtistValue("");
     setAlbumValue("");
+    setGenreValue("");
     setSearchResults([]);
     setIsLoading(false);
   };
@@ -548,26 +575,54 @@ const SearchBar = (props: propsType) => {
   const displaySearchBars = () => {
     if (selectedCategory.current === "Playlists") {
       return (
-        <TextInput
-          ref={nameSearchBar}
-          size="sm"
-          w="52.5%"
-          autoComplete="off"
-          autoCorrect="false"
-          aria-label="Playlist Search Bar"
+        <Flex
+          gap="lg"
+          align="end"
+          justify="center"
+          direction="row"
+          wrap="wrap-reverse"
           miw="fit-content"
-          radius="xl"
-          placeholder="Search Playlists"
-          variant="filled"
-          mt="md"
+          w="52.5%"
+          mt="xs"
           mx="xl"
-          data-autofocus
-          onChange={event => {
-            setPlaylistValue(event.currentTarget.value);
-            setIsLoading(true);
-          }}
-          value={playlistValue}
-        />
+        >
+          <TextInput
+            size="sm"
+            w={selectedArea.current !== "Library" ? "100%" : "45%"}
+            autoComplete="off"
+            autoCorrect="false"
+            aria-label="Playlist Search Bar"
+            miw="fit-content"
+            radius="xl"
+            placeholder="Search Playlists"
+            variant="default"
+            data-autofocus
+            onChange={(event) => {
+              setPlaylistValue(event.currentTarget.value);
+              setIsLoading(true);
+            }}
+            value={playlistValue}
+          />
+          {selectedArea.current !== "Library" ? null : (
+            <TextInput
+              size="sm"
+              w="45%"
+              autoComplete="off"
+              autoCorrect="false"
+              aria-label="Top Genres Search Bar"
+              miw="fit-content"
+              radius="xl"
+              mt="xs"
+              placeholder="Search Top Genres"
+              variant="default"
+              onChange={(event) => {
+                setGenreValue(event.currentTarget.value);
+                setIsLoading(true);
+              }}
+              value={genreValue}
+            />
+          )}
+        </Flex>
       );
     } else {
       return (
@@ -582,7 +637,6 @@ const SearchBar = (props: propsType) => {
           mx="xl"
         >
           <TextInput
-            ref={nameSearchBar}
             size="sm"
             autoComplete="off"
             autoCorrect="false"
@@ -590,9 +644,9 @@ const SearchBar = (props: propsType) => {
             miw="fit-content"
             radius="xl"
             placeholder="Search Songs"
-            variant="filled"
+            variant="default"
             data-autofocus
-            onChange={event => {
+            onChange={(event) => {
               setSongValue(event.currentTarget.value);
               setIsLoading(true);
             }}
@@ -600,7 +654,6 @@ const SearchBar = (props: propsType) => {
           />
 
           <TextInput
-            ref={artistSearchBar}
             size="sm"
             autoComplete="off"
             autoCorrect="false"
@@ -608,8 +661,8 @@ const SearchBar = (props: propsType) => {
             miw="fit-content"
             radius="xl"
             placeholder="Search Artists"
-            variant="filled"
-            onChange={event => {
+            variant="default"
+            onChange={(event) => {
               setArtistValue(event.currentTarget.value);
               setIsLoading(true);
             }}
@@ -617,7 +670,6 @@ const SearchBar = (props: propsType) => {
           />
 
           <TextInput
-            ref={albumSearchBar}
             size="sm"
             autoComplete="off"
             autoCorrect="false"
@@ -626,13 +678,31 @@ const SearchBar = (props: propsType) => {
             radius="xl"
             mt="xs"
             placeholder="Search Albums"
-            variant="filled"
-            onChange={event => {
+            variant="default"
+            onChange={(event) => {
               setAlbumValue(event.currentTarget.value);
               setIsLoading(true);
             }}
             value={albumValue}
           />
+          {selectedArea.current !== "Library" ? null : (
+            <TextInput
+              size="sm"
+              autoComplete="off"
+              autoCorrect="false"
+              aria-label="Top Genres Search Bar"
+              miw="fit-content"
+              radius="xl"
+              mt="xs"
+              placeholder="Search Top Genres"
+              variant="default"
+              onChange={(event) => {
+                setGenreValue(event.currentTarget.value);
+                setIsLoading(true);
+              }}
+              value={genreValue}
+            />
+          )}
         </Flex>
       );
     }
@@ -647,11 +717,11 @@ const SearchBar = (props: propsType) => {
         }}
         withCloseButton={false}
         padding={0}
-        styles={theme => ({
+        styles={(theme) => ({
           modal: {
             width: "80vw",
-            minHeight: "fit-content"
-          }
+            minHeight: "fit-content",
+          },
         })}
       >
         <Flex
@@ -668,7 +738,7 @@ const SearchBar = (props: propsType) => {
             miw="fit-content"
             gap="xl"
             justify="center"
-            direction="row"
+            direction="row-reverse"
             wrap="wrap-reverse"
             mx="xl"
           >
@@ -676,12 +746,12 @@ const SearchBar = (props: propsType) => {
               id="category"
               label="Search Category"
               data={searchCategorySelect}
-              variant="filled"
+              variant="default"
               miw="fit-content"
               radius="xl"
               size="sm"
               value={selectedSearchCategory}
-              onChange={e => {
+              onChange={(e) => {
                 resetHandler();
                 selectedCategory.current = e.currentTarget
                   .value as searchCategoryType;
@@ -694,12 +764,12 @@ const SearchBar = (props: propsType) => {
               id="area"
               label="Search Area"
               data={searchAreaSelect}
-              variant="filled"
+              variant="default"
               radius="xl"
               miw="fit-content"
               size="sm"
               value={selectedSearchArea}
-              onChange={e => {
+              onChange={(e) => {
                 resetHandler();
                 selectedArea.current = e.currentTarget.value as searchAreaType;
                 setSelectedSearchArea(e.currentTarget.value as searchAreaType);
@@ -707,29 +777,42 @@ const SearchBar = (props: propsType) => {
             />
           </Flex>
         </Flex>
-        <div ref={scrollReset} className="searchlist">
-          {isLoading ||
-          (loadingAllTracks && selectedSearchCategory === "Tracks") ? (
+        <MyScrollArea
+          maxHeight={"60vh"}
+          type={"hover"}
+          styles={{
+            root: {
+              borderStyle: "inset outset outset inset",
+              borderColor: "rgba(255, 255, 255, 0.66)",
+              margin: "1rem",
+              minHeight: "min-content",
+              height: "calc(70vmin - 3rem)",
+              width: "calc(100% - 2rem)",
+              borderRadius: "0.33rem",
+            },
+          }}
+        >
+          {isLoading ? (
             displayLoader()
           ) : (
             <SimpleGrid miw={"max-content"} cols={1} verticalSpacing={0}>
               {searchResults}
             </SimpleGrid>
           )}
-        </div>
+        </MyScrollArea>
       </Modal>
 
       <TextInput
         size="sm"
-        w="60%"
+        w="80%"
+        mt={6}
         autoComplete="off"
-        miw="max-content"
+        miw="5em"
         radius="xl"
         placeholder="Search"
-        variant="filled"
         onClick={open}
         readOnly
-        value={""}
+        defaultValue=""
       />
     </>
   );
