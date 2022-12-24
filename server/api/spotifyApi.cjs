@@ -11,9 +11,9 @@ const maxOffset = 1000;
 let accessToken;
 let refreshToken;
 let expriresIn;
-let userId;
-let country;
-let premium;
+let userId = { value: "" };
+let country = { value: "" };
+let premium = { value: "" };
 
 /**
  * List of endpoints:
@@ -80,26 +80,26 @@ const getUser = (req, res) => {
   spotifyApi
     .getMe()
     .then((data) => {
-      userId = data.body.id;
-      country = data.body.country;
-      premium = data.body.product === "premium" ? true : false;
+      userId.value = data.body.id;
+      country.value = data.body.country;
+      premium.value = data.body.product === "premium" ? true : false;
       console.log(
         "Some information about the authenticated user:",
         "userId:",
-        userId,
+        userId.value,
         "display_name:",
         data.body.display_name,
         "country:",
-        country,
+        country.value,
         "premium:",
-        premium,
+        premium.value,
         "image:",
         data.body.images[0].url
       );
       res.json({
         display_name: data.body.display_name,
         display_image: data.body.images[0].url,
-        premium: premium,
+        premium: premium.value,
       });
     })
     .catch((err) => {

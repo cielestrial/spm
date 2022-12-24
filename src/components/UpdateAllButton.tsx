@@ -6,7 +6,7 @@ import { useSpotifyQuery } from "../api/QueryApi";
 import {
   addGenreSubscriptions,
   addPlaylistSubscriptions,
-} from "../api/SpotifyApiClientSide";
+} from "../api/SpotifyApiClientPlaylist";
 import { playlistType } from "../api/SpotifyApiClientTypes";
 
 type proptype = {
@@ -31,9 +31,15 @@ const UpdateAllButton = (props: proptype) => {
       useSpotifyQuery(
         addPlaylistSubscriptions,
         0,
+        context.playlistsQ,
         context.userInfo.display_name
       ),
-      useSpotifyQuery(addGenreSubscriptions, 0, context.userInfo.display_name),
+      useSpotifyQuery(
+        addGenreSubscriptions,
+        0,
+        context.playlistsQ,
+        context.userInfo.display_name
+      ),
     ]);
     props.setSelected(undefined);
     props.setLoading((prev) => prev - 1);

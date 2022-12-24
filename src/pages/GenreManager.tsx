@@ -11,9 +11,9 @@ import { useContext, useEffect, useState } from "react";
 import { StateContext } from "../api/ContextProvider";
 import { getBlacklist, setBlacklist } from "../api/functions/GenreBlacklist";
 import { useLastfmQuery } from "../api/QueryApi";
-import { getWhitelist, updateWhitelist } from "../api/SpotifyApiClientData";
-import { getAllTrackGenres, resetGenres } from "../api/SpotifyApiClientSide";
+import { getWhitelist, updateWhitelist } from "../api/ApiClientData";
 import { pageHeight, pagePadding } from "../App";
+import { getAllTrackGenres, resetGenres } from "../api/LastfmApiClientSide";
 
 const GenreManager = () => {
   const context = useContext(StateContext);
@@ -105,13 +105,28 @@ const GenreManager = () => {
           mt="xl"
           onClick={async () => {
             setLoading(true);
-            await useLastfmQuery(resetGenres, 0);
+            await useLastfmQuery(resetGenres, 0, context.playlistsQ);
             await useLastfmQuery(getAllTrackGenres, 0);
             context.navigate.current("/dashboard");
             setLoading(false);
           }}
         >
           Save
+        </Button>
+        <Button
+          compact
+          w="15%"
+          h="2.6rem"
+          mih="2.6rem"
+          miw="9rem"
+          variant="filled"
+          radius="md"
+          size="xl"
+          mt="xl"
+          component="a"
+          href={"https://www.last.fm/home"}
+        >
+          powered by AudioScrobbler
         </Button>
       </Stack>
     );

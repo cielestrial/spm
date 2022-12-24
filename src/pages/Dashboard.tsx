@@ -34,15 +34,12 @@ import UnfollowButton from "../components/UnfollowButton";
 import UpdateAllButton from "../components/UpdateAllButton";
 
 import { inPlaylists } from "../api/functions/HelperFunctions";
-import {
-  dashboardRefType,
-  playlistType,
-  tracksType,
-} from "../api/SpotifyApiClientTypes";
+import { playlistType, tracksType } from "../api/SpotifyApiClientTypes";
 import { StateContext } from "../api/ContextProvider";
 import { useSpotifyQuery } from "../api/QueryApi";
 import { GiPlainArrow } from "react-icons/gi";
-import { getTracks } from "../api/SpotifyApiClientSide";
+import { getTracks } from "../api/SpotifyApiClientTrack";
+import { dashboardRefType } from "../components/Nav/SearchBar/SearchBarTypes";
 
 type propType = {};
 
@@ -149,13 +146,12 @@ const Dashboard = forwardRef<dashboardRefType, propType>((props, ref) => {
             {dynamicList}
           </SimpleGrid>
         );
-      else
-        return (
-          <Center h="100%">
-            <Text className="text">No Playlists</Text>
-          </Center>
-        );
-    }
+    } else
+      return (
+        <Center h="100%">
+          <Text className="text">No Playlists</Text>
+        </Center>
+      );
   };
 
   /**
@@ -230,14 +226,13 @@ const Dashboard = forwardRef<dashboardRefType, propType>((props, ref) => {
             {dynamicList}
           </SimpleGrid>
         );
-      else
-        return (
-          <Center h="100%">
-            <Text className="text">No Tracks</Text>
-          </Center>
-        );
-    }
-    if (infoIndex === 2 && getSelectedTrack !== undefined) {
+    } else if (infoIndex === 1)
+      return (
+        <Center h="100%">
+          <Text className="text">No Playlists</Text>
+        </Center>
+      );
+    else if (infoIndex === 2 && getSelectedTrack !== undefined) {
       return (
         <Box className="info-card">
           <Row label={"Name:"} value={getSelectedTrack.name} />

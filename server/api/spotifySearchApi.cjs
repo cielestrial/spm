@@ -27,7 +27,7 @@ const searchPlaylists = (req, res) => {
         : maxGetLimit;
     spotifyApi
       .searchPlaylists(query, {
-        market: country,
+        market: country.value,
         offset: offset,
         limit: limit,
         include_external: "audio",
@@ -66,7 +66,7 @@ const searchTracks = (req, res) => {
         : maxGetLimit;
     spotifyApi
       .searchTracks(query, {
-        market: country,
+        market: country.value,
         offset: offset,
         limit: limit,
         include_external: "audio",
@@ -78,8 +78,8 @@ const searchTracks = (req, res) => {
           list: data.body.tracks.items
             .filter((tr) => !tr.is_local && tr.is_playable)
             .map((track) => ({
-              is_local: track.is_local,
-              is_playable: track.is_playable,
+              isLocal: track.is_local,
+              isPlayable: track.is_playable,
               id: track.id,
               name: track.name,
               uri: track.uri,

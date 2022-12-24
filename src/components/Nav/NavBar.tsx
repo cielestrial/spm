@@ -4,9 +4,9 @@ import DownloadButton from "./DownloadButton";
 import DarkModeSwitch from "./DarkModeSwitch";
 import PageNavigatorButton from "./PageNavigatorButton";
 import NavLogo from "./NavLogo";
-import SearchBar from "./SearchBar";
 import { useMediaQuery } from "@mantine/hooks";
-import { dashboardRefType } from "../../api/SpotifyApiClientTypes";
+import { dashboardRefType } from "./SearchBar/SearchBarTypes";
+import SearchBar from "./SearchBar/SearchBar";
 
 export const breakpoints = {
   xxs: "288px",

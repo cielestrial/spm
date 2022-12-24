@@ -7,7 +7,7 @@ const artistMasterList = new Map();
 const lastFm = new LastFmNode({
   api_key: process.env.LASTFM_API_CLIENT,
   secret: process.env.LASTFM_API_CLIENT,
-  useragent: "YSPM/" + userId,
+  useragent: "YSPM/" + userId.value,
 });
 
 const filter = new Filter();

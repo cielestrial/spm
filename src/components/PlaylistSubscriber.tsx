@@ -4,9 +4,9 @@ import { useContext, useEffect, useRef, useState } from "react";
 import { StateContext } from "../api/ContextProvider";
 import { generatePlaylistKey } from "../api/functions/HelperFunctions";
 import { useSpotifyQuery } from "../api/QueryApi";
-import { debounceWaitTime, waitTime } from "../api/SpotifyApiClientData";
-import { generalPlaylistsSearch } from "../api/SpotifyApiClientSide";
+import { debounceWaitTime, waitTime } from "../api/ApiClientData";
 import { playlistsType, playlistType } from "../api/SpotifyApiClientTypes";
+import { generalPlaylistsSearch } from "../api/SpotifyApiClientSearch";
 
 type proptype = {};
 type dataArrayType = dataType[];

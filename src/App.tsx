@@ -13,7 +13,7 @@ const Dashboard = lazy(() => import("./pages/Dashboard"));
 const GenreManager = lazy(() => import("./pages/GenreManager"));
 
 import { fadeIn, slideDown } from "./css/Keyframes";
-import { dashboardRefType } from "./api/SpotifyApiClientTypes";
+import { dashboardRefType } from "./components/Nav/SearchBar/SearchBarTypes";
 
 export const getCode = () =>
   new URLSearchParams(window.location.search).get("code");

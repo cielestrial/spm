@@ -12,11 +12,11 @@ import DarkModeSwitch from "./DarkModeSwitch";
 import DownloadButton from "./DownloadButton";
 import Logout from "./Logout";
 import PageNavigatorButton from "./PageNavigatorButton";
-import SearchBar from "./SearchBar";
 import { StateContext } from "../../api/ContextProvider";
 import { useMediaQuery } from "@mantine/hooks";
 import { breakpoints } from "./NavBar";
-import { dashboardRefType } from "../../api/SpotifyApiClientTypes";
+import { dashboardRefType } from "./SearchBar/SearchBarTypes";
+import SearchBar from "./SearchBar/SearchBar";
 
 type propType = {
   height: string | number;

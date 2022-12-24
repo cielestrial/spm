@@ -3,7 +3,7 @@ import { useDisclosure } from "@mantine/hooks";
 import { useContext } from "react";
 import { StateContext } from "../api/ContextProvider";
 import { useSpotifyQuery } from "../api/QueryApi";
-import { unfollowPlaylist } from "../api/SpotifyApiClientSide";
+import { unfollowPlaylist } from "../api/SpotifyApiClientPlaylist";
 import { playlistType } from "../api/SpotifyApiClientTypes";
 
 type propsType = {
@@ -17,14 +17,13 @@ const UnfollowButton = (props: propsType) => {
 
   const unfollow = async () => {
     props.setLoading((prev) => prev + 1);
-
     const unfollowQ = await useSpotifyQuery(
       unfollowPlaylist,
       0,
+      context.playlistsQ,
       context.selectedPlaylist.current
     );
     props.setSelected(undefined);
-
     props.setLoading((prev) => prev - 1);
     return unfollowQ;
   };

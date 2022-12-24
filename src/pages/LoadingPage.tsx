@@ -2,16 +2,18 @@ import { Button, Center, FileButton, Flex, Loader, Title } from "@mantine/core";
 import { useState, useEffect, useContext, useRef } from "react";
 import { StateContext } from "../api/ContextProvider";
 import { loadDataFromFiles } from "../api/functions/Load";
+import { getAllTrackGenres } from "../api/LastfmApiClientSide";
 import { useLastfmQuery, useSpotifyQuery } from "../api/QueryApi";
+import {
+  getPlaylists,
+  getTopPlaylistGenres,
+} from "../api/SpotifyApiClientPlaylist";
 import {
   getToken,
   getAuthenticatedUserInfo,
-  getPlaylists,
-  getAllTracks,
-  getAllTrackGenres,
-  getTopPlaylistGenres,
-} from "../api/SpotifyApiClientSide"; //?
-import { userInfoType, playlistsType } from "../api/SpotifyApiClientTypes";
+} from "../api/SpotifyApiClientSide";
+import { getAllTracks, manageDuplicates } from "../api/SpotifyApiClientTrack";
+import { userInfoType } from "../api/SpotifyApiClientTypes";
 import { pageHeight, pagePadding } from "../App";
 import { custom_ease_out, shake } from "../css/Keyframes";
 
@@ -40,11 +42,7 @@ const LoadingPage = () => {
         )) as userInfoType | undefined | null;
         if (userData !== undefined && userData !== null) {
           context.setUserInfo(userData);
-
-          context.playlistsQ.current = (await useSpotifyQuery(
-            getPlaylists,
-            0
-          )) as playlistsType;
+          await useSpotifyQuery(getPlaylists, 0, context.playlistsQ);
         } else context.setUserInfo(null);
       } else context.setToken(false);
       setLoading(false);
@@ -61,9 +59,15 @@ const LoadingPage = () => {
       context.userInfo?.display_name !== undefined &&
       context.userInfo.display_name !== null
     ) {
-      await useSpotifyQuery(getAllTracks, 0, context.userInfo.display_name);
+      await useSpotifyQuery(
+        getAllTracks,
+        0,
+        context.playlistsQ,
+        context.userInfo.display_name
+      );
+      await manageDuplicates(context.playlistsQ, context.userInfo.display_name);
       await useLastfmQuery(getAllTrackGenres, 0);
-      await useLastfmQuery(getTopPlaylistGenres, 0);
+      getTopPlaylistGenres(context.playlistsQ);
     } else console.error("Could not read display_name");
   };
 

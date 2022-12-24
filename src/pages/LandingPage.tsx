@@ -2,6 +2,7 @@ import { useContext, useEffect } from "react";
 import { getCode, pageHeight, pagePadding } from "../App";
 import { StateContext } from "../api/ContextProvider";
 import { Button, Center, Loader, Stack, Title } from "@mantine/core";
+import { SlSocialSpotify } from "react-icons/sl";
 
 const scope =
   "&scope=" +
@@ -64,13 +65,14 @@ const LandingPage = () => {
         <Button
           variant="filled"
           w="20%"
-          miw="9rem"
+          miw="fit-content"
           radius="xl"
           size="md"
           component="a"
           href={AUTH_URL}
+          leftIcon={<SlSocialSpotify size={"24px"} />}
         >
-          Login
+          Log In With Spotify
         </Button>
       </Stack>
     );

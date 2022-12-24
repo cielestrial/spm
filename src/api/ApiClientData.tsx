@@ -1,6 +1,7 @@
 import { TransferListItem } from "@mantine/core";
 import { uniqueType } from "./SpotifyApiClientTypes";
 
+export const server = "http://localhost:8080";
 export const getLimit = 50;
 export const postLimit = 100;
 export const maxOffset = 1000;

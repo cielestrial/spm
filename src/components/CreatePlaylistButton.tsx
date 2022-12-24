@@ -2,9 +2,9 @@ import { Button, Group, Modal, TextInput } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import { playlistType } from "../api/SpotifyApiClientTypes";
 import { useSpotifyQuery } from "../api/QueryApi";
-import { createPlaylist } from "../api/SpotifyApiClientSide";
 import { useContext, useRef, useState } from "react";
 import { StateContext } from "../api/ContextProvider";
+import { createPlaylist } from "../api/SpotifyApiClientPlaylist";
 
 type propsType = {
   setSelected: (selected: playlistType | undefined) => Promise<void>;
@@ -20,15 +20,13 @@ const CreatePlaylistButton = (props: propsType) => {
 
   const create = async () => {
     props.setLoading((prev) => prev + 1);
-
     const createQ = (await useSpotifyQuery(
       createPlaylist,
       0,
-      playlistName.current,
-      props.setSelected
+      context.playlistsQ,
+      playlistName.current
     )) as playlistType | undefined;
     props.setSelected(createQ);
-
     props.setLoading((prev) => prev - 1);
     return createQ;
   };

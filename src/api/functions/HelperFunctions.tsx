@@ -1,3 +1,4 @@
+import { duplicateManager } from "../ApiClientData";
 import {
   occuranceType,
   playlistType,
@@ -15,17 +16,15 @@ export const displayMap = (map: Map<string, occuranceType>) => {
 export const inPlaylists = (track: tracksType | undefined) => {
   let output = "None";
   if (track !== undefined) {
-    import("../SpotifyApiClientData").then((module) => {
-      for (const uniqueTrack of module.duplicateManager.values()) {
-        if (
-          uniqueTrack.track.name === track.name &&
-          uniqueTrack.track.artists.join() === track.artists.join()
-        ) {
-          output = displayMap(uniqueTrack.in_playlists);
-          break;
-        }
+    for (const uniqueTrack of duplicateManager.values()) {
+      if (
+        uniqueTrack.track.name === track.name &&
+        uniqueTrack.track.artists.join() === track.artists.join()
+      ) {
+        output = displayMap(uniqueTrack.in_playlists);
+        break;
       }
-    });
+    }
   }
   return output;
 };

@@ -20,28 +20,28 @@ import {
   displayMap,
   generatePlaylistKey,
   inPlaylists,
-} from "../../api/functions/HelperFunctions";
+} from "../../../api/functions/HelperFunctions";
 import {
-  dashboardRefType,
   occuranceType,
   playlistsType,
   playlistType,
   uniqueType,
-} from "../../api/SpotifyApiClientTypes";
+} from "../../../api/SpotifyApiClientTypes";
 
-import LoadMoreGeneralButton from "../LoadMoreGeneralButton";
-import LoadMoreLibraryButton from "../LoadMoreLibraryButton";
-import Row from "../Row";
+import LoadMoreGeneralButton from "../../LoadMoreGeneralButton";
+import LoadMoreLibraryButton from "../../LoadMoreLibraryButton";
+import Row from "../../Row";
 
-import { useSpotifyQuery } from "../../api/QueryApi";
-import { StateContext } from "../../api/ContextProvider";
+import { useSpotifyQuery } from "../../../api/QueryApi";
+import { StateContext } from "../../../api/ContextProvider";
 import {
   debounceWaitTime,
   waitTime,
   getLimit,
   duplicateManager,
-} from "../../api/SpotifyApiClientData";
-import MyScrollArea from "../MyScrollArea";
+} from "../../../api/ApiClientData";
+import MyScrollArea from "../../MyScrollArea";
+import { dashboardRefType } from "./SearchBarTypes";
 
 type propsType = {
   dashboardRef: React.RefObject<dashboardRefType>;
@@ -93,7 +93,7 @@ const SearchBar = (props: propsType) => {
   const offsetRef = useRef(0);
   async function generalPlaylistsQ() {
     const generalPlaylistsSearch = (
-      await import("../../api/SpotifyApiClientSide")
+      await import("../../../api/SpotifyApiClientSearch")
     ).generalPlaylistsSearch;
     const results = (await useSpotifyQuery(
       generalPlaylistsSearch,
@@ -105,8 +105,9 @@ const SearchBar = (props: propsType) => {
   }
   const trackValueRef = useRef("");
   const generalTracksQ = async () => {
-    const generalTracksSearch = (await import("../../api/SpotifyApiClientSide"))
-      .generalTracksSearch;
+    const generalTracksSearch = (
+      await import("../../../api/SpotifyApiClientSearch")
+    ).generalTracksSearch;
     const results = (await useSpotifyQuery(
       generalTracksSearch,
       0,
@@ -161,7 +162,7 @@ const SearchBar = (props: propsType) => {
 
   const displayLoader = () => {
     return [
-      <Center key={"loader"} className="loading" h="100%">
+      <Center key={"loader"} className="loading" h="calc(60vmin - 3rem)">
         <Loader size="md" />
       </Center>,
     ];
@@ -425,13 +426,12 @@ const SearchBar = (props: propsType) => {
     indexRef.current = 0;
     totalPageRef.current = 0;
     counterRef.current = 0;
-    console.log(duplicateManager.size);
     if (duplicateManager.size > 0) {
       trackResults.current.push(new Set<uniqueType>());
       for (const uniqueTrack of duplicateManager.values()) {
         if (
-          !uniqueTrack.track.is_local &&
-          uniqueTrack.track.is_playable &&
+          !uniqueTrack.track.isLocal &&
+          uniqueTrack.track.isPlayable &&
           uniqueTrack.track.name
             .toLocaleLowerCase()
             .includes(debouncedSongValue.toLocaleLowerCase()) &&
@@ -790,7 +790,7 @@ const SearchBar = (props: propsType) => {
             },
           }}
         >
-          {isLoading || selectedSearchCategory === "Tracks" ? (
+          {isLoading ? (
             displayLoader()
           ) : (
             <SimpleGrid miw={"max-content"} cols={1} verticalSpacing={0}>

@@ -3,7 +3,7 @@ import { useDisclosure } from "@mantine/hooks";
 import { useContext } from "react";
 import { StateContext } from "../api/ContextProvider";
 import { useSpotifyQuery } from "../api/QueryApi";
-import { followPlaylist } from "../api/SpotifyApiClientSide";
+import { followPlaylist } from "../api/SpotifyApiClientPlaylist";
 import { playlistType } from "../api/SpotifyApiClientTypes";
 
 type propsType = {
@@ -22,6 +22,7 @@ const FollowButton = (props: propsType) => {
     const followQ = await useSpotifyQuery(
       followPlaylist,
       0,
+      context.playlistsQ,
       context.selectedPlaylist.current
     );
     props.setSelected(undefined);

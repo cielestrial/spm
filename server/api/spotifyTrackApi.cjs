@@ -96,7 +96,7 @@ const getTracks = (req, res) => {
     .getPlaylistTracks(playlistId, {
       offset: offset,
       limit: limit,
-      market: country,
+      market: country.value,
       include_external: "audio",
       fields:
         "items(is_local, " +
@@ -112,16 +112,17 @@ const getTracks = (req, res) => {
         "Total:",
         data.body.total,
         "Limit:",
-        limit
+        limit,
+        country.value
       );
       res.json({
         list: data.body.items.map((track) => ({
-          is_local: track.is_local,
-          is_playable: track.track.is_playable,
+          isLocal: track.is_local,
+          isPlayable: track.track.is_playable,
           id: track.track.id,
           name: track.track.name,
           uri: track.track.uri,
-          linked_from:
+          linkedFrom:
             track.track.linked_from !== undefined
               ? {
                   id: track.track.linked_from.id,

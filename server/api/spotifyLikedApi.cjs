@@ -1,18 +1,10 @@
-const {
-  spotifyApi,
-  rateLimit,
-  country,
-  maxGetLimit,
-  maxPostLimit,
-} = require("./spotifyApi.cjs");
-
 /**
  * List of endpoints:
  *
  * get
  * add
  * remove
- */
+ 
 
 // Get tracks in the signed in user's Your Music library
 spotifyApi
@@ -49,3 +41,4 @@ spotifyApi.addToMySavedTracks(["3VNWq8rTnQG6fM1eldSpZ0"]).then(
 );
 
 //module.exports = {};
+*/

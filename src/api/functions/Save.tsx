@@ -1,6 +1,6 @@
 import saveAs from "file-saver";
 import JSZip from "jszip";
-import { genreWhitelist, artistMasterList } from "../SpotifyApiClientData";
+import { genreWhitelist, artistMasterList } from "../ApiClientData";
 import {
   playlistsType,
   genreMasterListType,

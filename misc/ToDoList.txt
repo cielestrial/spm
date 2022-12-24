@@ -1,11 +1,11 @@
 To Do:    
-  3) Liked Songs
-  2) Hosting
-  1) Performance & Bugs
+  1) Diagnostic 
+  2) Bug Fixes
+  3) Host on Netify
+  5) Liked Songs
   
 
 Performance:    
-  Code-split spotify client & searchbar file
 
 Security:
   env file
@@ -26,5 +26,5 @@ Dynamic Visuals:
 Extras:
   Comment Code
   Multi-select tracks to remove or add to another playlist (change arrow direction)
-  Track player capabilities (will only work for premium though....).
+  Track player capabilities (will only work for premium though....)(Streaming SDAs cant be commercial?).
   Proper shuffle

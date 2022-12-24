@@ -26,12 +26,12 @@ export type definedPlaylistsType = {
   list: Map<string, playlistType>;
 };
 export type tracksType = {
-  is_local: boolean;
+  isLocal: boolean;
   id: string;
   name: string;
   uri: string;
-  is_playable: boolean;
-  linked_from: {
+  isPlayable: boolean;
+  linkedFrom?: {
     id: string;
     uri: string;
   };
@@ -58,9 +58,4 @@ export type occuranceType = {
 export type genreMasterListType = {
   whitelist: Map<string, number>;
   blacklist: string[];
-};
-
-export type dashboardRefType = {
-  setSelectedP: (selected: playlistType | undefined) => Promise<void>;
-  setSelectedT: (track: tracksType) => void;
 };

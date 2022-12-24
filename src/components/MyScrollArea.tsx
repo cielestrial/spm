@@ -1,5 +1,5 @@
 import { ScrollArea, ScrollAreaStylesParams, Styles } from "@mantine/core";
-import { debounceWaitTime } from "../api/SpotifyApiClientData";
+import { debounceWaitTime } from "../api/ApiClientData";
 
 type propType = {
   maxHeight: string | number;
@@ -18,7 +18,6 @@ const MyScrollArea = (props: propType) => {
     <ScrollArea.Autosize
       maxHeight={props.maxHeight}
       type={props.type}
-      offsetScrollbars
       scrollbarSize={8}
       scrollHideDelay={debounceWaitTime}
       styles={(theme) => ({
