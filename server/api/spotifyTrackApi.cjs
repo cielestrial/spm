@@ -100,7 +100,7 @@ const getTracks = (req, res) => {
       include_external: "audio",
       fields:
         "items(is_local, " +
-        "track(album.name, album.artists, artists.name, duration_ms, " +
+        "track(album.name, album.artists, artists.name, artists.id, duration_ms, " +
         "id, name, uri, is_playable, linked_from(id, uri))), " +
         "offset, total",
     })
@@ -131,8 +131,16 @@ const getTracks = (req, res) => {
               : undefined,
           duration: track.track.duration_ms,
           album: track.track.album.name,
-          album_artists: track.track.album.artists.map((artist) => artist.name),
-          artists: track.track.artists.map((artist) => artist.name),
+          album_artists: track.track.album.artists.map((artist) => ({
+            name: artist.name,
+            id: artist.id,
+            genres: [],
+          })),
+          artists: track.track.artists.map((artist) => ({
+            name: artist.name,
+            id: artist.id,
+            genres: [],
+          })),
         })),
       });
     })

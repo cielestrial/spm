@@ -1,16 +1,13 @@
 import axios from "axios";
-import { getLimit, server, duplicateManager } from "./ApiClientData";
+import { getLimit, server, duplicateManager, options } from "./ApiClientData";
 import { generatePlaylistKey } from "./functions/HelperFunctions";
 import { useSpotifyQuery } from "./QueryApi";
 import { rateLimitSpotify } from "./SpotifyApiClientSide";
 import {
-  optionsType,
   playlistsType,
   playlistType,
   tracksType,
 } from "./SpotifyApiClientTypes";
-
-const options: optionsType = { offset: 0, limit: 0 };
 
 /**
  * Get a user's playlists
@@ -26,6 +23,7 @@ export const getPlaylists = async (
     console.log("Playlists retrieved from client");
     return playlists.current;
   }
+
   let newOffset: Promise<number> | number = 0;
   options.offset = 0;
   options.limit = getLimit;
@@ -218,7 +216,6 @@ export const getTopPlaylistGenres = (
   let minOccurance = 2;
   for (const playlist of playlists.current.list.values()) {
     if (playlist.genres !== undefined && playlist.genres.size > 0) {
-      minOccurance = Math.round(playlist.total * (0.5 / 3));
       playlist.topGenres = Array.from(playlist.genres.entries())
         .filter((value) => value[1] >= minOccurance)
         .sort((a, b) => b[1] - a[1])
@@ -232,8 +229,7 @@ export const getTopPlaylistGenres = (
  * Add playlist subscriptions
  */
 export const addPlaylistSubscriptions = async (
-  playlists: React.MutableRefObject<playlistsType>,
-  username: string
+  playlists: React.MutableRefObject<playlistsType>
 ) => {
   if (playlists.current === undefined) return false;
   let status = true;
@@ -250,13 +246,7 @@ export const addPlaylistSubscriptions = async (
           tempPlaylist.total += playlistSub.total;
           tempPlaylist.tracks.push(...playlistSub.tracks);
         }
-        await useSpotifyQuery(
-          addPlaylistToPlaylist,
-          0,
-          tempPlaylist,
-          target,
-          username
-        );
+        await useSpotifyQuery(addPlaylistToPlaylist, 0, tempPlaylist, target);
       }
     }
   } catch (err) {
@@ -273,8 +263,7 @@ export const addPlaylistSubscriptions = async (
  * Add genre subscriptions
  */
 export const addGenreSubscriptions = async (
-  playlists: React.MutableRefObject<playlistsType>,
-  username: string
+  playlists: React.MutableRefObject<playlistsType>
 ) => {
   if (playlists.current === undefined) return false;
   if (duplicateManager.size === 0) {
@@ -298,13 +287,7 @@ export const addGenreSubscriptions = async (
         tempPlaylist = {} as playlistType;
         tempPlaylist.total = allTracks.length;
         tempPlaylist.tracks = allTracks;
-        await useSpotifyQuery(
-          addPlaylistToPlaylist,
-          0,
-          tempPlaylist,
-          target,
-          username
-        );
+        await useSpotifyQuery(addPlaylistToPlaylist, 0, tempPlaylist, target);
       }
     }
   } catch (err) {

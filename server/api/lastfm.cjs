@@ -1,8 +1,13 @@
 const LastFmNode = require("lastfm").LastFmNode;
 const CaN = require("./misc/genreBlacklist.cjs");
 const Filter = require("bad-words");
-const { userId, rateLimit } = require("./spotifyApi.cjs");
 const artistMasterList = new Map();
+const {
+  userId,
+  spotifyApi,
+  rateLimit,
+  maxGetLimit,
+} = require("./spotifyApi.cjs");
 
 const lastFm = new LastFmNode({
   api_key: process.env.LASTFM_API_CLIENT,
@@ -62,9 +67,40 @@ const getArtistGenres = (req, res) => {
   } else res.json(artistMasterList.get(artist));
 };
 
+const getArtistsGenres = (req, res) => {
+  const artists = req.body.artists;
+  spotifyApi
+    .getArtists(artists)
+    .then((data) => {
+      console.log(
+        "Artists' genres retrieved",
+        "Size:",
+        artists.length,
+        "Limit:",
+        maxGetLimit
+      );
+      res.json({
+        list: data.body.artists
+          .filter((artist) => artist.genres.length > 0)
+          .map((artist) => ({
+            name: artist.name,
+            id: artist.id,
+            genres: artist.genres,
+          })),
+      });
+    })
+    .catch((err) => {
+      console.error(
+        "Something went wrong with getting artists' genres",
+        artists
+      );
+      rateLimit(err, res);
+    });
+};
+
 const resetArtistGenres = (req, res) => {
   artistMasterList.clear();
   res.json("success");
 };
 
-module.exports = { getArtistGenres, resetArtistGenres };
+module.exports = { getArtistGenres, getArtistsGenres, resetArtistGenres };

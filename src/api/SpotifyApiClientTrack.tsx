@@ -1,6 +1,14 @@
 import axios from "axios";
-import { getLimit, server, postLimit, duplicateManager } from "./ApiClientData";
 import {
+  getLimit,
+  server,
+  postLimit,
+  duplicateManager,
+  artistMasterList,
+  options,
+} from "./ApiClientData";
+import {
+  generateArtistKey,
   generatePlaylistKey,
   generateTrackKey,
 } from "./functions/HelperFunctions";
@@ -12,20 +20,14 @@ import {
   uniqueType,
   occuranceType,
   duplicateType,
-  optionsType,
   playlistsType,
 } from "./SpotifyApiClientTypes";
-
-const options: optionsType = { offset: 0, limit: 0 };
 
 /**
  * Get tracks in a playlist
  * @returns playlistType
  */
-export const getTracks = async (
-  playlist: playlistType | undefined,
-  username: string
-) => {
+export const getTracks = async (playlist: playlistType | undefined) => {
   if (playlist === undefined) throw new Error("Playlist not defined");
 
   if (playlist.genres === undefined)
@@ -37,7 +39,10 @@ export const getTracks = async (
   // Can be loaded from file
   if (playlist.playlistSubscriptions === undefined)
     playlist.playlistSubscriptions = new Map<string, playlistType>();
-  if (playlist.total === 0) return playlist;
+  if (playlist.total === 0) {
+    playlist.tracks = [];
+    return playlist;
+  }
   if (
     playlist.tracks !== undefined &&
     playlist.total === playlist.tracks.length
@@ -99,29 +104,14 @@ const appendTracks = async (
  * Get all tracks
  */
 export const getAllTracks = async (
-  playlists: React.MutableRefObject<playlistsType>,
-  username: string
+  playlists: React.MutableRefObject<playlistsType>
 ) => {
   if (playlists.current === undefined) {
     throw new Error("Playlists has not been defined");
   }
-  let promises = [];
-  let i = 1;
-  const bundle = postLimit;
   try {
-    for (const playlist of playlists.current.list.values()) {
-      promises.push(getTracks(playlist, username));
-      if (i % bundle === 0) {
-        await Promise.all(promises);
-        promises = [];
-      }
-      i++;
-    }
-    if (promises.length > 0) {
-      await Promise.all(promises);
-      promises = [];
-      i = 1;
-    }
+    for (const playlist of playlists.current.list.values())
+      await useSpotifyQuery(getTracks, 0, playlist);
   } catch (err) {
     console.error(err);
     return false;
@@ -135,13 +125,12 @@ export const getAllTracks = async (
  */
 export const addPlaylistToPlaylist = async (
   source: playlistType,
-  target: playlistType,
-  username: string
+  target: playlistType
 ) => {
   if (source === undefined) throw new Error("Couldn't find source playlist");
   if (target === undefined) throw new Error("Couldn't find target playlist");
 
-  const tracks = await getTracks(source, username);
+  const tracks = await getTracks(source);
   const playlistKey = generatePlaylistKey(target);
   let uniqueTrack: uniqueType;
   const uris = tracks?.tracks
@@ -236,7 +225,7 @@ export const manageDuplicates = async (
         tempPlaylist.total = originals.length;
         tempPlaylist.tracks = originals;
         //source = from, target = to
-        await addPlaylistToPlaylist(tempPlaylist, playlist, username);
+        await addPlaylistToPlaylist(tempPlaylist, playlist);
       }
     }
   }
@@ -269,47 +258,79 @@ const createUniqueTrack = (
  * Records all occurances of a track
  */
 const getOccurances = async (playlist: playlistType) => {
+  if (playlist.tracks !== undefined) {
+    for (const track of playlist.tracks) {
+      populateDuplicateManager(track, playlist);
+      populateArtistMasterList(track);
+    }
+  }
+};
+
+/**
+ * Duplicate Manager
+ * @param track
+ * @param playlist
+ */
+const populateDuplicateManager = (
+  track: tracksType,
+  playlist: playlistType
+) => {
   const playlistKey = generatePlaylistKey(playlist);
   let trackKey: string;
   let duplicate: occuranceType | undefined;
   let uniqueTrack = {} as uniqueType;
-  if (playlist.tracks !== undefined) {
-    for (const track of playlist.tracks) {
-      trackKey = generateTrackKey(track);
-      if (!duplicateManager.has(trackKey))
-        duplicateManager.set(
-          trackKey,
-          createUniqueTrack(track, playlist, playlistKey)
-        );
-      else {
-        uniqueTrack = duplicateManager.get(trackKey) as uniqueType;
-        uniqueTrack.total_occurances++;
-        if (!uniqueTrack.in_playlists.has(playlistKey)) {
-          uniqueTrack.in_playlists.set(playlistKey, {
-            playlist: playlist,
-            occurances: 1,
-            duplicate_uris:
-              track.linkedFrom !== undefined
-                ? new Map<string, duplicateType>()
-                    .set(track.uri, { uri: track.uri })
-                    .set(track.linkedFrom.uri, { uri: track.linkedFrom.uri })
-                : new Map<string, duplicateType>(),
+  trackKey = generateTrackKey(track);
+  if (!duplicateManager.has(trackKey))
+    duplicateManager.set(
+      trackKey,
+      createUniqueTrack(track, playlist, playlistKey)
+    );
+  else {
+    uniqueTrack = duplicateManager.get(trackKey) as uniqueType;
+    uniqueTrack.total_occurances++;
+    if (!uniqueTrack.in_playlists.has(playlistKey)) {
+      uniqueTrack.in_playlists.set(playlistKey, {
+        playlist: playlist,
+        occurances: 1,
+        duplicate_uris:
+          track.linkedFrom !== undefined
+            ? new Map<string, duplicateType>()
+                .set(track.uri, { uri: track.uri })
+                .set(track.linkedFrom.uri, { uri: track.linkedFrom.uri })
+            : new Map<string, duplicateType>(),
+      });
+    } else {
+      duplicate = uniqueTrack.in_playlists.get(playlistKey) as occuranceType;
+      duplicate.occurances++;
+      if (!duplicate.duplicate_uris.has(track.uri))
+        duplicate.duplicate_uris.set(track.uri, { uri: track.uri });
+      if (
+        track.linkedFrom !== undefined &&
+        !duplicate.duplicate_uris.has(track.linkedFrom.uri)
+      )
+        duplicate.duplicate_uris.set(track.linkedFrom.uri, {
+          uri: track.linkedFrom.uri,
+        });
+    }
+  }
+};
+
+/**
+ * Artist Master List
+ * @param track
+ */
+const populateArtistMasterList = (track: tracksType) => {
+  // ArtistMasterList
+  if (!track.isLocal && track.isPlayable) {
+    for (const artist of track.artists) {
+      if (artist.id !== undefined && artist.id !== null && artist.id !== "") {
+        const key = generateArtistKey(artist);
+        if (!artistMasterList.has(key))
+          artistMasterList.set(key, {
+            name: artist.name,
+            id: artist.id,
+            genres: [],
           });
-        } else {
-          duplicate = uniqueTrack.in_playlists.get(
-            playlistKey
-          ) as occuranceType;
-          duplicate.occurances++;
-          if (!duplicate.duplicate_uris.has(track.uri))
-            duplicate.duplicate_uris.set(track.uri, { uri: track.uri });
-          if (
-            track.linkedFrom !== undefined &&
-            !duplicate.duplicate_uris.has(track.linkedFrom.uri)
-          )
-            duplicate.duplicate_uris.set(track.linkedFrom.uri, {
-              uri: track.linkedFrom.uri,
-            });
-        }
       }
     }
   }

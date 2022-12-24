@@ -1,9 +1,13 @@
 import { Button, Center, FileButton, Flex, Loader, Title } from "@mantine/core";
-import { useState, useEffect, useContext, useRef } from "react";
+import { useState, useEffect, useContext, useRef, useCallback } from "react";
 import { StateContext } from "../api/ContextProvider";
 import { loadDataFromFiles } from "../api/functions/Load";
-import { getAllTrackGenres } from "../api/LastfmApiClientSide";
-import { useLastfmQuery, useSpotifyQuery } from "../api/QueryApi";
+import {
+  getAllArtistGenres,
+  getAllTrackGenres,
+  populateGenreWhitelist,
+} from "../api/LastfmApiClientSide";
+import { useSpotifyQuery } from "../api/QueryApi";
 import {
   getPlaylists,
   getTopPlaylistGenres,
@@ -54,22 +58,19 @@ const LoadingPage = () => {
       context.navigate.current("/");
   }, [context.token, context.userInfo]);
 
-  const getAll = async () => {
+  const getAll = useCallback(async () => {
     if (
       context.userInfo?.display_name !== undefined &&
       context.userInfo.display_name !== null
     ) {
-      await useSpotifyQuery(
-        getAllTracks,
-        0,
-        context.playlistsQ,
-        context.userInfo.display_name
-      );
+      await useSpotifyQuery(getAllTracks, 0, context.playlistsQ);
       await manageDuplicates(context.playlistsQ, context.userInfo.display_name);
-      await useLastfmQuery(getAllTrackGenres, 0);
+      await useSpotifyQuery(getAllArtistGenres, 0);
+      getAllTrackGenres();
+      populateGenreWhitelist();
       getTopPlaylistGenres(context.playlistsQ);
     } else console.error("Could not read display_name");
-  };
+  }, [context.playlistsQ.current]);
 
   const playErrorAnimation = () => {
     setError(true);
@@ -140,9 +141,8 @@ const LoadingPage = () => {
                 );
               else console.error("Could not read display_name");
               await getAll();
-              context.navigate.current("/dashboard");
-              context.setShowHeader(true);
               setLoading(false);
+              context.navigate.current("/dashboard");
             }
           }}
         >

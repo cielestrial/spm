@@ -1,5 +1,9 @@
 import { TransferListItem } from "@mantine/core";
-import { uniqueType } from "./SpotifyApiClientTypes";
+import {
+  artistInfoType,
+  optionsType,
+  uniqueType,
+} from "./SpotifyApiClientTypes";
 
 export const server = "http://localhost:8080";
 export const getLimit = 50;
@@ -9,16 +13,10 @@ export const waitTime = 750;
 export const debounceWaitTime = Math.round(0.67 * waitTime);
 export const duplicateManager = new Map<string, uniqueType>();
 
+export const options: optionsType = { offset: 0, limit: 1 };
+
 export let genreWhitelist = new Map<string, number>();
-export const loadWhitelistFromFile = (
-  whitelist: Map<string, number>,
-  blacklist: string[]
-) => {
-  for (let i = 0; i < blacklist.length; i++) {
-    if (whitelist.has(blacklist[i])) whitelist.delete(blacklist[i]);
-  }
-  genreWhitelist = whitelist;
-};
+
 export const updateWhitelist = (genres: TransferListItem[]) => {
   genreWhitelist = new Map<string, number>(
     genres.map((item) => {
@@ -44,11 +42,12 @@ export const getWhitelist = () => {
     )
     .map((element) => ({
       value: element[0],
-      label: element[0],
+      label: element[0] + ", frequency: " + element[1],
     }));
 };
 
-export let artistMasterList = new Map<string, string[]>();
-export const loadArtistsFromFile = (artists: Map<string, string[]>) => {
+// Check
+export let artistMasterList = new Map<string, artistInfoType>();
+export const loadArtistsFromFile = (artists: Map<string, artistInfoType>) => {
   artistMasterList = artists;
 };

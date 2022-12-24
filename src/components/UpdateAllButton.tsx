@@ -28,18 +28,8 @@ const UpdateAllButton = (props: proptype) => {
       return;
     }
     const resAll = await Promise.allSettled([
-      useSpotifyQuery(
-        addPlaylistSubscriptions,
-        0,
-        context.playlistsQ,
-        context.userInfo.display_name
-      ),
-      useSpotifyQuery(
-        addGenreSubscriptions,
-        0,
-        context.playlistsQ,
-        context.userInfo.display_name
-      ),
+      useSpotifyQuery(addPlaylistSubscriptions, 0, context.playlistsQ),
+      useSpotifyQuery(addGenreSubscriptions, 0, context.playlistsQ),
     ]);
     props.setSelected(undefined);
     props.setLoading((prev) => prev - 1);

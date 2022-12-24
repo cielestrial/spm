@@ -1,10 +1,8 @@
 import axios, { AxiosResponse } from "axios";
 import { code } from "../pages/LandingPage";
-import { optionsType, userInfoType } from "./SpotifyApiClientTypes";
+import { userInfoType } from "./SpotifyApiClientTypes";
 import { setRetryAfterSpotify } from "./QueryApi";
 import { server } from "./ApiClientData";
-
-const options: optionsType = { offset: 0, limit: 0 };
 
 /**
  * Handle Rate limit Spotify

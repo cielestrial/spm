@@ -1,14 +1,9 @@
 import axios from "axios";
-import { maxOffset, getLimit, server } from "./ApiClientData";
+import { maxOffset, getLimit, server, options } from "./ApiClientData";
 import { generatePlaylistKey } from "./functions/HelperFunctions";
 import { rateLimitSpotify } from "./SpotifyApiClientSide";
-import {
-  optionsType,
-  playlistsType,
-  playlistType,
-} from "./SpotifyApiClientTypes";
+import { playlistsType, playlistType } from "./SpotifyApiClientTypes";
 
-const options: optionsType = { offset: 0, limit: 0 };
 /**
  * General search for playlists
  * @param querySearch

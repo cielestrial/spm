@@ -85,8 +85,7 @@ const Dashboard = forwardRef<dashboardRefType, propType>((props, ref) => {
         tracksQ.current = await useSpotifyQuery(
           getTracks,
           0,
-          context.selectedPlaylist.current,
-          context.userInfo.display_name
+          context.selectedPlaylist.current
         );
       else console.error("Could not read display_name");
       setLoadingT((prev) => prev - 1);
@@ -237,7 +236,12 @@ const Dashboard = forwardRef<dashboardRefType, propType>((props, ref) => {
         <Box className="info-card">
           <Row label={"Name:"} value={getSelectedTrack.name} />
           <Space h="md" />
-          <Row label={"Artists:"} value={getSelectedTrack.artists.join(", ")} />
+          <Row
+            label={"Artists:"}
+            value={getSelectedTrack.artists
+              .map((artist) => artist.name)
+              .join(", ")}
+          />
           <Space h="md" />
           <Row label={"Album:"} value={getSelectedTrack.album} />
           <Space h="md" />

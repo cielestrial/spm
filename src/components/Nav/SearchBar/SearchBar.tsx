@@ -356,7 +356,9 @@ const SearchBar = (props: propsType) => {
               <Space h={5} />
               <Row
                 label={"Artists:"}
-                value={uniqueTrack.track.artists.join(", ")}
+                value={uniqueTrack.track.artists
+                  .map((artist) => artist.name)
+                  .join(", ")}
               />
               <Space h={5} />
               <Row label={"Album:"} value={uniqueTrack.track.album} />
@@ -439,7 +441,7 @@ const SearchBar = (props: propsType) => {
             .toLocaleLowerCase()
             .includes(debouncedAlbumValue.toLocaleLowerCase()) &&
           uniqueTrack.track.artists.some((artist) =>
-            artist
+            artist.name
               .toLocaleLowerCase()
               .includes(debouncedArtistValue.toLocaleLowerCase())
           ) &&

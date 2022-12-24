@@ -10,10 +10,8 @@ import {
 import { useContext, useEffect, useState } from "react";
 import { StateContext } from "../api/ContextProvider";
 import { getBlacklist, setBlacklist } from "../api/functions/GenreBlacklist";
-import { useLastfmQuery } from "../api/QueryApi";
 import { getWhitelist, updateWhitelist } from "../api/ApiClientData";
 import { pageHeight, pagePadding } from "../App";
-import { getAllTrackGenres, resetGenres } from "../api/LastfmApiClientSide";
 
 const GenreManager = () => {
   const context = useContext(StateContext);
@@ -63,7 +61,10 @@ const GenreManager = () => {
           }}
           searchPlaceholder={"Search Genres"}
           nothingFound={"Genre not found"}
-          placeholder={["No Whitelisted Genres", "No Blacklisted Genres"]}
+          placeholder={[
+            isLoading ? "Loading..." : "No Whitelisted Genres",
+            "No Blacklisted Genres",
+          ]}
           titles={["Whitelist", "Blacklist"]}
           showTransferAll={false}
           autoCorrect="off"
@@ -93,6 +94,7 @@ const GenreManager = () => {
             },
           })}
         />
+        {/*
         <Button
           compact
           w="15%"
@@ -113,21 +115,24 @@ const GenreManager = () => {
         >
           Save
         </Button>
+  
         <Button
           compact
           w="15%"
           h="2.6rem"
           mih="2.6rem"
-          miw="9rem"
-          variant="filled"
+          miw="fit-content"
+          variant="outline"
           radius="md"
           size="xl"
           mt="xl"
           component="a"
+          target="_blank"
+          rel="noreferrer noopener"
           href={"https://www.last.fm/home"}
         >
           powered by AudioScrobbler
-        </Button>
+        </Button> */}
       </Stack>
     );
   }

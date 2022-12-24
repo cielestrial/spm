@@ -37,7 +37,7 @@ const GenreSubscriber = (props: proptype) => {
       }
       nothingFound="Genre not found"
       filter={searchFilter}
-      maxDropdownHeight={288}
+      maxDropdownHeight={264}
       dropdownPosition="top"
       disabled={!context.isFollowed() || !context.isOwned()}
       size="sm"

@@ -1,9 +1,6 @@
 To Do:    
-  1) Diagnostic 
-  2) Bug Fixes
-  3) Host on Netify
-  5) Liked Songs
-  
+  1) Host on Netify
+  2) Liked Songs
 
 Performance:    
 
@@ -17,7 +14,7 @@ Hosting:
   Collect User Feedback
 
 Bugs: 
-  Genre re-pulling
+  
 
 Static Visuals:
 

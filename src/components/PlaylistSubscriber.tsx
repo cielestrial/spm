@@ -207,7 +207,7 @@ const PlaylistSubscriber = (props: proptype) => {
       }
       nothingFound={isLoading ? "Searching..." : "Playlist not found"}
       filter={searchFilter}
-      maxDropdownHeight={220}
+      maxDropdownHeight={192}
       dropdownPosition="top"
       disabled={!context.isFollowed() || !context.isOwned()}
       size="sm"

@@ -3,7 +3,6 @@ import JSZip from "jszip";
 import { genreWhitelist, artistMasterList } from "../ApiClientData";
 import {
   playlistsType,
-  genreMasterListType,
   definedPlaylistsType,
   playlistType,
 } from "../SpotifyApiClientTypes";
@@ -30,16 +29,14 @@ export const saveDataToFiles = async (
   playlists: React.MutableRefObject<playlistsType>
 ) => {
   const zip = new JSZip();
-  const genreMasterList: genreMasterListType = {
-    whitelist: genreWhitelist,
-    blacklist: genreBlacklist,
-  };
   zip
     .folder(username)
-    ?.file(
-      "Genre_Master_List.json",
-      JSON.stringify(genreMasterList, replacer, 2)
-    );
+    ?.file("Genre_Blacklist.json", JSON.stringify(genreBlacklist, replacer, 2));
+
+  zip
+    .folder(username)
+    ?.file("Genre_Whitelist.json", JSON.stringify(genreWhitelist, replacer, 2));
+
   zip
     .folder(username)
     ?.file(
@@ -83,7 +80,12 @@ const generatePlaylistsMetaData = (
 
     let cleanPlaylist = {} as playlistType;
     for (const playlist of playlists.current.list.entries()) {
-      cleanPlaylist = { ...playlist[1], tracks: [] };
+      cleanPlaylist = {
+        ...playlist[1],
+        tracks: [],
+        topGenres: [],
+        genres: new Map(),
+      };
       playlistsMetaData.list.set(playlist[0], cleanPlaylist);
       if (playlist[1].tracks !== undefined && playlist[1].tracks.length > 0) {
         zip

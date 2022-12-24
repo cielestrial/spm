@@ -4,10 +4,13 @@ import {
   artistMasterList,
   duplicateManager,
   genreWhitelist,
-  postLimit,
+  getLimit,
   server,
 } from "./ApiClientData";
-import { playlistsType, uniqueType } from "./SpotifyApiClientTypes";
+import { artistInfoType, playlistsType } from "./SpotifyApiClientTypes";
+import { rateLimitSpotify } from "./SpotifyApiClientSide";
+import { generateArtistKey } from "./functions/HelperFunctions";
+import { genreBlacklist } from "./functions/GenreBlacklist";
 
 /**
  * Handle Rate limit lastfm
@@ -22,41 +25,122 @@ const rateLimitLastfm = async (res: AxiosResponse<any, any>) => {
 };
 
 /**
- * Get genres for all tracks
+ * Get genres for all artists
+ * @returns true on success and false otherwise
  */
-export const getAllTrackGenres = async () => {
-  if (duplicateManager.size === 0) {
-    console.log("Empty duplicate manager");
-    return genreWhitelist;
+export const getAllArtistGenres = async () => {
+  if (artistMasterList.size === 0) {
+    console.warn("Empty artistMasterList");
+    return false;
   }
-  let promises = [];
-  let i = 1;
-  const bundle = postLimit;
+  const bundle = getLimit;
   try {
-    for (const uniqueTrack of duplicateManager.values()) {
-      promises.push(getTrackGenres(uniqueTrack));
+    let i = 1;
+    let res;
+    let artists: string[] = [];
+    for (const artist of artistMasterList.entries()) {
+      artists.push(artist[1].id);
       if (i % bundle === 0) {
-        await Promise.all(promises);
-        promises = [];
+        res = await axios.post(server + "/genres", { artists });
+        await rateLimitSpotify(res);
+        if (res.data !== undefined && res.data.list.length > 0)
+          for (const artistInfo of res.data.list)
+            artistMasterList.set(generateArtistKey(artistInfo), artistInfo);
+        artists = [];
       }
       i++;
     }
-    if (promises.length > 0) {
-      await Promise.all(promises);
-      promises = [];
-      i = 1;
+    if (artists.length > 0) {
+      res = await axios.post(server + "/genres", { artists });
+      await rateLimitSpotify(res);
+      if (res.data !== undefined && res.data.list.length > 0)
+        for (const artistInfo of res.data.list)
+          artistMasterList.set(generateArtistKey(artistInfo), artistInfo);
     }
   } catch (err) {
-    console.error(err);
+    console.error("Something went wrong with getAllArtistGenres()\n", err);
+    return false;
   }
-  return genreWhitelist;
+  return true;
+};
+
+/**
+ * Add track genres to unique tracks in duplicate manager
+ * @returns true on success and false otherwise
+ */
+export const getAllTrackGenres = () => {
+  if (duplicateManager.size === 0) {
+    console.warn("Empty duplicateManager");
+    return false;
+  }
+  let key: string;
+  for (const uniqueTrack of duplicateManager.values()) {
+    if (uniqueTrack.track.isLocal || !uniqueTrack.track.isPlayable) {
+      if (uniqueTrack.track.isLocal) uniqueTrack.track.genres.add("local");
+      if (!uniqueTrack.track.isPlayable)
+        uniqueTrack.track.genres.add("unplayable");
+      continue;
+    }
+
+    for (const artist of uniqueTrack.track.artists) {
+      key = generateArtistKey(artist);
+      if (artistMasterList.has(key)) {
+        const artistGenres = artistMasterList.get(key) as artistInfoType;
+        if (artistGenres.genres.length > 0) {
+          for (const genre of artistGenres.genres) {
+            if (!uniqueTrack.track.genres.has(genre))
+              uniqueTrack.track.genres.add(genre);
+            for (const playlist of uniqueTrack.in_playlists.values()) {
+              if (!playlist.playlist.genres.has(genre))
+                playlist.playlist.genres.set(genre, 1);
+              else {
+                let frequency = playlist.playlist.genres.get(genre) as number;
+                playlist.playlist.genres.set(genre, frequency + 1);
+              }
+            }
+          }
+        }
+      }
+    }
+    if (uniqueTrack.track.genres.size === 0)
+      uniqueTrack.track.genres.add("Unknown");
+  }
+  return true;
+};
+
+/**
+ * populate genre whitelist
+ * @returns true on success and false otherwise
+ */
+export const populateGenreWhitelist = () => {
+  if (artistMasterList.size === 0) {
+    console.warn("Empty artistMasterList");
+    return false;
+  }
+  genreWhitelist.clear();
+  for (const artist of artistMasterList.values()) {
+    for (const genre of artist.genres) {
+      if (
+        genreBlacklist.some(
+          (value) => value.toLocaleLowerCase() === genre.toLocaleLowerCase()
+        )
+      )
+        console.warn(genre, "is in blacklist");
+      if (!genreWhitelist.has(genre)) genreWhitelist.set(genre, 1);
+      else {
+        let frequency = genreWhitelist.get(genre) as number;
+        genreWhitelist.set(genre, frequency + 1);
+      }
+    }
+  }
+  return true;
 };
 
 /**
  * Get genres for a single track
  * @returns
- */
-export const getTrackGenres = async (uniqueTrack: uniqueType) => {
+ 
+const getTrackGenres = async (uniqueTrack: uniqueType) => {
   let popularity: number;
 
   if (!uniqueTrack.track.isPlayable) {
@@ -70,6 +154,7 @@ export const getTrackGenres = async (uniqueTrack: uniqueType) => {
     return true;
   }
   let genreList: string[] | undefined = [];
+  // Only primary artist atm
   const artist = uniqueTrack.track.artists[0];
   if (artistMasterList.has(artist)) {
     genreList = artistMasterList.get(artist);
@@ -137,7 +222,7 @@ export const getTrackGenres = async (uniqueTrack: uniqueType) => {
     }
     return true;
   }
-};
+};*/
 
 export const resetGenres = async (
   playlists: React.MutableRefObject<playlistsType>

@@ -37,10 +37,11 @@ export type tracksType = {
   };
   duration: number;
   album: string;
-  album_artists: string[];
-  artists: string[];
+  album_artists: artistInfoType[];
+  artists: artistInfoType[];
   genres: Set<string>;
 };
+
 export type uniqueType = {
   track: tracksType;
   total_occurances: number;
@@ -55,7 +56,10 @@ export type occuranceType = {
   duplicate_uris: Map<string, duplicateType>;
 };
 
-export type genreMasterListType = {
-  whitelist: Map<string, number>;
-  blacklist: string[];
+export type artistMasterListType = Map<string, artistInfoType>;
+
+export type artistInfoType = {
+  name: string;
+  id: string;
+  genres: string[];
 };

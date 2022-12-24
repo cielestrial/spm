@@ -85,8 +85,16 @@ const searchTracks = (req, res) => {
               uri: track.uri,
               duration: track.duration_ms,
               album: track.album.name,
-              album_artists: track.album.artists.map((artist) => artist.name),
-              artists: track.artists.map((artist) => artist.name),
+              album_artists: track.album.artists.map((artist) => ({
+                name: artist.name,
+                id: artist.id,
+                genres: [],
+              })),
+              artists: track.artists.map((artist) => ({
+                name: artist.name,
+                id: artist.id,
+                genres: [],
+              })),
             })),
         });
       })

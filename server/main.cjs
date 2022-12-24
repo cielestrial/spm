@@ -74,7 +74,7 @@ app.post("/search-tracks", spotifySearchApi.searchTracks);
  * lastfm api
  */
 // Get associated genres for an artist
-app.post("/genres", lastfm.getArtistGenres);
+app.post("/genres", lastfm.getArtistsGenres);
 
 // Reset associated genres for all artists
 app.post("/reset-genres", lastfm.resetArtistGenres);
