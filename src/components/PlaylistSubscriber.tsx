@@ -1,12 +1,12 @@
-import { SelectItem, MultiSelect } from "@mantine/core";
+import { MultiSelect, SelectItem } from "@mantine/core";
 import { useDebouncedValue, useForceUpdate } from "@mantine/hooks";
 import { useContext, useEffect, useRef, useState } from "react";
+import { debounceWaitTime, waitTime } from "../api/ApiClientData";
 import { StateContext } from "../api/ContextProvider";
 import { generatePlaylistKey } from "../api/functions/HelperFunctions";
 import { useSpotifyQuery } from "../api/QueryApi";
-import { debounceWaitTime, waitTime } from "../api/ApiClientData";
-import { playlistsType, playlistType } from "../api/SpotifyApiClientTypes";
 import { generalPlaylistsSearch } from "../api/SpotifyApiClientSearch";
+import { playlistsType, playlistType } from "../api/SpotifyApiClientTypes";
 
 type proptype = {};
 type dataArrayType = dataType[];
@@ -17,13 +17,7 @@ type dataType = {
 const PlaylistSubscriber = (props: proptype) => {
   const context = useContext(StateContext);
   const [isLoading, setLoading] = useState(false);
-  const [subscribedPlaylists, setSubscribedPlaylists] = useState<string[]>(
-    context.selectedPlaylist.current !== undefined
-      ? Array.from(
-          context.selectedPlaylist.current.playlistSubscriptions.keys()
-        )
-      : []
-  );
+  const [subscribedPlaylists, setSubscribedPlaylists] = useState<string[]>([]);
 
   const forceUpdate = useForceUpdate();
   const [searchValue, onSearchChange] = useState("");
@@ -34,6 +28,15 @@ const PlaylistSubscriber = (props: proptype) => {
   const searchValueRef = useRef("");
   const timeout = useRef<NodeJS.Timeout>();
   const queryHolder = useRef<playlistsType>();
+
+  useEffect(() => {
+    if (context.selectedPlaylist.current !== undefined)
+      setSubscribedPlaylists(
+        Array.from(
+          context.selectedPlaylist.current.playlistSubscriptions.keys()
+        )
+      );
+  }, []);
 
   useEffect(() => {
     clearTimeout(timeout.current);
@@ -207,7 +210,7 @@ const PlaylistSubscriber = (props: proptype) => {
       }
       nothingFound={isLoading ? "Searching..." : "Playlist not found"}
       filter={searchFilter}
-      maxDropdownHeight={192}
+      maxDropdownHeight={200}
       dropdownPosition="top"
       disabled={!context.isFollowed() || !context.isOwned()}
       size="sm"

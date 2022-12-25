@@ -1,4 +1,5 @@
 import { TransferListItem } from "@mantine/core";
+import { getGenreFromLabel } from "./functions/HelperFunctions";
 import {
   artistInfoType,
   optionsType,
@@ -20,11 +21,12 @@ export let genreWhitelist = new Map<string, number>();
 export const updateWhitelist = (genres: TransferListItem[]) => {
   genreWhitelist = new Map<string, number>(
     genres.map((item) => {
-      if (genreWhitelist.has(item.label)) {
-        const value = genreWhitelist.get(item.label);
-        if (value !== undefined) return [item.label, value];
+      const genre = getGenreFromLabel(item.label);
+      if (genreWhitelist.has(genre)) {
+        const value = genreWhitelist.get(genre);
+        if (value !== undefined) return [genre, value];
       }
-      return [item.label, 0];
+      return [genre, 0];
     })
   );
 };

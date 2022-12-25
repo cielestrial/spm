@@ -1,7 +1,7 @@
 import { Button } from "@mantine/core";
 import { useContext } from "react";
-import { setCode } from "../../pages/LandingPage";
 import { StateContext } from "../../api/ContextProvider";
+import { setCode } from "../../pages/LandingPage";
 
 type propType = {
   height: string | number | undefined;

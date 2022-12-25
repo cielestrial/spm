@@ -1,4 +1,4 @@
-import { Modal, Group, Button, Text } from "@mantine/core";
+import { Button, Group, Modal, Text } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import { useContext } from "react";
 import { StateContext } from "../api/ContextProvider";

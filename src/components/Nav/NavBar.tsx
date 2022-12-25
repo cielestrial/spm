@@ -1,12 +1,12 @@
-import Logout from "./Logout";
 import { Group } from "@mantine/core";
-import DownloadButton from "./DownloadButton";
-import DarkModeSwitch from "./DarkModeSwitch";
-import PageNavigatorButton from "./PageNavigatorButton";
-import NavLogo from "./NavLogo";
 import { useMediaQuery } from "@mantine/hooks";
-import { dashboardRefType } from "./SearchBar/SearchBarTypes";
+import DarkModeSwitch from "./DarkModeSwitch";
+import DownloadButton from "./DownloadButton";
+import Logout from "./Logout";
+import NavLogo from "./NavLogo";
+import PageNavigatorButton from "./PageNavigatorButton";
 import SearchBar from "./SearchBar/SearchBar";
+import { dashboardRefType } from "./SearchBar/SearchBarTypes";
 
 export const breakpoints = {
   xxs: "288px",

@@ -55,3 +55,7 @@ export const generateArtistKey = (artist: artistInfoType) => {
   uniqueId = uniqueId.replace(/[^a-zA-Z0-9]+/g, "");
   return uniqueId;
 };
+
+export const getGenreFromLabel = (label: string) => {
+  return label.slice(0, label.indexOf(", frequency: "));
+};

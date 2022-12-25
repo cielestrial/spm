@@ -1,4 +1,3 @@
-import "../css/dashboard.scss";
 import {
   Box,
   Center,
@@ -20,6 +19,7 @@ import {
   useRef,
   useState,
 } from "react";
+import "../css/dashboard.scss";
 
 import BackButton from "../components/BackButton";
 import CreatePlaylistButton from "../components/CreatePlaylistButton";
@@ -33,12 +33,12 @@ import TopPlaylistGenres from "../components/TopPlaylistGenres";
 import UnfollowButton from "../components/UnfollowButton";
 import UpdateAllButton from "../components/UpdateAllButton";
 
-import { inPlaylists } from "../api/functions/HelperFunctions";
-import { playlistType, tracksType } from "../api/SpotifyApiClientTypes";
-import { StateContext } from "../api/ContextProvider";
-import { useSpotifyQuery } from "../api/QueryApi";
 import { GiPlainArrow } from "react-icons/gi";
+import { StateContext } from "../api/ContextProvider";
+import { inPlaylists } from "../api/functions/HelperFunctions";
+import { useSpotifyQuery } from "../api/QueryApi";
 import { getTracks } from "../api/SpotifyApiClientTrack";
+import { playlistType, tracksType } from "../api/SpotifyApiClientTypes";
 import { dashboardRefType } from "../components/Nav/SearchBar/SearchBarTypes";
 
 type propType = {};
@@ -74,20 +74,22 @@ const Dashboard = forwardRef<dashboardRefType, propType>((props, ref) => {
    */
   const setSelectedP = useCallback(
     async (selected: playlistType | undefined) => {
-      if (selected === undefined || isLoadingT) return;
+      if (isLoadingT) return;
       context.selectedPlaylist.current = selected;
       setInfoIndex(0);
       setLoadingT((prev) => prev + 1);
-      if (
-        context.userInfo?.display_name !== undefined &&
-        context.userInfo.display_name !== null
-      )
-        tracksQ.current = await useSpotifyQuery(
-          getTracks,
-          0,
-          context.selectedPlaylist.current
-        );
-      else console.error("Could not read display_name");
+      if (selected !== undefined) {
+        if (
+          context.userInfo?.display_name !== undefined &&
+          context.userInfo.display_name !== null
+        )
+          tracksQ.current = await useSpotifyQuery(
+            getTracks,
+            0,
+            context.selectedPlaylist.current
+          );
+        else console.error("Could not read display_name");
+      }
       setLoadingT((prev) => prev - 1);
     },
     [isLoadingT]
@@ -117,7 +119,7 @@ const Dashboard = forwardRef<dashboardRefType, propType>((props, ref) => {
   const displayPlaylists = () => {
     if (isLoadingP)
       return (
-        <Center h="100%" className="loading">
+        <Center h="60vh" className="loading">
           <Loader size="sm" />
         </Center>
       );
@@ -145,12 +147,13 @@ const Dashboard = forwardRef<dashboardRefType, propType>((props, ref) => {
             {dynamicList}
           </SimpleGrid>
         );
-    } else
-      return (
-        <Center h="100%">
-          <Text className="text">No Playlists</Text>
-        </Center>
-      );
+      else
+        return (
+          <Center h="60vh">
+            <Text className="text">No Playlists</Text>
+          </Center>
+        );
+    }
   };
 
   /**
@@ -160,7 +163,7 @@ const Dashboard = forwardRef<dashboardRefType, propType>((props, ref) => {
   const displayInfo = () => {
     if (isLoadingT)
       return (
-        <Center h="100%" className="loading">
+        <Center h="60vh" className="loading">
           <Loader size="sm" />
         </Center>
       );
@@ -225,13 +228,13 @@ const Dashboard = forwardRef<dashboardRefType, propType>((props, ref) => {
             {dynamicList}
           </SimpleGrid>
         );
-    } else if (infoIndex === 1)
-      return (
-        <Center h="100%">
-          <Text className="text">No Playlists</Text>
-        </Center>
-      );
-    else if (infoIndex === 2 && getSelectedTrack !== undefined) {
+      else
+        return (
+          <Center h="60vh">
+            <Text className="text">No Tracks</Text>
+          </Center>
+        );
+    } else if (infoIndex === 2 && getSelectedTrack !== undefined) {
       return (
         <Box className="info-card">
           <Row label={"Name:"} value={getSelectedTrack.name} />

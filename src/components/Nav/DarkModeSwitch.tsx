@@ -1,6 +1,6 @@
 import { Switch, useMantineColorScheme } from "@mantine/core";
 import { useContext, useState } from "react";
-import { MdLightMode, MdDarkMode } from "react-icons/md";
+import { MdDarkMode, MdLightMode } from "react-icons/md";
 import { StateContext } from "../../api/ContextProvider";
 
 const DarkModeSwitch = () => {

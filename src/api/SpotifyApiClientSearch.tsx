@@ -1,5 +1,5 @@
 import axios from "axios";
-import { maxOffset, getLimit, server, options } from "./ApiClientData";
+import { getLimit, maxOffset, options, server } from "./ApiClientData";
 import { generatePlaylistKey } from "./functions/HelperFunctions";
 import { rateLimitSpotify } from "./SpotifyApiClientSide";
 import { playlistsType, playlistType } from "./SpotifyApiClientTypes";

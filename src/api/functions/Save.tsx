@@ -1,9 +1,9 @@
 import saveAs from "file-saver";
 import JSZip from "jszip";
-import { genreWhitelist, artistMasterList } from "../ApiClientData";
+import { artistMasterList, genreWhitelist } from "../ApiClientData";
 import {
-  playlistsType,
   definedPlaylistsType,
+  playlistsType,
   playlistType,
 } from "../SpotifyApiClientTypes";
 import { genreBlacklist } from "./GenreBlacklist";
@@ -17,7 +17,7 @@ export const replacer = (key: string, value: any) => {
   } else if (value instanceof Set) {
     return {
       dataType: "Set",
-      value: Array.from(value.entries()), // or with spread: value: [...value]
+      value: Array.from(value.keys()), // or with spread: value: [...value]
     };
   } else {
     return value;

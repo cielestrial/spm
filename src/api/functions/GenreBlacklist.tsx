@@ -1,4 +1,5 @@
 import { TransferListItem } from "@mantine/core";
+import { getGenreFromLabel } from "./HelperFunctions";
 
 export let genreBlacklist: string[] = [
   "3",
@@ -72,5 +73,5 @@ export const getBlacklist = () => {
 };
 
 export const setBlacklist = (genres: TransferListItem[]) => {
-  genreBlacklist = genres.map((item) => item.label);
+  genreBlacklist = genres.map((item) => getGenreFromLabel(item.label));
 };

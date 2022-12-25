@@ -1,8 +1,8 @@
-import { useContext, useEffect } from "react";
-import { getCode, pageHeight, pagePadding } from "../App";
-import { StateContext } from "../api/ContextProvider";
 import { Button, Center, Loader, Stack, Title } from "@mantine/core";
+import { useContext, useEffect } from "react";
 import { SlSocialSpotify } from "react-icons/sl";
+import { StateContext } from "../api/ContextProvider";
+import { getCode, pageHeight, pagePadding } from "../App";
 
 const scope =
   "&scope=" +

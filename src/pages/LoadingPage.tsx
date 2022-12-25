@@ -1,5 +1,5 @@
 import { Button, Center, FileButton, Flex, Loader, Title } from "@mantine/core";
-import { useState, useEffect, useContext, useRef, useCallback } from "react";
+import { useCallback, useContext, useEffect, useRef, useState } from "react";
 import { StateContext } from "../api/ContextProvider";
 import { loadDataFromFiles } from "../api/functions/Load";
 import {
@@ -13,8 +13,8 @@ import {
   getTopPlaylistGenres,
 } from "../api/SpotifyApiClientPlaylist";
 import {
-  getToken,
   getAuthenticatedUserInfo,
+  getToken,
 } from "../api/SpotifyApiClientSide";
 import { getAllTracks, manageDuplicates } from "../api/SpotifyApiClientTrack";
 import { userInfoType } from "../api/SpotifyApiClientTypes";
