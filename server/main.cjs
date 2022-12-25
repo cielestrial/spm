@@ -17,9 +17,8 @@ app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, "build")));
 app.set("port", process.env.PORT || 8080);
 
-const server = app.listen(app.get("port"), function () {
-  console.log("listening on port ", server.address().port);
-});
+const router = express.Router();
+app.use("/server", router);
 
 app.get("/server", (req, res) => {
   res.sendFile(path.join(__dirname, "views/page.html"));
