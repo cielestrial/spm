@@ -21,7 +21,7 @@ app.set("port", process.env.PORT || 8080);
 const router = express.Router();
 app.use("/.netlify/functions/api", router);
 
-app.get("/", (req, res) => {
+router.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "views/page.html"));
 });
 
@@ -29,16 +29,16 @@ app.get("/", (req, res) => {
  * spotify api
  */
 // Get Access Token
-app.post("/login", spotifyApi.login);
+router.post("/login", spotifyApi.login);
 
 // Get UserId, display name, and country
-app.post("/user", spotifyApi.getUser);
+router.post("/user", spotifyApi.getUser);
 
 /**
  * spotify playlist api
  */
 // Get user's playlists
-app.post("/playlists", spotifyPlaylistApi.getPlaylists);
+router.post("/playlists", spotifyPlaylistApi.getPlaylists);
 
 // Create new playlist
 app.post("/create", spotifyPlaylistApi.create);
