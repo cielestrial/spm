@@ -80,6 +80,9 @@ function App() {
               element={<Dashboard ref={dashboardRef} />}
             />
             <Route path="stats" element={<GenreManager />} />
+            <Route path="/server/login" />
+            <Route path="/server/user" />
+            <Route path="/server/playlists" />
           </Routes>
         </Suspense>
       </MyScrollArea>

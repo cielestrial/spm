@@ -21,7 +21,7 @@ const server = app.listen(app.get("port"), function () {
   console.log("listening on port ", server.address().port);
 });
 
-app.get("/", (req, res) => {
+app.get("/server", (req, res) => {
   res.sendFile(path.join(__dirname, "views/page.html"));
 });
 
@@ -29,55 +29,55 @@ app.get("/", (req, res) => {
  * spotify api
  */
 // Get Access Token
-app.post("/login", spotifyApi.login);
+app.post("/server/login", spotifyApi.login);
 
 // Get UserId, display name, and country
-app.post("/user", spotifyApi.getUser);
+app.post("/server/user", spotifyApi.getUser);
 
 /**
  * spotify playlist api
  */
 // Get user's playlists
-app.post("/playlists", spotifyPlaylistApi.getPlaylists);
+app.post("/server/playlists", spotifyPlaylistApi.getPlaylists);
 
 // Create new playlist
-app.post("/create", spotifyPlaylistApi.create);
+app.post("/server/create", spotifyPlaylistApi.create);
 
 // Unfollow a playlist
-app.post("/unfollow", spotifyPlaylistApi.unfollow);
+app.post("/server/unfollow", spotifyPlaylistApi.unfollow);
 
 // Follow a playlist
-app.post("/follow", spotifyPlaylistApi.follow);
+app.post("/server/follow", spotifyPlaylistApi.follow);
 
 /**
  * spotify track api
  */
 // Add tracks to a specific position in a playlist
-app.post("/add", spotifyTrackApi.add);
+app.post("/server/add", spotifyTrackApi.add);
 
 // Remove all occurances of a track from a playlist
-app.post("/remove", spotifyTrackApi.remove);
+app.post("/server/remove", spotifyTrackApi.remove);
 
 // Get tracks in a playlist
-app.post("/tracks", spotifyTrackApi.getTracks);
+app.post("/server/tracks", spotifyTrackApi.getTracks);
 
 /**
  * spotify search api
  */
 // Search general playlists
-app.post("/search-playlists", spotifySearchApi.searchPlaylists);
+app.post("/server/search-playlists", spotifySearchApi.searchPlaylists);
 
 // Search general tracks
-app.post("/search-tracks", spotifySearchApi.searchTracks);
+app.post("/server/search-tracks", spotifySearchApi.searchTracks);
 
 /**
  * lastfm api
  */
 // Get associated genres for an artist
-app.post("/genres", lastfm.getArtistsGenres);
+app.post("/server/genres", lastfm.getArtistsGenres);
 
 // Reset associated genres for all artists
-app.post("/reset-genres", lastfm.resetArtistGenres);
+app.post("/server/reset-genres", lastfm.resetArtistGenres);
 
 /**
  * spotify liked api
