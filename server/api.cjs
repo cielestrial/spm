@@ -22,7 +22,8 @@ const router = express.Router();
 app.use("/.netlify/functions/api", router);
 
 router.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "views/page.html"));
+  res.send("Hi from " + __dirname);
+  res.sendFile(path.join(__dirname, "views/page.html")); //"/var/task/server/apis/"
 });
 
 /**
