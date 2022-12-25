@@ -6,7 +6,7 @@ import {
   uniqueType,
 } from "./SpotifyApiClientTypes";
 
-export const server = "https://yspm.netlify.app/.netlify/functions";
+export const server = "https://yspm.netlify.app/.netlify/functions/api";
 export const getLimit = 50;
 export const postLimit = 100;
 export const maxOffset = 1000;

@@ -4,12 +4,12 @@ const express = require("express");
 const serverless = require("serverless-http");
 const cors = require("cors");
 const bodyParser = require("body-parser");
-const spotifyApi = require("./api/spotifyApi.cjs");
-const spotifyPlaylistApi = require("./api/spotifyPlaylistApi.cjs");
-const spotifyTrackApi = require("./api/spotifyTrackApi.cjs");
-const spotifySearchApi = require("./api/spotifySearchApi.cjs");
-//const spotifyLikedApi = require("./api/spotifyLikedApi.cjs");
-const lastfm = require("./api/lastfm.cjs");
+const spotifyApi = require("./apis/spotifyApi.cjs");
+const spotifyPlaylistApi = require("./apis/spotifyPlaylistApi.cjs");
+const spotifyTrackApi = require("./apis/spotifyTrackApi.cjs");
+const spotifySearchApi = require("./apis/spotifySearchApi.cjs");
+//const spotifyLikedApi = require("./apis/spotifyLikedApi.cjs");
+const lastfm = require("./apis/lastfm.cjs");
 
 const app = express();
 app.use(cors());
@@ -19,7 +19,7 @@ app.use(express.static(path.join(__dirname, "build")));
 app.set("port", process.env.PORT || 8080);
 
 const router = express.Router();
-app.use("/.netlify/functions", router);
+app.use("/.netlify/functions/api", router);
 
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "views/page.html"));
