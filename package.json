@@ -1,6 +1,7 @@
 {
   "name": "yspm",
   "private": true,
+  "homepage": "https://yspm.netlify.app/",
   "version": "4.7.2",
   "type": "module",
   "scripts": {
