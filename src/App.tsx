@@ -79,7 +79,7 @@ function App() {
               path="dashboard"
               element={<Dashboard ref={dashboardRef} />}
             />
-            <Route path="genres" element={<GenreManager />} />
+            <Route path="stats" element={<GenreManager />} />
           </Routes>
         </Suspense>
       </MyScrollArea>

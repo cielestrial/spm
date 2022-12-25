@@ -26,7 +26,7 @@ const PageNavigatorButton = (props: propType) => {
       onClick={() => {
         if (context.currentPage === "dashboard") {
           setDisplay("Playlists");
-          context.navigate.current("/genres");
+          context.navigate.current("/stats");
         } else {
           setDisplay("Genres");
           context.navigate.current("/dashboard");

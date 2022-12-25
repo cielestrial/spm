@@ -8,7 +8,7 @@ import {
   userInfoType,
 } from "./SpotifyApiClientTypes";
 
-export type pagesType = "landing" | "loading" | "dashboard" | "genres";
+export type pagesType = "landing" | "loading" | "dashboard" | "stats";
 
 export const StateContext = createContext({} as stateContextType);
 
