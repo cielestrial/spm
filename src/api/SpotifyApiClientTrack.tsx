@@ -1,11 +1,11 @@
 import axios from "axios";
 import {
-  getLimit,
-  server,
-  postLimit,
-  duplicateManager,
   artistMasterList,
+  duplicateManager,
+  getLimit,
   options,
+  postLimit,
+  server,
 } from "./ApiClientData";
 import {
   generateArtistKey,
@@ -15,12 +15,12 @@ import {
 import { useSpotifyQuery } from "./QueryApi";
 import { rateLimitSpotify } from "./SpotifyApiClientSide";
 import {
+  duplicateType,
+  occuranceType,
+  playlistsType,
   playlistType,
   tracksType,
   uniqueType,
-  occuranceType,
-  duplicateType,
-  playlistsType,
 } from "./SpotifyApiClientTypes";
 
 /**
@@ -134,7 +134,9 @@ export const addPlaylistToPlaylist = async (
   const playlistKey = generatePlaylistKey(target);
   let uniqueTrack: uniqueType;
   const uris = tracks?.tracks
-    ?.filter((track) => isUnique(track, target))
+    ?.filter(
+      (track) => !track.isLocal && track.isPlayable && isUnique(track, target)
+    )
     .map((track) => {
       const key = generateTrackKey(track);
       if (duplicateManager.has(key)) {
@@ -365,6 +367,7 @@ const removeDuplicates = async (playlist: playlistType) => {
   let allUris: duplicateType[] = [];
   let duplicate: occuranceType | undefined;
   for (const uniqueTrack of duplicateManager.values()) {
+    if (uniqueTrack.track.isLocal) continue;
     duplicate = uniqueTrack.in_playlists.get(generatePlaylistKey(playlist));
     if (
       duplicate !== undefined &&

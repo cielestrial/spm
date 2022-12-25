@@ -1,8 +1,8 @@
 import axios, { AxiosResponse } from "axios";
 import { code } from "../pages/LandingPage";
-import { userInfoType } from "./SpotifyApiClientTypes";
-import { setRetryAfterSpotify } from "./QueryApi";
 import { server } from "./ApiClientData";
+import { setRetryAfterSpotify } from "./QueryApi";
+import { userInfoType } from "./SpotifyApiClientTypes";
 
 /**
  * Handle Rate limit Spotify

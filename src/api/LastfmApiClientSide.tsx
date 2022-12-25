@@ -1,5 +1,4 @@
 import axios, { AxiosResponse } from "axios";
-import { setRetryAfterLastfm } from "./QueryApi";
 import {
   artistMasterList,
   duplicateManager,
@@ -7,10 +6,11 @@ import {
   getLimit,
   server,
 } from "./ApiClientData";
-import { artistInfoType, playlistsType } from "./SpotifyApiClientTypes";
-import { rateLimitSpotify } from "./SpotifyApiClientSide";
-import { generateArtistKey } from "./functions/HelperFunctions";
 import { genreBlacklist } from "./functions/GenreBlacklist";
+import { generateArtistKey } from "./functions/HelperFunctions";
+import { setRetryAfterLastfm } from "./QueryApi";
+import { rateLimitSpotify } from "./SpotifyApiClientSide";
+import { artistInfoType, playlistsType } from "./SpotifyApiClientTypes";
 
 /**
  * Handle Rate limit lastfm
@@ -75,35 +75,39 @@ export const getAllTrackGenres = () => {
   }
   let key: string;
   for (const uniqueTrack of duplicateManager.values()) {
-    if (uniqueTrack.track.isLocal || !uniqueTrack.track.isPlayable) {
-      if (uniqueTrack.track.isLocal) uniqueTrack.track.genres.add("local");
-      if (!uniqueTrack.track.isPlayable)
-        uniqueTrack.track.genres.add("unplayable");
-      continue;
-    }
-
-    for (const artist of uniqueTrack.track.artists) {
-      key = generateArtistKey(artist);
-      if (artistMasterList.has(key)) {
-        const artistGenres = artistMasterList.get(key) as artistInfoType;
-        if (artistGenres.genres.length > 0) {
-          for (const genre of artistGenres.genres) {
-            if (!uniqueTrack.track.genres.has(genre))
-              uniqueTrack.track.genres.add(genre);
-            for (const playlist of uniqueTrack.in_playlists.values()) {
-              if (!playlist.playlist.genres.has(genre))
-                playlist.playlist.genres.set(genre, 1);
-              else {
-                let frequency = playlist.playlist.genres.get(genre) as number;
-                playlist.playlist.genres.set(genre, frequency + 1);
+    if (uniqueTrack.track.isLocal) {
+      uniqueTrack.track.genres.add("local");
+      addToWhitelist("local");
+    } else if (!uniqueTrack.track.isPlayable) {
+      uniqueTrack.track.genres.add("unplayable");
+      addToWhitelist("unplayable");
+    } else {
+      for (const artist of uniqueTrack.track.artists) {
+        key = generateArtistKey(artist);
+        if (artistMasterList.has(key)) {
+          const artistGenres = artistMasterList.get(key) as artistInfoType;
+          if (artistGenres.genres.length > 0) {
+            for (const genre of artistGenres.genres) {
+              if (!uniqueTrack.track.genres.has(genre))
+                uniqueTrack.track.genres.add(genre);
+              for (const playlist of uniqueTrack.in_playlists.values()) {
+                if (!playlist.playlist.genres.has(genre))
+                  playlist.playlist.genres.set(genre, 1);
+                else {
+                  let frequency = playlist.playlist.genres.get(genre) as number;
+                  playlist.playlist.genres.set(genre, frequency + 1);
+                }
               }
             }
           }
         }
       }
+      if (uniqueTrack.track.genres.size === 0) {
+        uniqueTrack.track.genres.add("unknown");
+        addToWhitelist("unknown");
+      } else if (uniqueTrack.track.genres.has("unknown"))
+        addToWhitelist("unknown");
     }
-    if (uniqueTrack.track.genres.size === 0)
-      uniqueTrack.track.genres.add("Unknown");
   }
   return true;
 };
@@ -117,7 +121,7 @@ export const populateGenreWhitelist = () => {
     console.warn("Empty artistMasterList");
     return false;
   }
-  genreWhitelist.clear();
+  //genreWhitelist.clear();
   for (const artist of artistMasterList.values()) {
     for (const genre of artist.genres) {
       if (
@@ -126,14 +130,18 @@ export const populateGenreWhitelist = () => {
         )
       )
         console.warn(genre, "is in blacklist");
-      if (!genreWhitelist.has(genre)) genreWhitelist.set(genre, 1);
-      else {
-        let frequency = genreWhitelist.get(genre) as number;
-        genreWhitelist.set(genre, frequency + 1);
-      }
+      addToWhitelist(genre);
     }
   }
   return true;
+};
+
+const addToWhitelist = (genre: string) => {
+  if (!genreWhitelist.has(genre)) genreWhitelist.set(genre, 1);
+  else {
+    let frequency = genreWhitelist.get(genre) as number;
+    genreWhitelist.set(genre, frequency + 1);
+  }
 };
 
 /**

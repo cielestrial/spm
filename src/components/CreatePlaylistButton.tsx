@@ -1,10 +1,10 @@
 import { Button, Group, Modal, TextInput } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
-import { playlistType } from "../api/SpotifyApiClientTypes";
-import { useSpotifyQuery } from "../api/QueryApi";
 import { useContext, useRef, useState } from "react";
 import { StateContext } from "../api/ContextProvider";
+import { useSpotifyQuery } from "../api/QueryApi";
 import { createPlaylist } from "../api/SpotifyApiClientPlaylist";
+import { playlistType } from "../api/SpotifyApiClientTypes";
 
 type propsType = {
   setSelected: (selected: playlistType | undefined) => Promise<void>;

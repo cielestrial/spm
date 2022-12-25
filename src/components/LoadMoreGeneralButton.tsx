@@ -1,6 +1,6 @@
 import { Button, Loader } from "@mantine/core";
 import { useState } from "react";
-import { maxOffset, getLimit } from "../api/ApiClientData";
+import { getLimit, maxOffset } from "../api/ApiClientData";
 
 type propType = {
   offset: React.MutableRefObject<number>;

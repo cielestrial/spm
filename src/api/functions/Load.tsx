@@ -1,8 +1,8 @@
 import JSZip from "jszip";
 import { loadArtistsFromFile } from "../ApiClientData";
 import {
-  playlistsType,
   definedPlaylistsType,
+  playlistsType,
   playlistType,
 } from "../SpotifyApiClientTypes";
 import { loadBlacklistFromFile } from "./GenreBlacklist";

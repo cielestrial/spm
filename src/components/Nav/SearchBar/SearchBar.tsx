@@ -32,14 +32,14 @@ import LoadMoreGeneralButton from "../../LoadMoreGeneralButton";
 import LoadMoreLibraryButton from "../../LoadMoreLibraryButton";
 import Row from "../../Row";
 
-import { useSpotifyQuery } from "../../../api/QueryApi";
-import { StateContext } from "../../../api/ContextProvider";
 import {
   debounceWaitTime,
-  waitTime,
-  getLimit,
   duplicateManager,
+  getLimit,
+  waitTime,
 } from "../../../api/ApiClientData";
+import { StateContext } from "../../../api/ContextProvider";
+import { useSpotifyQuery } from "../../../api/QueryApi";
 import MyScrollArea from "../../MyScrollArea";
 import { dashboardRefType } from "./SearchBarTypes";
 
@@ -73,6 +73,7 @@ const SearchBar = (props: propsType) => {
 
   const [genreValue, setGenreValue] = useState("");
   const [debouncedGenreValue] = useDebouncedValue(genreValue, debounceWaitTime);
+  const genreValueRef = useRef("");
 
   const selectedCategory = useRef<searchCategoryType>("Playlists");
   const searchCategorySelect: searchCategoryType[] = ["Playlists", "Tracks"];
@@ -223,9 +224,9 @@ const SearchBar = (props: propsType) => {
               id={playlist.id}
               key={indexRef.current++}
               onClick={() => {
+                closeHandler();
                 if (props.dashboardRef.current !== null)
                   props.dashboardRef.current.setSelectedP(playlist);
-                closeHandler();
               }}
             >
               <Row label={"Name:"} value={playlist.name} />
@@ -321,7 +322,7 @@ const SearchBar = (props: propsType) => {
     addToResultListP();
     if (dynamicList.current.length === 0) {
       return [
-        <Center key="No Playlists" h="calc(66vh - 2rem)">
+        <Center key="No Playlists" h="calc(60vh - 2rem)">
           <Text fw="bold" color="crimson">
             No Playlists Found
           </Text>
@@ -347,9 +348,9 @@ const SearchBar = (props: propsType) => {
               id={uniqueTrack.track.id}
               key={indexRef.current++}
               onClick={() => {
+                closeHandler();
                 if (props.dashboardRef.current !== null)
                   props.dashboardRef.current.setSelectedT(uniqueTrack.track);
-                closeHandler();
               }}
             >
               <Row label={"Name:"} value={uniqueTrack.track.name} />
@@ -373,7 +374,7 @@ const SearchBar = (props: propsType) => {
                         ? Array.from(uniqueTrack.track.genres).join(", ")
                         : null
                     }
-                  />{" "}
+                  />
                 </>
               ) : null}
               <Space h={5} />
@@ -432,8 +433,6 @@ const SearchBar = (props: propsType) => {
       trackResults.current.push(new Set<uniqueType>());
       for (const uniqueTrack of duplicateManager.values()) {
         if (
-          !uniqueTrack.track.isLocal &&
-          uniqueTrack.track.isPlayable &&
           uniqueTrack.track.name
             .toLocaleLowerCase()
             .includes(debouncedSongValue.toLocaleLowerCase()) &&
@@ -467,7 +466,7 @@ const SearchBar = (props: propsType) => {
     }
     if (dynamicList.current.length === 0) {
       return [
-        <Center key="No Tracks" h="calc(66vh - 2rem)">
+        <Center key="No Tracks" h="calc(60vh - 2rem)">
           <Text fw="bold" color="crimson">
             No Tracks Found
           </Text>
@@ -505,7 +504,7 @@ const SearchBar = (props: propsType) => {
 
     if (totalPageRef.current === 0) {
       return [
-        <Center key="No Playlists" h="calc(66vh - 2rem)">
+        <Center key="No Playlists" h="calc(60vh - 2rem)">
           <Text fw="bold" color="crimson">
             No Playlists Found
           </Text>
@@ -548,7 +547,7 @@ const SearchBar = (props: propsType) => {
     await getGeneralResultsT();
     if (totalPageRef.current === 0) {
       return [
-        <Center key="No Tracks" h="calc(66vh - 2rem)">
+        <Center key="No Tracks" h="calc(60vh - 2rem)">
           <Text fw="bold" color="crimson">
             No Tracks Found
           </Text>
@@ -568,8 +567,8 @@ const SearchBar = (props: propsType) => {
   };
 
   const closeHandler = () => {
-    resetHandler();
     close();
+    resetHandler();
   };
 
   const displaySearchBars = () => {

@@ -1,19 +1,19 @@
-import "./css/main.scss";
-import { lazy, Suspense, useContext, useRef } from "react";
-import { Routes, Route } from "react-router-dom";
 import { AppShell, Center, Header, Loader } from "@mantine/core";
+import { lazy, Suspense, useContext, useRef } from "react";
+import { Route, Routes } from "react-router-dom";
 import { StateContext } from "./api/ContextProvider";
+import "./css/main.scss";
 
-import LandingPage from "./pages/LandingPage";
 import MyScrollArea from "./components/MyScrollArea";
+import LandingPage from "./pages/LandingPage";
 
 const LoadingPage = lazy(() => import("./pages/LoadingPage"));
 const NavBar = lazy(() => import("./components/Nav/NavBar"));
 const Dashboard = lazy(() => import("./pages/Dashboard"));
 const GenreManager = lazy(() => import("./pages/GenreManager"));
 
-import { fadeIn, slideDown } from "./css/Keyframes";
 import { dashboardRefType } from "./components/Nav/SearchBar/SearchBarTypes";
+import { fadeIn, slideDown } from "./css/Keyframes";
 
 export const getCode = () =>
   new URLSearchParams(window.location.search).get("code");

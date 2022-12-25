@@ -1,16 +1,21 @@
 import {
-  Button,
   Center,
   Loader,
   Stack,
+  Title,
   TransferList,
   TransferListData,
   TransferListItem,
 } from "@mantine/core";
 import { useContext, useEffect, useState } from "react";
+import {
+  duplicateManager,
+  getWhitelist,
+  updateWhitelist,
+} from "../api/ApiClientData";
 import { StateContext } from "../api/ContextProvider";
 import { getBlacklist, setBlacklist } from "../api/functions/GenreBlacklist";
-import { getWhitelist, updateWhitelist } from "../api/ApiClientData";
+import { getGenreFromLabel } from "../api/functions/HelperFunctions";
 import { pageHeight, pagePadding } from "../App";
 
 const GenreManager = () => {
@@ -41,7 +46,7 @@ const GenreManager = () => {
   }, []);
 
   const searchFilter = (query: string, item: TransferListItem) =>
-    item.label.includes(query.toLocaleLowerCase());
+    getGenreFromLabel(item.label).includes(query.toLocaleLowerCase());
 
   if (isLoading) {
     return (
@@ -52,6 +57,16 @@ const GenreManager = () => {
   } else {
     return (
       <Stack align="center" justify="center">
+        <Title
+          ta="center"
+          order={2}
+          my="lg"
+          color={
+            context.theme.colorScheme === "dark"
+              ? context.theme.colors.green[7]
+              : context.theme.colors.blue[4]
+          }
+        >{`Total Songs: ${duplicateManager.size}`}</Title>
         <TransferList
           value={data}
           onChange={(values: TransferListData) => {
@@ -72,6 +87,7 @@ const GenreManager = () => {
           breakpoint="md"
           w="75vw"
           miw="10rem"
+          mb="xl"
           listHeight={288}
           styles={(theme) => ({
             transferListTitle: {

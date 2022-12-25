@@ -1,22 +1,28 @@
 import { MultiSelect, SelectItem } from "@mantine/core";
-import { useContext, useState } from "react";
-import { StateContext } from "../api/ContextProvider";
+import { useContext, useEffect, useState } from "react";
 import { getWhitelist } from "../api/ApiClientData";
+import { StateContext } from "../api/ContextProvider";
 
 type proptype = {};
 const GenreSubscriber = (props: proptype) => {
   const context = useContext(StateContext);
-  const [genres, setGenres] = useState<string[]>(
-    context.selectedPlaylist.current !== undefined
-      ? context.selectedPlaylist.current.genreSubscriptions
-      : []
+  const [genres, setGenres] = useState<string[]>([]);
+  const data = getWhitelist().filter(
+    (element) =>
+      element.value !== "unknown" &&
+      element.value !== "local" &&
+      element.value !== "unplayable"
   );
-  const data = getWhitelist();
+
+  useEffect(() => {
+    if (context.selectedPlaylist.current !== undefined)
+      setGenres(context.selectedPlaylist.current.genreSubscriptions);
+  }, []);
 
   const searchFilter = (value: string, selected: boolean, item: SelectItem) =>
-    item.label !== undefined &&
+    item.value !== undefined &&
     !selected &&
-    item.label.includes(value.toLocaleLowerCase());
+    item.value.includes(value.toLocaleLowerCase());
 
   return (
     <MultiSelect
@@ -26,7 +32,7 @@ const GenreSubscriber = (props: proptype) => {
       value={genres}
       onChange={(e) => {
         setGenres(e);
-        if (context.selectedPlaylist.current !== undefined && e.length > 0)
+        if (context.selectedPlaylist.current !== undefined)
           context.selectedPlaylist.current.genreSubscriptions = e;
       }}
       searchable

@@ -1,4 +1,3 @@
-import { useContext, useEffect, useState } from "react";
 import {
   Avatar,
   Burger,
@@ -8,15 +7,16 @@ import {
   Text,
   Title,
 } from "@mantine/core";
+import { useMediaQuery } from "@mantine/hooks";
+import { useContext, useEffect, useState } from "react";
+import { StateContext } from "../../api/ContextProvider";
 import DarkModeSwitch from "./DarkModeSwitch";
 import DownloadButton from "./DownloadButton";
 import Logout from "./Logout";
-import PageNavigatorButton from "./PageNavigatorButton";
-import { StateContext } from "../../api/ContextProvider";
-import { useMediaQuery } from "@mantine/hooks";
 import { breakpoints } from "./NavBar";
-import { dashboardRefType } from "./SearchBar/SearchBarTypes";
+import PageNavigatorButton from "./PageNavigatorButton";
 import SearchBar from "./SearchBar/SearchBar";
+import { dashboardRefType } from "./SearchBar/SearchBarTypes";
 
 type propType = {
   height: string | number;

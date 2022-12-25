@@ -1,5 +1,5 @@
 import axios from "axios";
-import { getLimit, server, duplicateManager, options } from "./ApiClientData";
+import { duplicateManager, getLimit, options, server } from "./ApiClientData";
 import { generatePlaylistKey } from "./functions/HelperFunctions";
 import { useSpotifyQuery } from "./QueryApi";
 import { rateLimitSpotify } from "./SpotifyApiClientSide";
@@ -238,7 +238,10 @@ export const addPlaylistSubscriptions = async (
     const addPlaylistToPlaylist = (await import("./SpotifyApiClientTrack"))
       .addPlaylistToPlaylist;
     for (const target of playlists.current.list.values()) {
-      if (target.playlistSubscriptions !== undefined) {
+      if (
+        target.playlistSubscriptions !== undefined &&
+        target.playlistSubscriptions.size > 0
+      ) {
         tempPlaylist = {} as playlistType;
         tempPlaylist.total = 0;
         tempPlaylist.tracks = [];
@@ -276,7 +279,10 @@ export const addGenreSubscriptions = async (
     const addPlaylistToPlaylist = (await import("./SpotifyApiClientTrack"))
       .addPlaylistToPlaylist;
     for (const target of playlists.current.list.values()) {
-      if (target.genreSubscriptions !== undefined) {
+      if (
+        target.genreSubscriptions !== undefined &&
+        target.genreSubscriptions.length > 0
+      ) {
         const allTracks: tracksType[] = [];
         for (const genreSub of target.genreSubscriptions) {
           for (const uniqueTrack of duplicateManager.values()) {
