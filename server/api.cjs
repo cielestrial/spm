@@ -29,55 +29,55 @@ router.get("/", (req, res) => {
  * spotify api
  */
 // Get Access Token
-router.post("/login", spotifyApi.login);
+router.get("/login", spotifyApi.login);
 
 // Get UserId, display name, and country
-router.post("/user", spotifyApi.getUser);
+router.get("/user", spotifyApi.getUser);
 
 /**
  * spotify playlist api
  */
 // Get user's playlists
-router.post("/playlists", spotifyPlaylistApi.getPlaylists);
+router.get("/playlists", spotifyPlaylistApi.getPlaylists);
 
 // Create new playlist
-app.post("/create", spotifyPlaylistApi.create);
+router.get("/create", spotifyPlaylistApi.create);
 
 // Unfollow a playlist
-app.post("/unfollow", spotifyPlaylistApi.unfollow);
+router.get("/unfollow", spotifyPlaylistApi.unfollow);
 
 // Follow a playlist
-app.post("/follow", spotifyPlaylistApi.follow);
+router.get("/follow", spotifyPlaylistApi.follow);
 
 /**
  * spotify track api
  */
 // Add tracks to a specific position in a playlist
-app.post("/add", spotifyTrackApi.add);
+router.get("/add", spotifyTrackApi.add);
 
 // Remove all occurances of a track from a playlist
-app.post("/remove", spotifyTrackApi.remove);
+router.get("/remove", spotifyTrackApi.remove);
 
 // Get tracks in a playlist
-app.post("/tracks", spotifyTrackApi.getTracks);
+router.get("/tracks", spotifyTrackApi.getTracks);
 
 /**
  * spotify search api
  */
 // Search general playlists
-app.post("/search-playlists", spotifySearchApi.searchPlaylists);
+router.get("/search-playlists", spotifySearchApi.searchPlaylists);
 
 // Search general tracks
-app.post("/search-tracks", spotifySearchApi.searchTracks);
+router.get("/search-tracks", spotifySearchApi.searchTracks);
 
 /**
  * lastfm api
  */
 // Get associated genres for an artist
-app.post("/genres", lastfm.getArtistsGenres);
+router.get("/genres", lastfm.getArtistsGenres);
 
 // Reset associated genres for all artists
-app.post("/reset-genres", lastfm.resetArtistGenres);
+router.get("/reset-genres", lastfm.resetArtistGenres);
 
 /**
  * spotify liked api
