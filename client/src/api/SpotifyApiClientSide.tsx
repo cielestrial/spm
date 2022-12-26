@@ -28,7 +28,8 @@ export const rateLimitSpotify = async (res: AxiosResponse<any, any>) => {
 export const getToken = async (
   codeRef: React.MutableRefObject<string | null>
 ) => {
-  if (codeRef.current === null) throw new Error();
+  if (codeRef.current === null) throw new Error("Null code");
+  console.log("touch grass");
   try {
     const res = await axios.post(server + "/login", { code: codeRef.current });
     console.log("what are you?", res.data);
