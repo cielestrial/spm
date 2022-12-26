@@ -4,12 +4,12 @@ const path = require("path");
 const express = require("express");
 const cors = require("cors");
 const bodyParser = require("body-parser");
-const spotifyApi = require("./apis/spotifyApi.cjs");
-const spotifyPlaylistApi = require("./apis/spotifyPlaylistApi.cjs");
-const spotifyTrackApi = require("./apis/spotifyTrackApi.cjs");
-const spotifySearchApi = require("./apis/spotifySearchApi.cjs");
+const spotifyApi = require("./spotifyApi.cjs");
+const spotifyPlaylistApi = require("./spotifyPlaylistApi.cjs");
+const spotifyTrackApi = require("./spotifyTrackApi.cjs");
+const spotifySearchApi = require("./spotifySearchApi.cjs");
 //const spotifyLikedApi = require("./api/spotifyLikedApi.cjs");
-const lastfm = require("./apis/lastfm.cjs");
+const lastfm = require("./lastfm.cjs");
 
 const app = express();
 app.use(cors());
@@ -24,12 +24,6 @@ const server = app.listen(app.get("port"), function () {
 
 */
 const router = express.Router();
-
-router.get("/", (req, res) => {
-  res.json("Hello World");
-  // res.sendFile(path.join(__dirname, "views/page.html"));
-});
-
 /**
  * spotify api
  */
