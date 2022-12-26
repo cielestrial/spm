@@ -1,5 +1,5 @@
 import { Button, Center, Loader, Stack, Title } from "@mantine/core";
-import { useContext, useEffect } from "react";
+import { useContext, useEffect, useLayoutEffect } from "react";
 import { SlSocialSpotify } from "react-icons/sl";
 import { StateContext } from "../api/ContextProvider";
 import { pageHeight, pagePadding } from "../App";
@@ -24,7 +24,7 @@ const AUTH_URL =
   "client_id=d03dd28afb3f40d1aad5e6a45d9bff7f" +
   "&response_type=code" +
   scope +
-  "&redirect_uri=https://yspm-ccnd.onrender.com/" +
+  "&redirect_uri=https://yspm-ccnd.onrender.com" +
   "&state=" +
   crypto.randomUUID() +
   "&show_dialog=true";
@@ -34,12 +34,15 @@ const LandingPage = () => {
   useEffect(() => {
     context.setCurrentPage("landing");
     context.setShowHeader(false);
+  }, []);
+
+  useLayoutEffect(() => {
     const searchParam = new URLSearchParams(window.location.search).get("code");
     if (searchParam !== null) {
       context.codeRef.current = searchParam;
       context.navigate.current("/loading");
     }
-  }, []);
+  });
 
   return (
     <Stack
