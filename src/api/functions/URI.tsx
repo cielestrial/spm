@@ -1,5 +1,5 @@
 const production = {
-  url: "https://yspm.netlify.app",
+  url: "https://yspm.vercel.app/",
 };
 const development = {
   url: "http://localhost:8888",

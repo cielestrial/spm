@@ -7,7 +7,7 @@ import {
   uniqueType,
 } from "./SpotifyApiClientTypes";
 
-export const server = envUri.url + "/.netlify/functions/api";
+export const server = envUri.url + "/server";
 export const getLimit = 50;
 export const postLimit = 100;
 export const maxOffset = 1000;
