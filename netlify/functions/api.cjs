@@ -21,7 +21,9 @@ const server = app.listen(app.get("port"), function () {
   console.log("listening on port ", server.address().port);
 });
 
-app.get("/", (req, res) => {
+const router = express.Router();
+
+router.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "views/page.html"));
 });
 
@@ -29,57 +31,58 @@ app.get("/", (req, res) => {
  * spotify api
  */
 // Get Access Token
-app.post("/login", spotifyApi.login);
+router.post("/login", spotifyApi.login);
 
 // Get UserId, display name, and country
-app.post("/user", spotifyApi.getUser);
+router.post("/user", spotifyApi.getUser);
 
 /**
  * spotify playlist api
  */
 // Get user's playlists
-app.post("/playlists", spotifyPlaylistApi.getPlaylists);
+router.post("/playlists", spotifyPlaylistApi.getPlaylists);
 
 // Create new playlist
-app.post("/create", spotifyPlaylistApi.create);
+router.post("/create", spotifyPlaylistApi.create);
 
 // Unfollow a playlist
-app.post("/unfollow", spotifyPlaylistApi.unfollow);
+router.post("/unfollow", spotifyPlaylistApi.unfollow);
 
 // Follow a playlist
-app.post("/follow", spotifyPlaylistApi.follow);
+router.post("/follow", spotifyPlaylistApi.follow);
 
 /**
  * spotify track api
  */
 // Add tracks to a specific position in a playlist
-app.post("/add", spotifyTrackApi.add);
+router.post("/add", spotifyTrackApi.add);
 
 // Remove all occurances of a track from a playlist
-app.post("/remove", spotifyTrackApi.remove);
+router.post("/remove", spotifyTrackApi.remove);
 
 // Get tracks in a playlist
-app.post("/tracks", spotifyTrackApi.getTracks);
+router.post("/tracks", spotifyTrackApi.getTracks);
 
 /**
  * spotify search api
  */
 // Search general playlists
-app.post("/search-playlists", spotifySearchApi.searchPlaylists);
+router.post("/search-playlists", spotifySearchApi.searchPlaylists);
 
 // Search general tracks
-app.post("/search-tracks", spotifySearchApi.searchTracks);
+router.post("/search-tracks", spotifySearchApi.searchTracks);
 
 /**
  * lastfm api
  */
 // Get associated genres for an artist
-app.post("/genres", lastfm.getArtistsGenres);
+router.post("/genres", lastfm.getArtistsGenres);
 
 // Reset associated genres for all artists
-app.post("/reset-genres", lastfm.resetArtistGenres);
+router.post("/reset-genres", lastfm.resetArtistGenres);
 
 /**
  * spotify liked api
  */
-module.exports.handler = app;
+app.use("/.netlify/functions/api", router);
+module.exports.handler = server;
