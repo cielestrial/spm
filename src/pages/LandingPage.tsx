@@ -3,7 +3,7 @@ import { useContext, useEffect } from "react";
 import { SlSocialSpotify } from "react-icons/sl";
 import { StateContext } from "../api/ContextProvider";
 import { envUri } from "../api/functions/URI";
-import { getCode, pageHeight, pagePadding } from "../App";
+import { pageHeight, pagePadding } from "../App";
 
 const scope =
   "&scope=" +
@@ -32,31 +32,27 @@ const AUTH_URL =
   crypto.randomUUID() +
   "&show_dialog=true";
 
-export let code: string | null;
-export const setCode = (newCode: string | null) => {
-  code = newCode;
-};
-
 const LandingPage = () => {
   const context = useContext(StateContext);
+
   useEffect(() => {
     context.setCurrentPage("landing");
     context.setShowHeader(false);
     return () => {
-      if (getCode() !== null) {
-        setCode(getCode());
+      if (context.getCode() !== null) {
+        context.setCode(context.getCode());
       }
     };
   }, []);
 
   useEffect(() => {
-    if (getCode() !== null) {
-      console.log(code);
+    if (context.getCode() !== null) {
+      console.log(context.code);
       context.navigate.current("/loading");
     }
-  }, [code]);
+  }, [context.code]);
 
-  if (getCode() !== null) {
+  if (context.getCode() !== null) {
     return (
       <Center h={pageHeight} pt={pagePadding} className="loading">
         <Loader size="lg" />

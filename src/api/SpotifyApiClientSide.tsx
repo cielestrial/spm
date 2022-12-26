@@ -1,5 +1,4 @@
 import axios, { AxiosResponse } from "axios";
-import { code } from "../pages/LandingPage";
 import { server } from "./ApiClientData";
 import { setRetryAfterSpotify } from "./QueryApi";
 import { userInfoType } from "./SpotifyApiClientTypes";
@@ -14,7 +13,6 @@ export const rateLimitSpotify = async (res: AxiosResponse<any, any>) => {
       "Rate limit hit for spotify. Wait for " + res.data.retryAfter
     );
   } else if (res.data.errorCode === 400 || res.data.errorCode === 401) {
-    await getToken();
     throw new Error(
       "Token expired and could not be refreshed." +
         "\n" +
@@ -27,7 +25,7 @@ export const rateLimitSpotify = async (res: AxiosResponse<any, any>) => {
  * Get access token
  * @returns
  */
-export const getToken = async () => {
+export const getToken = async (code: string | null) => {
   if (code === null) throw new Error();
   try {
     const res = await axios.post(server + "/login", { code });
