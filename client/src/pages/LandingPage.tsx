@@ -25,8 +25,6 @@ const AUTH_URL =
   "&response_type=code" +
   scope +
   "&redirect_uri=https://yspm-ccnd.onrender.com/index.html" +
-  "&state=" +
-  crypto.randomUUID() +
   "&show_dialog=true";
 
 const LandingPage = () => {

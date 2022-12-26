@@ -1,3 +1,4 @@
+const { json } = require("body-parser");
 const SpotifyWebApi = require("spotify-web-api-node");
 const spotifyApi = new SpotifyWebApi({
   redirectUri: "https://yspm-ccnd.onrender.com/index.html",
@@ -8,9 +9,9 @@ const spotifyApi = new SpotifyWebApi({
 const maxGetLimit = 50;
 const maxPostLimit = 100;
 const maxOffset = 1000;
-let accessToken;
-let refreshToken;
-let expriresIn;
+let accessToken = { value: "" };
+let refreshToken = { value: "" };
+let expriresIn = { value: "" };
 let userId = { value: "" };
 let country = { value: "" };
 let premium = { value: "" };
@@ -36,9 +37,9 @@ const rateLimit = (err, res) => {
     spotifyApi
       .refreshAccessToken()
       .then((data) => {
-        accessToken = data.body.access_token;
-        expriresIn = data.body.expires_in;
-        spotifyApi.setAccessToken(accessToken);
+        accessToken.value = data.body.access_token;
+        expriresIn.value = data.body.expires_in;
+        spotifyApi.setAccessToken(accessToken.value);
         res.json(true);
       })
       .catch((err) => {
@@ -61,15 +62,16 @@ const login = (req, res) => {
   spotifyApi
     .authorizationCodeGrant(code)
     .then((data) => {
-      accessToken = data.body.access_token;
-      refreshToken = data.body.refresh_token;
-      expriresIn = data.body.expires_in;
-      spotifyApi.setAccessToken(accessToken);
-      spotifyApi.setRefreshToken(refreshToken);
+      accessToken.value = data.body.access_token;
+      refreshToken.value = data.body.refresh_token;
+      expriresIn.value = data.body.expires_in;
+      spotifyApi.setAccessToken(accessToken.value);
+      spotifyApi.setRefreshToken(refreshToken.value);
       res.json(true);
     })
     .catch((err) => {
-      rateLimit(err, res);
+      console.error("Something went wrong with auth\n", err);
+      res.json(err);
     });
 };
 
