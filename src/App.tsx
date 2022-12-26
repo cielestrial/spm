@@ -15,9 +15,6 @@ const GenreManager = lazy(() => import("./pages/GenreManager"));
 import { dashboardRefType } from "./components/Nav/SearchBar/SearchBarTypes";
 import { fadeIn, slideDown } from "./css/Keyframes";
 
-export const getCode = () =>
-  new URLSearchParams(window.location.search).get("code");
-
 export const pageHeight = "calc(85vh - 60px)";
 export const pagePadding = "calc(60px + 2em)";
 
@@ -79,7 +76,7 @@ function App() {
               path="dashboard"
               element={<Dashboard ref={dashboardRef} />}
             />
-            <Route path="genres" element={<GenreManager />} />
+            <Route path="stats" element={<GenreManager />} />
           </Routes>
         </Suspense>
       </MyScrollArea>

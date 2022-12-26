@@ -37,7 +37,7 @@ const GenreManager = () => {
   }, [isLoading]);
 
   useEffect(() => {
-    context.setCurrentPage("genres");
+    context.setCurrentPage("stats");
     setLoading(true);
     const whitelist: TransferListItem[] = getWhitelist();
     const blacklist: TransferListItem[] = getBlacklist();

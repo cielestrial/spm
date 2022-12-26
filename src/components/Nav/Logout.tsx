@@ -1,7 +1,6 @@
 import { Button } from "@mantine/core";
 import { useContext } from "react";
 import { StateContext } from "../../api/ContextProvider";
-import { setCode } from "../../pages/LandingPage";
 
 type propType = {
   height: string | number | undefined;
@@ -21,7 +20,7 @@ const Logout = (props: propType) => {
       size="xl"
       component="a"
       onClick={async () => {
-        setCode(null);
+        context.codeRef.current = null;
         context.setUserInfo(null);
         context.setToken(false);
         context.navigate.current("/");

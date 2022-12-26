@@ -1,5 +1,5 @@
 To Do:    
-  1) Host on Netify
+  1) Host on Netify (new address, production build setups,and minimize files css etc) 
   2) Liked Songs
 
 Performance:    

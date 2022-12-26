@@ -1,7 +1,8 @@
 {
   "name": "yspm",
   "private": true,
-  "version": "4.7.1",
+  "homepage": "https://yspm.netlify.app",
+  "version": "4.7.2",
   "type": "module",
   "scripts": {
     "start": "nodemon netlify/functions/main.cjs",
@@ -28,6 +29,7 @@
     "react-icons": "^4.6.0",
     "react-router-dom": "^6.4.3",
     "sass": "^1.56.1",
+    "serverless-http": "^3.1.0",
     "spotify-web-api-node": "^5.0.2"
   },
   "devDependencies": {
@@ -37,6 +39,7 @@
     "@types/react-dom": "^18.0.8",
     "@types/spotify-web-api-node": "^5.0.7",
     "@vitejs/plugin-react": "^2.2.0",
+    "netlify-cli": "^12.5.0",
     "nodemon": "^2.0.20",
     "prettier": "^2.8.1",
     "typescript": "^4.6.4",
