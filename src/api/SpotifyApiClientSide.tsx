@@ -25,9 +25,12 @@ export const rateLimitSpotify = async (res: AxiosResponse<any, any>) => {
  * Get access token
  * @returns
  */
-export const getToken = async (code: string | null) => {
-  if (code === null) throw new Error();
+export const getToken = async (
+  codeRef: React.MutableRefObject<string | null>
+) => {
+  if (codeRef.current === null) throw new Error();
   try {
+    const code = codeRef.current;
     const res = await axios.post(server + "/login", { code });
     if (res.data !== true) return false;
   } catch (err) {

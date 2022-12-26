@@ -20,7 +20,7 @@ const Logout = (props: propType) => {
       size="xl"
       component="a"
       onClick={async () => {
-        context.setCode(null);
+        context.code.current = null;
         context.setUserInfo(null);
         context.setToken(false);
         context.navigate.current("/");

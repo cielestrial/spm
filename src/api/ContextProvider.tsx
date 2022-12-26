@@ -15,8 +15,7 @@ export const StateContext = createContext({} as stateContextType);
 type stateContextType = {
   theme: MantineTheme;
   getCode: () => string | null;
-  code: string | null;
-  setCode: React.Dispatch<React.SetStateAction<string | null>>;
+  code: React.MutableRefObject<string | null>;
   navigate: React.MutableRefObject<NavigateFunction>;
   playlistsQ: React.MutableRefObject<playlistsType>;
   selectedPlaylist: React.MutableRefObject<playlistType | undefined>;
@@ -41,7 +40,7 @@ type StateProviderProps = {
 export function StateProvider({ children }: StateProviderProps) {
   const theme = useMantineTheme();
   const getCode = () => new URLSearchParams(window.location.search).get("code");
-  const [code, setCode] = useState<string | null>(null);
+  const code = useRef<string | null>(null);
   const navigate = useRef(useNavigate());
   const playlistsQ = useRef<playlistsType>(undefined);
   const selectedPlaylist = useRef<playlistType>();
@@ -80,7 +79,6 @@ export function StateProvider({ children }: StateProviderProps) {
         theme,
         getCode,
         code,
-        setCode,
         navigate,
         token,
         setToken,
