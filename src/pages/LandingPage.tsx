@@ -42,10 +42,12 @@ const LandingPage = () => {
   useEffect(() => {
     context.setCurrentPage("landing");
     context.setShowHeader(false);
-    context.navigate.current("/loading");
-    if (getCode() !== null) {
-      setCode(getCode());
-    }
+    return () => {
+      if (getCode() !== null) {
+        setCode(getCode());
+        context.navigate.current("/loading");
+      }
+    };
   }, []);
 
   if (getCode() !== null) {
