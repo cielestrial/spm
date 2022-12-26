@@ -1,4 +1,4 @@
-const { spotifyApi, rateLimit, maxGetLimit } = require("./spotifyApi.js");
+const { spotifyApi, rateLimit, maxGetLimit } = require("./spotifyApi.cjs");
 
 const getArtistsGenres = (req, res) => {
   const artists = req.body.artists;

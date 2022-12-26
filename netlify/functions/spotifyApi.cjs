@@ -3,9 +3,9 @@ const production = {
   url: "https://yspm.vercel.app/",
 };
 const development = {
-  url: "http://localhost:8888",
+  url: "http://localhost:3000",
 };
-const envUri = production;
+const envUri = development;
 
 const spotifyApi = new SpotifyWebApi({
   redirectUri: envUri.url,

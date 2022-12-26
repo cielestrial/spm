@@ -1,11 +1,11 @@
 {
   "name": "yspm",
   "private": true,
-  "homepage": "https://yspm.netlify.app/",
+  "homepage": "https://yspm.netlify.app",
   "version": "4.7.2",
   "type": "module",
   "scripts": {
-    "start": "nodemon api",
+    "start": "nodemon netlify\\functions\\api.cjs",
     "dev": "vite --host --port 3000",
     "build": "tsc && vite build",
     "preview": "vite preview",

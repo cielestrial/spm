@@ -1,4 +1,4 @@
-const { spotifyApi, rateLimit, maxGetLimit } = require("./spotifyApi.js");
+const { spotifyApi, rateLimit, maxGetLimit } = require("./spotifyApi.cjs");
 
 /**
  * List of endpoints:

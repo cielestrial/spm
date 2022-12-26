@@ -4,7 +4,7 @@ const {
   country,
   maxGetLimit,
   maxPostLimit,
-} = require("./spotifyApi.js");
+} = require("./spotifyApi.cjs");
 /**
  * List of endpoints:
  *
