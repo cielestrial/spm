@@ -1,4 +1,5 @@
 require("dotenv").config();
+const serverless = require("serverless-http");
 const path = require("path");
 const express = require("express");
 const cors = require("cors");
@@ -14,17 +15,19 @@ const app = express();
 app.use(cors());
 app.use(bodyParser.json());
 
-app.use(express.static(path.join(__dirname, "build")));
+//app.use(express.static(path.join(__dirname, "build")));
+/*;
 app.set("port", process.env.PORT || 8080);
-
 const server = app.listen(app.get("port"), function () {
   console.log("listening on port ", server.address().port);
 });
 
+*/
 const router = express.Router();
 
 router.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "views/page.html"));
+  res.json("Hello World");
+  // res.sendFile(path.join(__dirname, "views/page.html"));
 });
 
 /**
@@ -85,4 +88,4 @@ router.post("/reset-genres", lastfm.resetArtistGenres);
  * spotify liked api
  */
 app.use("/.netlify/functions/api", router);
-module.exports.handler = server;
+module.exports.handler = serverless(app);
