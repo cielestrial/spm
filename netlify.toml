@@ -1,7 +1,5 @@
 [build]
-  command="yarn build"
   functions="server"
-  publish="build"
   
 [[redirects]]
   from="/server/*"
