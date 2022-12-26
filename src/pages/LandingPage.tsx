@@ -39,20 +39,20 @@ const LandingPage = () => {
     context.setCurrentPage("landing");
     context.setShowHeader(false);
     if (context.getCode() !== null) {
-      context.code.current = context.getCode();
+      context.codeRef.current = context.getCode();
     }
   }, []);
 
   useEffect(() => {
     if (context.getCode() !== null) {
       console.log(
-        context.code.current,
+        context.codeRef.current,
         window.location.search,
         context.getCode()
       );
       context.navigate.current("/loading");
     }
-  }, [context.code.current]);
+  }, [context.codeRef.current]);
 
   if (context.getCode() !== null) {
     return (
