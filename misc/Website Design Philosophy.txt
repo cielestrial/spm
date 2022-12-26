@@ -1,0 +1,47 @@
+I started out with game design, so my approach to UI has always been a minimilist one.
+What information is so important it must ALWAYS be displayed?
+What information can be poppped in to display when needed?
+Avoid clutter, keep it clean and simple, don't bombard with a lot information or choices.
+
+Search:
+1 search bar on top.
+Searches all followed playlists
+If playlist is not in followed Search General button or option
+Options: Playlists/Tracks
+Playlists: Followed then unfollowed
+Tracks: Library then unFollowed
+When a track is selected show if they are any playlists you follow which that track is in.
+
+Unfollow:
+Unfollow button bottom right
+Unfollows current selected playlist if already followed
+Popup for confirmation
+If not followed it becomes follow button
+
+Create:
+Create button bottom left
+Textbox popup type in name and hit enter
+
+Manage Subscriptions (Contents):
+Replaces add and modify/edit features.
+Select a playlist then select followed(/unfollowed?) playlists to subscribe to
+Genres from library can also be subscribed too
+
+Update: 
+Update button
+Updates all playlists by adding the tracks from the playlists or genres they are subscribed too
+Then removes duplicates
+
+Local storage feature: 
+On load:
+Compare playlist snapshot id
+snapshot
+: 
+"MTY2OTkwODk2MiwwMDAwMDAwMDBiNjFiY2QxNTNkMTdkZjM2MDAwYmUyNjE3M2RmODE5"
+
+Save:
+playlistKey: metadata, [subscribed genres], [subscribed playlists]
+
+
+datasets:
+  genreMasterList, artistGenreMasterList,(whitelist, blacklist)
