@@ -7,7 +7,7 @@
   "scripts": {
     "start": "nodemon api",
     "dev": "vite --host --port 3000",
-    "build": "tsc && vite build src && vite build api",
+    "build": "tsc && vite build",
     "preview": "vite preview",
     "format": "prettier --write **/*.{ts,tsx,cjs}"
   },
