@@ -47,7 +47,7 @@ const LandingPage = () => {
 
   useEffect(() => {
     if (context.getCode() !== null) {
-      console.log(context.code);
+      console.log(context.code, window.location.search, context.getCode);
       context.navigate.current("/loading");
     }
   }, [context.code]);
