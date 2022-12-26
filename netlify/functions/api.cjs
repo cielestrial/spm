@@ -82,3 +82,4 @@ app.post("/reset-genres", lastfm.resetArtistGenres);
 /**
  * spotify liked api
  */
+module.exports.handler = app;
