@@ -35,9 +35,11 @@ const LoadingPage = () => {
     context.setShowHeader(false);
     (async () => {
       setLoading(true);
-      const tokenData = (await useSpotifyQuery(getToken, 0)) as
-        | boolean
-        | undefined;
+      const tokenData = (await useSpotifyQuery(
+        getToken,
+        0,
+        context.codeRef
+      )) as boolean | undefined;
       if (tokenData !== undefined && tokenData !== false) {
         context.setToken(tokenData);
         const userData = (await useSpotifyQuery(

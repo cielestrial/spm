@@ -2,7 +2,7 @@ import { Button, Center, Loader, Stack, Title } from "@mantine/core";
 import { useContext, useEffect } from "react";
 import { SlSocialSpotify } from "react-icons/sl";
 import { StateContext } from "../api/ContextProvider";
-import { getCode, pageHeight, pagePadding } from "../App";
+import { pageHeight, pagePadding } from "../App";
 
 const scope =
   "&scope=" +
@@ -24,59 +24,42 @@ const AUTH_URL =
   "client_id=d03dd28afb3f40d1aad5e6a45d9bff7f" +
   "&response_type=code" +
   scope +
-  "&redirect_uri=https://yspm-ccnd.onrender.com" +
+  "&redirect_uri=https://yspm-ccnd.onrender.com/callback/" +
   "&state=" +
   crypto.randomUUID() +
   "&show_dialog=true";
-
-export let code: string | null;
-export const setCode = (newCode: string | null) => {
-  code = newCode;
-};
 
 const LandingPage = () => {
   const context = useContext(StateContext);
   useEffect(() => {
     context.setCurrentPage("landing");
     context.setShowHeader(false);
-    if (getCode() !== null) {
-      setCode(getCode());
-      context.navigate.current("/loading");
-    }
   }, []);
 
-  if (getCode() !== null) {
-    return (
-      <Center h={pageHeight} pt={pagePadding} className="loading">
-        <Loader size="lg" />
-      </Center>
-    );
-  } else {
-    return (
-      <Stack
-        mt="calc(50vh - 60px - 1em)"
-        align="center"
-        justify="center"
-        spacing="lg"
+  return (
+    <Stack
+      mt="calc(50vh - 60px - 1em)"
+      align="center"
+      justify="center"
+      spacing="lg"
+    >
+      <Title ta="center" order={1}>
+        Welcome to YSPM
+      </Title>
+      <Button
+        variant="filled"
+        w="20%"
+        miw="fit-content"
+        radius="xl"
+        size="md"
+        component="a"
+        href={AUTH_URL}
+        leftIcon={<SlSocialSpotify size={"24px"} />}
       >
-        <Title ta="center" order={1}>
-          Welcome to YSPM
-        </Title>
-        <Button
-          variant="filled"
-          w="20%"
-          miw="fit-content"
-          radius="xl"
-          size="md"
-          component="a"
-          href={AUTH_URL}
-          leftIcon={<SlSocialSpotify size={"24px"} />}
-        >
-          Log In With Spotify
-        </Button>
-      </Stack>
-    );
-  }
+        Log In With Spotify
+      </Button>
+    </Stack>
+  );
 };
 
 export default LandingPage;

@@ -8,12 +8,18 @@ import {
   userInfoType,
 } from "./SpotifyApiClientTypes";
 
-export type pagesType = "landing" | "loading" | "dashboard" | "genres";
+export type pagesType =
+  | "landing"
+  | "callback"
+  | "loading"
+  | "dashboard"
+  | "genres";
 
 export const StateContext = createContext({} as stateContextType);
 
 type stateContextType = {
   theme: MantineTheme;
+  codeRef: React.MutableRefObject<string | null>;
   navigate: React.MutableRefObject<NavigateFunction>;
   playlistsQ: React.MutableRefObject<playlistsType>;
   selectedPlaylist: React.MutableRefObject<playlistType | undefined>;
@@ -38,6 +44,7 @@ type StateProviderProps = {
 export function StateProvider({ children }: StateProviderProps) {
   const theme = useMantineTheme();
   const navigate = useRef(useNavigate());
+  const codeRef = useRef<string | null>(null);
   const playlistsQ = useRef<playlistsType>(undefined);
   const selectedPlaylist = useRef<playlistType>();
   const [showHeader, setShowHeader] = useState(false);
@@ -73,6 +80,7 @@ export function StateProvider({ children }: StateProviderProps) {
     <StateContext.Provider
       value={{
         theme,
+        codeRef,
         navigate,
         token,
         setToken,
