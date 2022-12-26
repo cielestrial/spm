@@ -1,8 +1,2 @@
 [build]
   functions="server"
-  
-[[redirects]]
-  from="/server/*"
-  to="/.netlify/functions/api/"
-  status=200
-  force=true

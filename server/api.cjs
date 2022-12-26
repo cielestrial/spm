@@ -106,5 +106,5 @@ router.post("/genres", lastfm.getArtistsGenres);
  * spotify liked api
  */
 
-app.use("/server", router);
+app.use("/.netlify/functions/api", router);
 module.exports.handler = serverless(app);
