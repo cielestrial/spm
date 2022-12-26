@@ -3,10 +3,10 @@ const express = require("express");
 const serverless = require("serverless-http");
 const cors = require("cors");
 const bodyParser = require("body-parser");
-const spotifyApi = require("./apis/spotifyApi.cjs");
-const spotifyPlaylistApi = require("./apis/spotifyPlaylistApi.cjs");
-const spotifyTrackApi = require("./apis/spotifyTrackApi.cjs");
-const spotifySearchApi = require("./apis/spotifySearchApi.cjs");
+const spotifyApi = require("./apis/spotifyApi.js");
+const spotifyPlaylistApi = require("./apis/spotifyPlaylistApi.js");
+const spotifyTrackApi = require("./apis/spotifyTrackApi.js");
+const spotifySearchApi = require("./apis/spotifySearchApi.js");
 //const spotifyLikedApi = require("./apis/spotifyLikedApi.cjs");
 const lastfm = require("./apis/lastfm.cjs");
 
@@ -107,4 +107,5 @@ router.post("/genres", lastfm.getArtistsGenres);
  */
 
 app.use("/server", router);
-module.exports.handler = serverless(app);
+
+export default handler = serverless(app);
