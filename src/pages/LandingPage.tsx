@@ -24,7 +24,7 @@ const AUTH_URL =
   "client_id=d03dd28afb3f40d1aad5e6a45d9bff7f" +
   "&response_type=code" +
   scope +
-  "&redirect_uri=http://localhost:3000" +
+  "&redirect_uri=https://yspm-ccnd.onrender.com/" +
   "&state=" +
   crypto.randomUUID() +
   "&show_dialog=true";
