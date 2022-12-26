@@ -45,10 +45,16 @@ const LandingPage = () => {
     return () => {
       if (getCode() !== null) {
         setCode(getCode());
-        context.navigate.current("/loading");
       }
     };
   }, []);
+
+  useEffect(() => {
+    if (getCode() !== null) {
+      console.log(code);
+      context.navigate.current("/loading");
+    }
+  }, [code]);
 
   if (getCode() !== null) {
     return (
