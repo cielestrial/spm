@@ -5,7 +5,7 @@ const production = {
 const development = {
   url: "http://localhost:8888",
 };
-const envUri = development;
+const envUri = production;
 
 const spotifyApi = new SpotifyWebApi({
   redirectUri: envUri.url,

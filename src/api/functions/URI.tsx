@@ -4,4 +4,4 @@ const production = {
 const development = {
   url: "http://localhost:8888",
 };
-export const envUri = development;
+export const envUri = production;
