@@ -8,12 +8,6 @@ const Callback = () => {
   useEffect(() => {
     context.setCurrentPage("callback");
     context.setShowHeader(false);
-
-    const searchParam = new URLSearchParams(window.location.search).get("code");
-    if (searchParam !== null) {
-      context.codeRef.current = searchParam;
-      context.navigate.current("/loading");
-    }
   }, []);
   return (
     <Center h={pageHeight} pt={pagePadding} className="loading">

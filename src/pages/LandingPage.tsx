@@ -24,7 +24,7 @@ const AUTH_URL =
   "client_id=d03dd28afb3f40d1aad5e6a45d9bff7f" +
   "&response_type=code" +
   scope +
-  "&redirect_uri=https://yspm-ccnd.onrender.com/callback/" +
+  "&redirect_uri=https://yspm-ccnd.onrender.com/" +
   "&state=" +
   crypto.randomUUID() +
   "&show_dialog=true";
@@ -34,6 +34,11 @@ const LandingPage = () => {
   useEffect(() => {
     context.setCurrentPage("landing");
     context.setShowHeader(false);
+    const searchParam = new URLSearchParams(window.location.search).get("code");
+    if (searchParam !== null) {
+      context.codeRef.current = searchParam;
+      context.navigate.current("/loading");
+    }
   }, []);
 
   return (
