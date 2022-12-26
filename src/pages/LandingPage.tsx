@@ -3,6 +3,7 @@ import { useContext, useEffect, useLayoutEffect } from "react";
 import { SlSocialSpotify } from "react-icons/sl";
 import { StateContext } from "../api/ContextProvider";
 import { pageHeight, pagePadding } from "../App";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 
 const scope =
   "&scope=" +
@@ -31,18 +32,18 @@ const AUTH_URL =
 
 const LandingPage = () => {
   const context = useContext(StateContext);
+  const params = useLocation();
   useEffect(() => {
     context.setCurrentPage("landing");
     context.setShowHeader(false);
   }, []);
 
-  useLayoutEffect(() => {
-    const searchParam = new URLSearchParams(window.location.search).get("code");
-    if (searchParam !== null) {
-      context.codeRef.current = searchParam;
+  useEffect(() => {
+    if (params.search.startsWith("?code=")) {
+      context.codeRef.current = params.search.substring(6);
       context.navigate.current("/loading");
     }
-  });
+  }, []);
 
   return (
     <Stack
