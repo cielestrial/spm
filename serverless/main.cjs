@@ -3,12 +3,12 @@ const path = require("path");
 const express = require("express");
 const cors = require("cors");
 const bodyParser = require("body-parser");
-const spotifyApi = require("../netlify/functions/api/spotifyApi.cjs");
-const spotifyPlaylistApi = require("../netlify/functions/api/spotifyPlaylistApi.cjs");
-const spotifyTrackApi = require("../netlify/functions/api/spotifyTrackApi.cjs");
-const spotifySearchApi = require("../netlify/functions/api/spotifySearchApi.cjs");
-//const spotifyLikedApi = require("./api/spotifyLikedApi.cjs");
-const lastfm = require("../netlify/functions/api/lastfm.cjs");
+const spotifyApi = require("./apis/spotifyApi.cjs");
+const spotifyPlaylistApi = require("./apis/spotifyPlaylistApi.cjs");
+const spotifyTrackApi = require("./apis/spotifyTrackApi.cjs");
+const spotifySearchApi = require("./apis/spotifySearchApi.cjs");
+//const spotifyLikedApi = require("./apis/spotifyLikedApi.cjs");
+const lastfm = require("./apis/lastfm.cjs");
 
 const app = express();
 app.use(cors());
