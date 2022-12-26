@@ -1,4 +1,3 @@
-require("dotenv").config();
 const path = require("path");
 const express = require("express");
 const serverless = require("serverless-http");
@@ -19,69 +18,93 @@ app.use(express.static(path.join(__dirname, "build")));
 app.set("port", process.env.PORT || 8080);
 
 const router = express.Router();
-app.use("/.netlify/functions/api", router);
 
 router.get("/", (req, res) => {
-  res.send("Hi from " + __dirname);
-  res.sendFile(path.join(__dirname, "views/page.html")); //"/var/task/server/apis/"
+  res.send(
+    "<!DOCTYPE html>" +
+      "<head>" +
+      "<style>" +
+      "html {" +
+      "background-color: #2b3039;" +
+      "color: #00e344;" +
+      "display: grid;" +
+      "place-content: center;" +
+      "height: 100%;" +
+      "}" +
+      "h1," +
+      "h3," +
+      "h5 {" +
+      "text-align: center;" +
+      "margin: 0;" +
+      "padding: 0;" +
+      "margin-bottom: 1rem;" +
+      "}" +
+      "</style>" +
+      "</head>" +
+      "<html>" +
+      "<body>" +
+      "<h1>Your Spotify Playlist Manager</h1>" +
+      "<h3>Welcome to the YSPM Server</h3>" +
+      "<h5>By: Cielestrial</h5>" +
+      "</body>" +
+      "</html>"
+  );
 });
 
 /**
  * spotify api
  */
 // Get Access Token
-router.get("/login", spotifyApi.login);
+router.post("/login", spotifyApi.login);
 
 // Get UserId, display name, and country
-router.get("/user", spotifyApi.getUser);
+router.post("/user", spotifyApi.getUser);
 
 /**
  * spotify playlist api
  */
 // Get user's playlists
-router.get("/playlists", spotifyPlaylistApi.getPlaylists);
+router.post("/playlists", spotifyPlaylistApi.getPlaylists);
 
 // Create new playlist
-router.get("/create", spotifyPlaylistApi.create);
+router.post("/create", spotifyPlaylistApi.create);
 
 // Unfollow a playlist
-router.get("/unfollow", spotifyPlaylistApi.unfollow);
+router.post("/unfollow", spotifyPlaylistApi.unfollow);
 
 // Follow a playlist
-router.get("/follow", spotifyPlaylistApi.follow);
+router.post("/follow", spotifyPlaylistApi.follow);
 
 /**
  * spotify track api
  */
 // Add tracks to a specific position in a playlist
-router.get("/add", spotifyTrackApi.add);
+router.post("/add", spotifyTrackApi.add);
 
 // Remove all occurances of a track from a playlist
-router.get("/remove", spotifyTrackApi.remove);
+router.post("/remove", spotifyTrackApi.remove);
 
 // Get tracks in a playlist
-router.get("/tracks", spotifyTrackApi.getTracks);
+router.post("/tracks", spotifyTrackApi.getTracks);
 
 /**
  * spotify search api
  */
 // Search general playlists
-router.get("/search-playlists", spotifySearchApi.searchPlaylists);
+router.post("/search-playlists", spotifySearchApi.searchPlaylists);
 
 // Search general tracks
-router.get("/search-tracks", spotifySearchApi.searchTracks);
+router.post("/search-tracks", spotifySearchApi.searchTracks);
 
 /**
  * lastfm api
  */
 // Get associated genres for an artist
-router.get("/genres", lastfm.getArtistsGenres);
-
-// Reset associated genres for all artists
-router.get("/reset-genres", lastfm.resetArtistGenres);
+router.post("/genres", lastfm.getArtistsGenres);
 
 /**
  * spotify liked api
  */
 
+app.use("/server", router);
 module.exports.handler = serverless(app);

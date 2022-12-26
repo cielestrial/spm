@@ -1,12 +1,13 @@
 import { TransferListItem } from "@mantine/core";
 import { getGenreFromLabel } from "./functions/HelperFunctions";
+import { envUri } from "./functions/URI";
 import {
   artistInfoType,
   optionsType,
   uniqueType,
 } from "./SpotifyApiClientTypes";
 
-export const server = "https://yspm.netlify.app/.netlify/functions/api";
+export const server = envUri.url + "/server";
 export const getLimit = 50;
 export const postLimit = 100;
 export const maxOffset = 1000;

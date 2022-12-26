@@ -1,2 +1,10 @@
-[functions]
-  directory="server"
+[build]
+  command="yarn build"
+  functions="server"
+  publish="build"
+  
+[[redirects]]
+  from="/server/*"
+  to="/.netlify/functions/api"
+  status=200
+  force=true
