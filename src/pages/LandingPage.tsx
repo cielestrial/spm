@@ -38,11 +38,9 @@ const LandingPage = () => {
   useEffect(() => {
     context.setCurrentPage("landing");
     context.setShowHeader(false);
-    return () => {
-      if (context.getCode() !== null) {
-        context.setCode(context.getCode());
-      }
-    };
+    if (context.getCode() !== null) {
+      context.setCode(context.getCode());
+    }
   }, []);
 
   useEffect(() => {
