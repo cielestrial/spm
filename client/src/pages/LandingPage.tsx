@@ -33,6 +33,7 @@ const AUTH_URL =
 const LandingPage = () => {
   const context = useContext(StateContext);
   const params = useLocation();
+  context.navigate.current = useNavigate();
   useEffect(() => {
     context.setCurrentPage("landing");
     context.setShowHeader(false);

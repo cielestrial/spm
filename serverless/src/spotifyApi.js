@@ -112,7 +112,6 @@ module.exports = {
   getUser,
   rateLimit,
   spotifyApi,
-  userId,
   country,
   maxGetLimit,
   maxPostLimit,

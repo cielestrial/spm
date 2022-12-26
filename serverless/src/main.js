@@ -3,12 +3,12 @@ const path = require("path");
 const express = require("express");
 const cors = require("cors");
 const bodyParser = require("body-parser");
-const spotifyApi = require("./apis/spotifyApi.cjs");
-const spotifyPlaylistApi = require("./apis/spotifyPlaylistApi.cjs");
-const spotifyTrackApi = require("./apis/spotifyTrackApi.cjs");
-const spotifySearchApi = require("./apis/spotifySearchApi.cjs");
-//const spotifyLikedApi = require("./apis/spotifyLikedApi.cjs");
-const lastfm = require("./apis/lastfm.cjs");
+const spotifyApi = require("./spotifyApi.js");
+const spotifyPlaylistApi = require("./spotifyPlaylistApi.js");
+const spotifyTrackApi = require("./spotifyTrackApi.js");
+const spotifySearchApi = require("./spotifySearchApi.js");
+//const spotifyLikedApi = require("./apis/spotifyLikedApi.js");
+const spotifyArtistApi = require("./spotifyArtistApi.js");
 
 const app = express();
 app.use(cors());
@@ -74,10 +74,7 @@ app.post("/search-tracks", spotifySearchApi.searchTracks);
  * lastfm api
  */
 // Get associated genres for an artist
-app.post("/genres", lastfm.getArtistsGenres);
-
-// Reset associated genres for all artists
-app.post("/reset-genres", lastfm.resetArtistGenres);
+app.post("/genres", spotifyArtistApi.getArtistsGenres);
 
 /**
  * spotify liked api
