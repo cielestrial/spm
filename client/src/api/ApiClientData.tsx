@@ -6,7 +6,7 @@ import {
   uniqueType,
 } from "./SpotifyApiClientTypes";
 
-export const server = "https://yspm.onrender.com";
+export const server = "http://localhost:8080"; // "https://yspm.onrender.com";
 export const getLimit = 50;
 export const postLimit = 100;
 export const maxOffset = 1000;

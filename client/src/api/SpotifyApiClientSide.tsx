@@ -30,8 +30,8 @@ export const getToken = async (
 ) => {
   if (codeRef.current === null) throw new Error();
   try {
-    const code = codeRef.current;
-    const res = await axios.post(server + "/login", { code });
+    const res = await axios.post(server + "/login", { code: codeRef.current });
+    console.log("what are you?", res.data);
     if (res.data !== true) return false;
   } catch (err) {
     console.error("Something went wrong with getToken()\n", err);
