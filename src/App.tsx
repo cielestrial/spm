@@ -71,6 +71,7 @@ function App() {
         >
           <Routes>
             <Route path="/" element={<LandingPage />} />
+            <Route path="/index.html" element={<LandingPage />} />
             <Route path="loading" element={<LoadingPage />} />
             <Route
               path="dashboard"
