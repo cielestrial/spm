@@ -1,6 +1,6 @@
 const SpotifyWebApi = require("spotify-web-api-node");
 const spotifyApi = new SpotifyWebApi({
-  redirectUri: "http://localhost:3000",
+  redirectUri: "https://yspm.netlify.app",
   clientId: process.env.SPOTIFY_API_CLIENT,
   clientSecret: process.env.SPOTIFY_API_SECRET,
 });
