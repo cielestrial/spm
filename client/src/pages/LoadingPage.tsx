@@ -35,6 +35,7 @@ const LoadingPage = () => {
     context.setShowHeader(false);
     (async () => {
       setLoading(true);
+      console.log(context.codeRef.current);
       const tokenData = (await useSpotifyQuery(
         getToken,
         0,
@@ -56,8 +57,10 @@ const LoadingPage = () => {
   }, []);
 
   useEffect(() => {
-    if (context.token === false || context.userInfo === null)
+    if (context.token === false || context.userInfo === null) {
+      console.log("its me");
       context.navigate.current("/");
+    }
   }, [context.token, context.userInfo]);
 
   const getAll = useCallback(async () => {

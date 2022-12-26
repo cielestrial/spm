@@ -1,9 +1,8 @@
-import { Button, Center, Loader, Stack, Title } from "@mantine/core";
-import { useContext, useEffect, useLayoutEffect } from "react";
+import { Button, Stack, Title } from "@mantine/core";
+import { useContext, useEffect } from "react";
 import { SlSocialSpotify } from "react-icons/sl";
 import { StateContext } from "../api/ContextProvider";
-import { pageHeight, pagePadding } from "../App";
-import { useLocation, useNavigate, useParams } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
 const scope =
   "&scope=" +
@@ -44,8 +43,6 @@ const LandingPage = () => {
       context.codeRef.current = params.search.substring(
         params.search.indexOf("?code=") + 6
       );
-      console.log(params.search);
-      console.log(context.codeRef.current);
       context.navigate.current("/loading");
     }
   }, []);
