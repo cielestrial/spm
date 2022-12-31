@@ -7,12 +7,13 @@ import "./css/main.scss";
 import MyScrollArea from "./components/MyScrollArea";
 import LandingPage from "./pages/LandingPage";
 
+const LoadingPage = lazy(() => import("./pages/LoadingPage"));
+const Dashboard = lazy(() => import("./pages/Dashboard"));
+const NavBar = lazy(() => import("./components/Nav/NavBar"));
+const GenreManager = lazy(() => import("./pages/GenreManager"));
+
 import { dashboardRefType } from "./components/Nav/SearchBar/SearchBarTypes";
 import { fadeIn, slideDown } from "./css/Keyframes";
-import LoadingPage from "./pages/LoadingPage";
-import Dashboard from "./pages/Dashboard";
-import NavBar from "./components/Nav/NavBar";
-import GenreManager from "./pages/GenreManager";
 
 export const pageHeight = "calc(85vh - 60px)";
 export const pagePadding = "calc(60px + 2em)";

@@ -21,6 +21,15 @@ export const rateLimitSpotify = async (res: AxiosResponse<any, any>) => {
   }
 };
 
+export const wakeUp = async () => {
+  try {
+    const res = await axios.get(server + "/wakeup");
+    console.log(res.data);
+  } catch (err) {
+    console.error("Something went wrong with wakeUp()\n", err);
+  }
+};
+
 /**
  * Get access token
  * @returns
@@ -29,10 +38,8 @@ export const getToken = async (
   codeRef: React.MutableRefObject<string | null>
 ) => {
   if (codeRef.current === null) throw new Error("Null code");
-  console.log("touch grass");
   try {
     const res = await axios.post(server + "/login", { code: codeRef.current });
-    console.log("what are you?", res.data);
     if (res.data !== true) return false;
   } catch (err) {
     console.error("Something went wrong with getToken()\n", err);

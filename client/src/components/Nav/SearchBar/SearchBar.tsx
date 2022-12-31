@@ -786,7 +786,8 @@ const SearchBar = (props: propsType) => {
               margin: "1rem",
               minHeight: "min-content",
               height: "calc(70vmin - 3rem)",
-              width: "calc(100% - 2rem)",
+              width: "calc(80vw - 2rem)",
+              minWidth: "15rem",
               borderRadius: "0.33rem",
             },
           }}

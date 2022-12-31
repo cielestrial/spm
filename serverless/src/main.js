@@ -25,6 +25,10 @@ app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "views/page.html"));
 });
 
+app.get("/wakeup", (req, res) => {
+  res.send("I'm awake");
+});
+
 /**
  * spotify api
  */

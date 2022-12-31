@@ -1,8 +1,10 @@
-import { Button, Stack, Title } from "@mantine/core";
-import { useContext, useEffect } from "react";
+import { Button, Center, Loader, Stack, Title } from "@mantine/core";
+import { useContext, useEffect, useState } from "react";
 import { SlSocialSpotify } from "react-icons/sl";
 import { StateContext } from "../api/ContextProvider";
 import { useLocation, useNavigate } from "react-router-dom";
+import { wakeUp } from "../api/SpotifyApiClientSide";
+import { pageHeight, pagePadding } from "../App";
 
 const scope =
   "&scope=" +
@@ -29,46 +31,58 @@ const AUTH_URL =
 
 const LandingPage = () => {
   const context = useContext(StateContext);
+  const [isLoading, setLoading] = useState(false);
   const params = useLocation();
   context.navigate.current = useNavigate();
   useEffect(() => {
-    context.setCurrentPage("landing");
-    context.setShowHeader(false);
-  }, []);
+    (async () => {
+      context.setCurrentPage("landing");
+      context.setShowHeader(false);
 
-  useEffect(() => {
-    if (params.search.includes("?code=")) {
-      context.codeRef.current = params.search.substring(
-        params.search.indexOf("?code=") + 6
-      );
-      context.navigate.current("/loading");
-    }
-  }, []);
+      setLoading(true);
+      const message = await wakeUp();
+      console.log(message);
+      setLoading(false);
 
-  return (
-    <Stack
-      mt="calc(50vh - 60px - 1em)"
-      align="center"
-      justify="center"
-      spacing="lg"
-    >
-      <Title ta="center" order={1}>
-        Welcome to YSPM
-      </Title>
-      <Button
-        variant="filled"
-        w="20%"
-        miw="fit-content"
-        radius="xl"
-        size="md"
-        component="a"
-        href={AUTH_URL}
-        leftIcon={<SlSocialSpotify size={"24px"} />}
+      if (params.search.includes("?code=")) {
+        context.codeRef.current = params.search.substring(
+          params.search.indexOf("?code=") + 6
+        );
+        context.navigate.current("/loading");
+      }
+    })();
+  }, []);
+  if (isLoading) {
+    return (
+      <Center h={pageHeight} pt={pagePadding} className="loading">
+        <Loader size="lg" />
+      </Center>
+    );
+  } else
+    return (
+      <Stack
+        mt="calc(50vh - 60px - 1em)"
+        align="center"
+        justify="center"
+        spacing="lg"
       >
-        Log In With Spotify
-      </Button>
-    </Stack>
-  );
+        <Title ta="center" order={1}>
+          Welcome to YSPM
+        </Title>
+        <Button
+          variant="filled"
+          w="20%"
+          miw="fit-content"
+          radius="xl"
+          size="md"
+          component="a"
+          href={AUTH_URL}
+          leftIcon={<SlSocialSpotify size={"24px"} />}
+        >
+          Log In With Spotify
+        </Button>
+      </Stack>
+    );
 };
 
 export default LandingPage;

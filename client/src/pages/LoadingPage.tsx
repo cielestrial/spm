@@ -24,7 +24,7 @@ import { custom_ease_out, shake } from "../css/Keyframes";
 const LoadingPage = () => {
   const context = useContext(StateContext);
   const [file, setFile] = useState<File | null>(null);
-  const [isLoading, setLoading] = useState(true);
+  const [isLoading, setLoading] = useState(false);
   const [error, setError] = useState(false);
   const resetRef = useRef<() => void>(null);
   const timer = useRef<NodeJS.Timeout>();
@@ -40,7 +40,6 @@ const LoadingPage = () => {
         0,
         context.codeRef
       )) as boolean | undefined;
-      console.log(context.codeRef.current);
       if (tokenData !== undefined && tokenData !== false) {
         context.setToken(tokenData);
         const userData = (await useSpotifyQuery(
@@ -58,7 +57,6 @@ const LoadingPage = () => {
 
   useEffect(() => {
     if (context.token === false || context.userInfo === null) {
-      console.log("its me");
       context.navigate.current("/");
     }
   }, [context.token, context.userInfo]);
@@ -88,7 +86,7 @@ const LoadingPage = () => {
         <Loader size="lg" />
       </Center>
     );
-  } else {
+  } else
     return (
       <Flex
         gap="2.3rem"
@@ -175,7 +173,6 @@ const LoadingPage = () => {
         </FileButton>
       </Flex>
     );
-  }
 };
 
 export default LoadingPage;

@@ -1,4 +1,3 @@
-const { json } = require("body-parser");
 const SpotifyWebApi = require("spotify-web-api-node");
 const spotifyApi = new SpotifyWebApi({
   redirectUri: "https://yspm-ccnd.onrender.com/index.html",
