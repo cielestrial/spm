@@ -48,9 +48,10 @@ const rateLimit = (err, res) => {
         );
         res.json({
           errorCode: err.statusCode,
+          error: err,
         });
       });
-  }
+  } else res.json(err);
 };
 
 /**
@@ -105,6 +106,7 @@ const getUser = (req, res) => {
     })
     .catch((err) => {
       console.error("Something went wrong with user\n", err);
+      res.json(err);
     });
 };
 

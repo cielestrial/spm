@@ -41,7 +41,10 @@ export const getToken = async (
   if (codeRef.current === null) throw new Error("Null code");
   try {
     const res = await axios.post(server + "/login", { code: codeRef.current });
-    if (res.data !== true) return false;
+    if (res.data !== true) {
+      console.error("Could not get token\n", res.data);
+      return false;
+    }
   } catch (err) {
     console.error("Something went wrong with getToken()\n", err);
     return false;
@@ -57,8 +60,10 @@ export const getAuthenticatedUserInfo = async () => {
   let userInfo: userInfoType | undefined | null = null;
   try {
     const res = await axios.post(server + "/user");
-    if (res.data === undefined || res.data.display_name === undefined)
+    if (res.data === undefined || res.data.display_name === undefined) {
+      console.error("Failed to get user info\n", res.data);
       return null;
+    }
     userInfo = {
       display_name: res.data.display_name,
       display_image: res.data.display_image,
@@ -73,5 +78,3 @@ export const getAuthenticatedUserInfo = async () => {
   }
   return userInfo;
 };
-
-//export const playTrack = () => {};
