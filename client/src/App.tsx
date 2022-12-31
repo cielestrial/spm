@@ -8,8 +8,8 @@ import MyScrollArea from "./components/MyScrollArea";
 import LandingPage from "./pages/LandingPage";
 
 const LoadingPage = lazy(() => import("./pages/LoadingPage"));
-const Dashboard = lazy(() => import("./pages/Dashboard"));
 const NavBar = lazy(() => import("./components/Nav/NavBar"));
+const Dashboard = lazy(() => import("./pages/Dashboard"));
 const GenreManager = lazy(() => import("./pages/GenreManager"));
 
 import { dashboardRefType } from "./components/Nav/SearchBar/SearchBarTypes";
