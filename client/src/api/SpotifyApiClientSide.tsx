@@ -24,9 +24,10 @@ export const rateLimitSpotify = async (res: AxiosResponse<any, any>) => {
 export const wakeUp = async () => {
   try {
     const res = await axios.get(server + "/wakeup");
-    console.log(res.data);
+    return res.data;
   } catch (err) {
     console.error("Something went wrong with wakeUp()\n", err);
+    return "Failed to wake";
   }
 };
 

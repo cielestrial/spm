@@ -374,7 +374,7 @@ const removeDuplicates = async (playlist: playlistType) => {
       duplicate.occurances > 1 &&
       duplicate.duplicate_uris.size > 0
     ) {
-      console.log(uniqueTrack);
+      console.log("has duplicates:", uniqueTrack);
       for (const uri of duplicate.duplicate_uris.values()) {
         console.warn(
           uniqueTrack.track.name,

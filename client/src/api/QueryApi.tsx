@@ -5,11 +5,6 @@ export const setRetryAfterSpotify = (waitPeriod: number) => {
   retryAfterSpotify = defaultWait + waitPeriod;
 };
 
-let retryAfterLastfm = defaultWait;
-export const setRetryAfterLastfm = (waitPeriod: number) => {
-  retryAfterLastfm = defaultWait + waitPeriod;
-};
-
 export async function useSpotifyQuery(
   func: (...args: any[]) => Promise<any>,
   retryCounter: number,
@@ -28,29 +23,6 @@ export async function useSpotifyQuery(
     setTimeout(
       () => useSpotifyQuery(func, retryCounter + 1, ...args),
       retryAfterSpotify
-    );
-  }
-  return data;
-}
-
-export async function useLastfmQuery(
-  func: (...args: any[]) => Promise<any>,
-  retryCounter: number,
-  ...args: any[]
-) {
-  //console.log(func.name + " is running with args ", ...args);
-  if (retryCounter === undefined) retryCounter = 0;
-  else if (retryCounter > 3) throw new Error("Retry limit hit");
-  let data;
-  try {
-    data = await func(...args);
-    // On success
-    retryAfterLastfm = defaultWait;
-  } catch (err) {
-    console.error(func.name + " is running but failing\n", err);
-    setTimeout(
-      () => useLastfmQuery(func, retryCounter + 1, ...args),
-      retryAfterLastfm
     );
   }
   return data;

@@ -24,16 +24,17 @@ import { custom_ease_out, shake } from "../css/Keyframes";
 const LoadingPage = () => {
   const context = useContext(StateContext);
   const [file, setFile] = useState<File | null>(null);
-  const [isLoading, setLoading] = useState(false);
+  const [isLoading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const resetRef = useRef<() => void>(null);
   const timer = useRef<NodeJS.Timeout>();
   const animationDuration = 0.25;
 
   useEffect(() => {
-    context.setCurrentPage("loading");
-    context.setShowHeader(false);
     (async () => {
+      context.setCurrentPage("loading");
+      context.setShowHeader(false);
+
       setLoading(true);
       const tokenData = (await useSpotifyQuery(
         getToken,
@@ -57,6 +58,7 @@ const LoadingPage = () => {
 
   useEffect(() => {
     if (context.token === false || context.userInfo === null) {
+      setLoading(false);
       context.navigate.current("/");
     }
   }, [context.token, context.userInfo]);

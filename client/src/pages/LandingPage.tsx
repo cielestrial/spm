@@ -31,7 +31,7 @@ const AUTH_URL =
 
 const LandingPage = () => {
   const context = useContext(StateContext);
-  const [isLoading, setLoading] = useState(false);
+  const [isLoading, setLoading] = useState(true);
   const params = useLocation();
   context.navigate.current = useNavigate();
   useEffect(() => {
@@ -41,7 +41,7 @@ const LandingPage = () => {
 
       setLoading(true);
       const message = await wakeUp();
-      console.log(message);
+      console.log("server message:", message);
       setLoading(false);
 
       if (params.search.includes("?code=")) {
@@ -52,37 +52,32 @@ const LandingPage = () => {
       }
     })();
   }, []);
-  if (isLoading) {
-    return (
-      <Center h={pageHeight} pt={pagePadding} className="loading">
-        <Loader size="lg" />
-      </Center>
-    );
-  } else
-    return (
-      <Stack
-        mt="calc(50vh - 60px - 1em)"
-        align="center"
-        justify="center"
-        spacing="lg"
+
+  return (
+    <Stack
+      mt="calc(50vh - 60px - 1em)"
+      align="center"
+      justify="center"
+      spacing="lg"
+    >
+      <Title ta="center" order={1}>
+        {isLoading ? "Waking server..." : "Welcome to YSPM"}
+      </Title>
+      <Button
+        variant="filled"
+        w="20%"
+        miw="fit-content"
+        radius="xl"
+        size="md"
+        component="a"
+        disabled={isLoading}
+        href={AUTH_URL}
+        leftIcon={<SlSocialSpotify size={"24px"} />}
       >
-        <Title ta="center" order={1}>
-          Welcome to YSPM
-        </Title>
-        <Button
-          variant="filled"
-          w="20%"
-          miw="fit-content"
-          radius="xl"
-          size="md"
-          component="a"
-          href={AUTH_URL}
-          leftIcon={<SlSocialSpotify size={"24px"} />}
-        >
-          Log In With Spotify
-        </Button>
-      </Stack>
-    );
+        Log In With Spotify
+      </Button>
+    </Stack>
+  );
 };
 
 export default LandingPage;

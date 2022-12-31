@@ -61,7 +61,7 @@ const UnfollowButton = (props: propsType) => {
             radius="xl"
             size="sm"
             onClick={async () => {
-              console.log(context.selectedPlaylist.current);
+              console.log("unfollowed", context.selectedPlaylist.current);
               unfollow();
               close();
             }}
