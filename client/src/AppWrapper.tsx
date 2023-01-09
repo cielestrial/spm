@@ -12,7 +12,7 @@ import { myThemeWrapper } from "./css/Theme";
 const AppWrapper = () => {
   const preferredColorScheme = useColorScheme();
   const [colorScheme, setColorScheme] = useLocalStorage<ColorScheme>({
-    key: "mantine-color-scheme",
+    key: "theme",
     defaultValue: preferredColorScheme,
   });
 
