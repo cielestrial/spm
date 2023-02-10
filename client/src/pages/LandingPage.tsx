@@ -1,10 +1,9 @@
-import { Button, Center, Loader, Stack, Title } from "@mantine/core";
+import { Button, Stack, Title } from "@mantine/core";
 import { useContext, useEffect, useState } from "react";
 import { SlSocialSpotify } from "react-icons/sl";
-import { StateContext } from "../api/ContextProvider";
 import { useLocation, useNavigate } from "react-router-dom";
+import { StateContext } from "../api/ContextProvider";
 import { wakeUp } from "../api/SpotifyApiClientSide";
-import { pageHeight, pagePadding } from "../App";
 
 const scope =
   "&scope=" +
@@ -34,6 +33,7 @@ const LandingPage = () => {
   const [isLoading, setLoading] = useState(true);
   const params = useLocation();
   context.navigate.current = useNavigate();
+
   useEffect(() => {
     (async () => {
       context.setCurrentPage("landing");

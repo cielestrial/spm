@@ -1,5 +1,5 @@
 To Do:    
-  1) Host on Netify
+  1) Bugs
   2) Liked Songs
 
 Performance:    
@@ -14,6 +14,8 @@ Hosting:
   Collect User Feedback
 
 Bugs: 
+	when on mobile selecting search result doesn't close sidenav
+	following a public playlist does not refresh the total list
   
 
 Static Visuals:
