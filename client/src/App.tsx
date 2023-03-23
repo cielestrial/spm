@@ -6,8 +6,8 @@ import "./css/main.scss";
 
 import MyScrollArea from "./components/MyScrollArea";
 import LandingPage from "./pages/LandingPage";
+import LoadingPage from "./pages/LoadingPage";
 
-const LoadingPage = lazy(() => import("./pages/LoadingPage"));
 const NavBar = lazy(() => import("./components/Nav/NavBar"));
 const Dashboard = lazy(() => import("./pages/Dashboard"));
 const GenreManager = lazy(() => import("./pages/GenreManager"));
