@@ -1,0 +1,14 @@
+@import "./variables";
+
+.loading {
+  cursor: progress;
+  &.text {
+    margin-top: calc(2.5 * $margin-bottom);
+  }
+}
+
+.error {
+  &.text {
+    margin-top: calc(2.5 * $margin-bottom);
+  }
+}

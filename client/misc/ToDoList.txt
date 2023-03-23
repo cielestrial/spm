@@ -1,0 +1,29 @@
+To Do:    
+  1) Bugs
+  2) Liked Songs
+
+Performance:    
+
+Security:
+  env file
+  remove token value from client if not used there
+
+Hosting: 
+  Comply with licensing (lastfm and spotify ToS)  
+  Host on Netify
+  Collect User Feedback
+
+Bugs: 
+	when on mobile selecting search result doesn't close sidenav
+	following a public playlist does not refresh the total list
+  
+
+Static Visuals:
+
+Dynamic Visuals:
+
+Extras:
+  Comment Code
+  Multi-select tracks to remove or add to another playlist (change arrow direction)
+  Track player capabilities (will only work for premium though....)(Streaming SDAs cant be commercial?).
+  Proper shuffle
