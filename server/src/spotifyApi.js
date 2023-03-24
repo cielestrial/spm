@@ -1,6 +1,6 @@
 const SpotifyWebApi = require("spotify-web-api-node");
 
-const redirectUri = "https://yspm-ccnd.onrender.com/index.html"; //http://localhost:3000
+const redirectUri = "https://yspm-ccnd.onrender.com/"; //http://localhost:3000
 const clientId = process.env.SPOTIFY_API_CLIENT;
 const clientSecret = process.env.SPOTIFY_API_SECRET;
 

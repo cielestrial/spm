@@ -25,7 +25,7 @@ const AUTH_URL =
   "client_id=d03dd28afb3f40d1aad5e6a45d9bff7f" +
   "&response_type=token" +
   scope +
-  "&redirect_uri=https://yspm-ccnd.onrender.com/index.html" + //http://localhost:3000
+  "&redirect_uri=https://yspm-ccnd.onrender.com/" + //http://localhost:3000
   "&show_dialog=true";
 
 const LandingPage = () => {

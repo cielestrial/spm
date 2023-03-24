@@ -2,7 +2,7 @@
   "name": "yspm",
   "private": true,
   "version": "4.8.0",
-  "homepage": "https://yspm-ccnd.onrender.com/index.html",
+  "homepage": "https://yspm-ccnd.onrender.com/",
   "type": "module",
   "scripts": {
     "dev": "vite --host --port 3000",
