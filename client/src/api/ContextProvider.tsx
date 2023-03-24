@@ -71,7 +71,7 @@ export function StateProvider({ children }: StateProviderProps) {
   );
   const [token, setToken] = useState<boolean | undefined>(undefined);
   const sessionTimer = useRef<NodeJS.Timer>();
-  const sessionBuffer = 1;
+  const sessionBuffer = 0;
 
   const [dialogOpened, { open: openDialog, close: closeDialog }] =
     useDisclosure(false);
@@ -105,36 +105,33 @@ export function StateProvider({ children }: StateProviderProps) {
    */
   function startSessionTimer() {
     if (authRef.current.expires_in !== null) {
+      setSessionAlert(
+        "Session ends in " + formatTime(authRef.current.expires_in) + "."
+      );
+      openDialog();
+
       clearInterval(sessionTimer.current);
       sessionTimer.current = setInterval(function () {
         if (
           authRef.current.expires_in !== null &&
           authRef.current.expires_in > 0
-        )
+        ) {
           authRef.current.expires_in--;
+          setSessionAlert(
+            "Session ends in " + formatTime(authRef.current.expires_in) + "."
+          );
+        }
       }, 1000);
-
-      setSessionAlert(
-        "Session started.\n" +
-          "Session ends in " +
-          formatTime(authRef.current.expires_in) +
-          "."
-      );
-      openDialog();
     }
   }
 
   useEffect(() => {
     if (authRef.current.expires_in !== null) {
       // Low time remaining
-      if (authRef.current.expires_in === 300) {
-        setSessionAlert(
-          "Session ends in " + formatTime(authRef.current.expires_in) + "."
-        );
-        openDialog();
-      }
+      if (authRef.current.expires_in === 300) openDialog();
       // End
       else if (authRef.current.expires_in === 0) {
+        clearInterval(sessionTimer.current);
         setSessionAlert("Session ended.");
         openDialog();
 
