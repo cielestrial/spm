@@ -67,29 +67,36 @@ const getUser = (req, res) => {
       userId.value = data.body.id;
       country.value = data.body.country;
       premium.value = data.body.product === "premium" ? true : false;
+      const display_name =
+        data.body.display_name === undefined || data.body.display_name === null
+          ? "Anon"
+          : data.body.display_name;
+      const display_image =
+        data.body.images === undefined || data.body.images?.length === 0
+          ? null
+          : data.body.images[0].url;
       console.log(
         "Some information about the authenticated user:",
         "userId:",
         userId.value,
         "display_name:",
-        data.body.display_name,
+        display_name,
         "country:",
         country.value,
         "premium:",
         premium.value,
         "image:",
-        data.body.images[0].url
+        display_image
       );
       res.json({
-        display_name: data.body.display_name,
-        display_image:
-          data.body.images?.length > 0 ? data.body.images?.[0].url : null,
+        display_name: display_name,
+        display_image: display_image,
         premium: premium.value,
       });
     })
     .catch((err) => {
       console.error("Something went wrong with user\n", err);
-      res.json(err);
+      res.json({ status: "error", error: err });
     });
 };
 
