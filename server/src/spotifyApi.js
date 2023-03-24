@@ -82,7 +82,8 @@ const getUser = (req, res) => {
       );
       res.json({
         display_name: data.body.display_name,
-        display_image: data.body.images[0].url,
+        display_image:
+          data.body.images?.length > 0 ? data.body.images?.[0].url : null,
         premium: premium.value,
       });
     })

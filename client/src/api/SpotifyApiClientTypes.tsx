@@ -1,6 +1,6 @@
 export type userInfoType = {
   display_name: string | null;
-  display_image: string;
+  display_image: string | null;
   premium: boolean;
 };
 export type optionsType = {
