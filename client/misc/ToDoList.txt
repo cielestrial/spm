@@ -1,7 +1,6 @@
 To Do:    
-  1) Switch from window alert to an asynchronous mantine alert
-  2) Bugs
-  3) Liked Songs
+  1) Bugs
+  2) Liked Songs
 
 Performance:    
 

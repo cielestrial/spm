@@ -1,4 +1,4 @@
-import { AppShell, Center, Header, Loader } from "@mantine/core";
+import { AppShell, Center, Dialog, Header, Loader } from "@mantine/core";
 import { lazy, Suspense, useContext, useRef } from "react";
 import { Route, Routes } from "react-router-dom";
 import { StateContext } from "./api/ContextProvider";
@@ -61,6 +61,17 @@ function App() {
         },
       })}
     >
+      <Dialog
+        opened={context.dialogOpened}
+        withCloseButton
+        onClose={context.closeDialog}
+        size="lg"
+        radius="md"
+        position={{ top: 20, right: 20 }}
+      >
+        {context.sessionAlert}
+      </Dialog>
+
       <MyScrollArea maxHeight={"80vh"} type={"auto"}>
         <Suspense
           fallback={

@@ -1,4 +1,5 @@
 import { MantineTheme, useMantineTheme } from "@mantine/core";
+import { useDisclosure } from "@mantine/hooks";
 import { createContext, useCallback, useEffect, useRef, useState } from "react";
 import { NavigateFunction, useNavigate } from "react-router-dom";
 import { formatTime, generatePlaylistKey } from "./functions/HelperFunctions";
@@ -37,6 +38,10 @@ type stateContextType = {
   setToken: React.Dispatch<React.SetStateAction<boolean | undefined>>;
   startSessionTimer(): void;
   sessionBuffer: number;
+  sessionAlert: string;
+  dialogOpened: boolean;
+  openDialog: () => void;
+  closeDialog: () => void;
 };
 
 export type implicit_grant = {
@@ -66,7 +71,11 @@ export function StateProvider({ children }: StateProviderProps) {
   );
   const [token, setToken] = useState<boolean | undefined>(undefined);
   const sessionTimer = useRef<NodeJS.Timer>();
-  const sessionBuffer = 3;
+  const sessionBuffer = 1;
+
+  const [dialogOpened, { open: openDialog, close: closeDialog }] =
+    useDisclosure(false);
+  const [sessionAlert, setSessionAlert] = useState("");
 
   const isFollowed = useCallback(() => {
     if (
@@ -96,12 +105,6 @@ export function StateProvider({ children }: StateProviderProps) {
    */
   function startSessionTimer() {
     if (authRef.current.expires_in !== null) {
-      alert(
-        "Session started.\n" +
-          "Session ends in " +
-          formatTime(authRef.current.expires_in) +
-          "."
-      );
       clearInterval(sessionTimer.current);
       sessionTimer.current = setInterval(function () {
         if (
@@ -110,18 +113,31 @@ export function StateProvider({ children }: StateProviderProps) {
         )
           authRef.current.expires_in--;
       }, 1000);
+
+      setSessionAlert(
+        "Session started.\n" +
+          "Session ends in " +
+          formatTime(authRef.current.expires_in) +
+          "."
+      );
+      openDialog();
     }
   }
 
   useEffect(() => {
     if (authRef.current.expires_in !== null) {
-      // Low
+      // Low time remaining
       if (authRef.current.expires_in === 300) {
-        alert("Session ends in 5 minutes.");
+        setSessionAlert(
+          "Session ends in " + formatTime(authRef.current.expires_in) + "."
+        );
+        openDialog();
       }
       // End
       else if (authRef.current.expires_in === 0) {
-        alert("Session ended.");
+        setSessionAlert("Session ended.");
+        openDialog();
+
         setUserInfo(null);
         setToken(false);
         authRef.current = {
@@ -144,6 +160,10 @@ export function StateProvider({ children }: StateProviderProps) {
         setToken,
         startSessionTimer,
         sessionBuffer,
+        sessionAlert,
+        dialogOpened,
+        openDialog,
+        closeDialog,
         userInfo,
         setUserInfo,
         showHeader,
