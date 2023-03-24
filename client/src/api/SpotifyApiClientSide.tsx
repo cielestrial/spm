@@ -62,7 +62,11 @@ export const getAuthenticatedUserInfo = async () => {
   try {
     const res = await axios.post(server + "/user");
     if (res.data === undefined || res.data.display_name === undefined) {
-      console.error("Failed to get user info\n", res.data);
+      console.error(
+        "Failed to get user info",
+        "\ndisplay_name: " + res.data.display_name,
+        "\nresponse data: " + res.data
+      );
       return null;
     }
     userInfo = {
