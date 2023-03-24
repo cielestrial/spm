@@ -1,7 +1,7 @@
 import { MantineTheme, useMantineTheme } from "@mantine/core";
-import { createContext, useCallback, useRef, useState } from "react";
+import { createContext, useCallback, useEffect, useRef, useState } from "react";
 import { NavigateFunction, useNavigate } from "react-router-dom";
-import { generatePlaylistKey } from "./functions/HelperFunctions";
+import { formatTime, generatePlaylistKey } from "./functions/HelperFunctions";
 import {
   playlistsType,
   playlistType,
@@ -19,7 +19,7 @@ export const StateContext = createContext({} as stateContextType);
 
 type stateContextType = {
   theme: MantineTheme;
-  codeRef: React.MutableRefObject<string | null>;
+  authRef: React.MutableRefObject<implicit_grant>;
   navigate: React.MutableRefObject<NavigateFunction>;
   playlistsQ: React.MutableRefObject<playlistsType>;
   selectedPlaylist: React.MutableRefObject<playlistType | undefined>;
@@ -35,6 +35,14 @@ type stateContextType = {
   >;
   token: boolean | undefined;
   setToken: React.Dispatch<React.SetStateAction<boolean | undefined>>;
+  startSessionTimer(): void;
+  sessionBuffer: number;
+};
+
+export type implicit_grant = {
+  access_token: string | null;
+  token_type: string | null;
+  expires_in: number | null;
 };
 
 type StateProviderProps = {
@@ -44,7 +52,11 @@ type StateProviderProps = {
 export function StateProvider({ children }: StateProviderProps) {
   const theme = useMantineTheme();
   const navigate = useRef(useNavigate());
-  const codeRef = useRef<string | null>(null);
+  const authRef = useRef<implicit_grant>({
+    access_token: null,
+    token_type: null,
+    expires_in: null,
+  });
   const playlistsQ = useRef<playlistsType>(undefined);
   const selectedPlaylist = useRef<playlistType>();
   const [showHeader, setShowHeader] = useState(false);
@@ -53,6 +65,8 @@ export function StateProvider({ children }: StateProviderProps) {
     undefined
   );
   const [token, setToken] = useState<boolean | undefined>(undefined);
+  const sessionTimer = useRef<NodeJS.Timer>();
+  const sessionBuffer = 3;
 
   const isFollowed = useCallback(() => {
     if (
@@ -76,14 +90,61 @@ export function StateProvider({ children }: StateProviderProps) {
     else return false;
   }, [selectedPlaylist.current, userInfo]);
 
+  /**
+   * Tracks remaining time in current session.
+   * @param expires_in Time in seconds.
+   */
+  function startSessionTimer() {
+    if (authRef.current.expires_in !== null) {
+      alert(
+        "Session started.\n" +
+          "Session ends in " +
+          formatTime(authRef.current.expires_in) +
+          "."
+      );
+      clearInterval(sessionTimer.current);
+      sessionTimer.current = setInterval(function () {
+        console.log("tick tock");
+        if (
+          authRef.current.expires_in !== null &&
+          authRef.current.expires_in > 0
+        )
+          authRef.current.expires_in--;
+      }, 1000);
+    }
+  }
+
+  useEffect(() => {
+    if (authRef.current.expires_in !== null) {
+      // Low
+      if (authRef.current.expires_in === 300) {
+        alert("Session ends in 5 minutes.");
+      }
+      // End
+      else if (authRef.current.expires_in === 0) {
+        alert("Session ended.");
+        setUserInfo(null);
+        setToken(false);
+        authRef.current = {
+          access_token: null,
+          token_type: null,
+          expires_in: null,
+        };
+        navigate.current("/");
+      }
+    }
+  }, [authRef.current.expires_in]);
+
   return (
     <StateContext.Provider
       value={{
         theme,
-        codeRef,
+        authRef,
         navigate,
         token,
         setToken,
+        startSessionTimer,
+        sessionBuffer,
         userInfo,
         setUserInfo,
         showHeader,

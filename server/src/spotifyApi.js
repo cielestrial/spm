@@ -1,15 +1,20 @@
 const SpotifyWebApi = require("spotify-web-api-node");
+
+const redirectUri = "https://yspm-ccnd.onrender.com/index.html"; //http://localhost:3000
+const clientId = process.env.SPOTIFY_API_CLIENT;
+const clientSecret = process.env.SPOTIFY_API_SECRET;
+
 const spotifyApi = new SpotifyWebApi({
-  redirectUri: "https://yspm-ccnd.onrender.com/index.html",
-  clientId: process.env.SPOTIFY_API_CLIENT,
-  clientSecret: process.env.SPOTIFY_API_SECRET,
+  redirectUri,
+  clientId,
+  clientSecret,
 });
 
 const maxGetLimit = 50;
 const maxPostLimit = 100;
 const maxOffset = 1000;
 let accessToken = { value: "" };
-let refreshToken = { value: "" };
+let tokenType = { value: "" };
 let expriresIn = { value: "" };
 let userId = { value: "" };
 let country = { value: "" };
@@ -32,47 +37,24 @@ const rateLimit = (err, res) => {
       errorCode: err.statusCode,
       retryAfter: err.headers["retry-after"],
     });
-  } else if (err.statusCode === 400 || err.statusCode === 401) {
-    spotifyApi
-      .refreshAccessToken()
-      .then((data) => {
-        accessToken.value = data.body.access_token;
-        expriresIn.value = data.body.expires_in;
-        spotifyApi.setAccessToken(accessToken.value);
-        res.json(true);
-      })
-      .catch((err) => {
-        console.error(
-          "Something went wrong with refreshing accessToken\n",
-          err
-        );
-        res.json({
-          errorCode: err.statusCode,
-          error: err,
-        });
-      });
-  } else res.json(err);
+  } else
+    res.json({
+      errorCode: err.statusCode,
+      error: err.message,
+    });
 };
 
 /**
  * Get Access Token
  */
 const login = (req, res) => {
-  const code = req.body.code;
-  spotifyApi
-    .authorizationCodeGrant(code)
-    .then((data) => {
-      accessToken.value = data.body.access_token;
-      refreshToken.value = data.body.refresh_token;
-      expriresIn.value = data.body.expires_in;
-      spotifyApi.setAccessToken(accessToken.value);
-      spotifyApi.setRefreshToken(refreshToken.value);
-      res.json(true);
-    })
-    .catch((err) => {
-      console.error("Something went wrong with auth\n", err);
-      res.json(err);
-    });
+  console.log(req.body);
+
+  accessToken.value = req.body.access_token;
+  tokenType.value = req.body.token_type;
+  expriresIn.value = req.body.expires_in;
+  spotifyApi.setAccessToken(accessToken.value);
+  res.json(true);
 };
 
 /**

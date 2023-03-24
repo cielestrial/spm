@@ -59,3 +59,32 @@ export const generateArtistKey = (artist: artistInfoType) => {
 export const getGenreFromLabel = (label: string) => {
   return label.slice(0, label.indexOf(", frequency: "));
 };
+
+/**
+ *
+ * @param seconds Time in seconds.
+ * @returns
+ */
+export function formatTime(seconds: number): string {
+  let formattedOutput = "";
+  let minutes = Math.floor(seconds / 60);
+  let hours = Math.floor(minutes / 60);
+
+  seconds %= 60;
+  minutes %= 60;
+
+  if (hours > 0) {
+    formattedOutput += hours + (hours > 1 ? " hours" : " hour");
+    if (minutes > 0) {
+      formattedOutput += " and ";
+      formattedOutput += minutes + (minutes > 1 ? " minutes" : " minute");
+    }
+  } else if (minutes > 0) {
+    formattedOutput += minutes + (minutes > 1 ? " minutes" : " minute");
+    if (seconds > 0) {
+      formattedOutput += " and ";
+      formattedOutput += seconds + (seconds > 1 ? " seconds" : " second");
+    }
+  } else formattedOutput += seconds + (seconds > 1 ? " seconds" : " second");
+  return formattedOutput;
+}

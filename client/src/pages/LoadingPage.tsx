@@ -14,7 +14,7 @@ import {
 } from "../api/SpotifyApiClientPlaylist";
 import {
   getAuthenticatedUserInfo,
-  getToken,
+  sendToken,
 } from "../api/SpotifyApiClientSide";
 import { getAllTracks, manageDuplicates } from "../api/SpotifyApiClientTrack";
 import { userInfoType } from "../api/SpotifyApiClientTypes";
@@ -37,9 +37,9 @@ const LoadingPage = () => {
 
       setLoading(true);
       const tokenData = (await useSpotifyQuery(
-        getToken,
+        sendToken,
         0,
-        context.codeRef
+        context.authRef
       )) as boolean | undefined;
       if (tokenData !== undefined && tokenData !== false) {
         context.setToken(tokenData);

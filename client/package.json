@@ -1,7 +1,7 @@
 {
   "name": "yspm",
   "private": true,
-  "version": "4.7.4",
+  "version": "4.8.0",
   "homepage": "https://yspm-ccnd.onrender.com/index.html",
   "type": "module",
   "scripts": {

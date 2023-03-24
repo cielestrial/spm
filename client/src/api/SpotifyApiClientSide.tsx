@@ -1,5 +1,6 @@
 import axios, { AxiosResponse } from "axios";
 import { server } from "./ApiClientData";
+import { implicit_grant } from "./ContextProvider";
 import { setRetryAfterSpotify } from "./QueryApi";
 import { userInfoType } from "./SpotifyApiClientTypes";
 
@@ -35,18 +36,18 @@ export const wakeUp = async () => {
  * Get access token
  * @returns
  */
-export const getToken = async (
-  codeRef: React.MutableRefObject<string | null>
+export const sendToken = async (
+  authRef: React.MutableRefObject<implicit_grant>
 ) => {
-  if (codeRef.current === null) throw new Error("Null code");
+  if (authRef.current.access_token === null) throw new Error("No access token");
   try {
-    const res = await axios.post(server + "/login", { code: codeRef.current });
+    const res = await axios.post(server + "/login", authRef.current);
     if (res.data !== true) {
-      console.error("Could not get token\n", res.data);
+      console.error("Could not send token\n", res.data);
       return false;
     }
   } catch (err) {
-    console.error("Something went wrong with getToken()\n", err);
+    console.error("Something went wrong with sendToken()\n", err);
     return false;
   }
   return true;

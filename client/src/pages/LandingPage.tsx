@@ -23,9 +23,9 @@ const scope =
 const AUTH_URL =
   "https://accounts.spotify.com/authorize?" +
   "client_id=d03dd28afb3f40d1aad5e6a45d9bff7f" +
-  "&response_type=code" +
+  "&response_type=token" +
   scope +
-  "&redirect_uri=https://yspm-ccnd.onrender.com/index.html" +
+  "&redirect_uri=https://yspm-ccnd.onrender.com/index.html" + //http://localhost:3000
   "&show_dialog=true";
 
 const LandingPage = () => {
@@ -44,10 +44,18 @@ const LandingPage = () => {
       console.log("server message:", message);
       setLoading(false);
 
-      if (params.search.includes("?code=")) {
-        context.codeRef.current = params.search.substring(
-          params.search.indexOf("?code=") + 6
-        );
+      if (params.hash.length > params.search.length) {
+        const auth = params.hash.split(/#|&|=/g);
+        for (let i = 0; i < auth.length; i++) {
+          if (auth[i] === "access_token")
+            context.authRef.current.access_token = auth[i + 1];
+          else if (auth[i] === "token_type")
+            context.authRef.current.token_type = auth[i + 1];
+          else if (auth[i] === "expires_in")
+            context.authRef.current.expires_in =
+              +auth[i + 1] - context.sessionBuffer;
+        }
+        context.startSessionTimer();
         context.navigate.current("/loading");
       }
     })();
