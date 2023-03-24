@@ -14,8 +14,6 @@ const DarkModeSwitch = () => {
       labelPosition="left"
       aria-label="Dark Mode Switch"
       size="lg"
-      h="60px"
-      sx={{ margin: "auto" }}
       checked={checked}
       onChange={(event) => {
         setChecked(event.currentTarget.checked);

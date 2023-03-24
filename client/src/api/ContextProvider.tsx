@@ -104,7 +104,6 @@ export function StateProvider({ children }: StateProviderProps) {
       );
       clearInterval(sessionTimer.current);
       sessionTimer.current = setInterval(function () {
-        console.log("tick tock");
         if (
           authRef.current.expires_in !== null &&
           authRef.current.expires_in > 0
