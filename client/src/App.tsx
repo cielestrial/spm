@@ -67,7 +67,7 @@ function App() {
         onClose={context.closeDialog}
         size="lg"
         radius="md"
-        position={{ top: 20, right: 20 }}
+        position={{ top: 60, right: 20 }}
       >
         {context.sessionAlert}
       </Dialog>
